@@ -54,9 +54,11 @@ form.addEventListener("submit", async function (event) {
     const events = [];
 
     events.push(
-        { key: "seed", data: { index: 1 } },
-        { key: "set-name", data: { ...formData, index: 1 } },
+        { key: "seed", data: { index: 0 } },
+        { key: "set-name", data: { ...formData, index: 0 } },
     )
+
+
 
     await fetch("http://localhost:8081/state", {
         method: "POST",

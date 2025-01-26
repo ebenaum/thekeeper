@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jmoiron/sqlx"
@@ -141,7 +142,9 @@ func POSTState(db *sqlx.DB, eventRegistry EventRegistry[Top]) http.HandlerFunc {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
 
+		start := time.Now()
 		stateID, err := auth(db, r.Header.Get("Authorization"))
+		fmt.Println("AUTH", time.Since(start))
 		if err != nil {
 			var errplus Error
 
@@ -159,6 +162,11 @@ func POSTState(db *sqlx.DB, eventRegistry EventRegistry[Top]) http.HandlerFunc {
 
 			return
 		}
+
+		start = time.Now()
+		defer func() {
+			fmt.Println("APP", time.Since(start))
+		}()
 
 		type EventRequest struct {
 			Key  string          `json:"key"`
@@ -241,7 +249,7 @@ func POSTState(db *sqlx.DB, eventRegistry EventRegistry[Top]) http.HandlerFunc {
 }
 
 func main() {
-	db, err := sqlx.Open("sqlite3", "./foo.db")
+	db, err := sqlx.Open("sqlite3", "./foo.db?_journal_mode=WAL&_busy_timeout=5000")
 	if err != nil {
 		log.Fatal(err)
 	}
