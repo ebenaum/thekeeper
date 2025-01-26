@@ -51,7 +51,13 @@ func auth(db *sqlx.DB, tokenString string) (int64, error) {
 
 		return &publicKey, nil
 
-	}, jwt.WithValidMethods([]string{jwt.SigningMethodES256.Alg()}))
+	},
+		jwt.WithValidMethods([]string{jwt.SigningMethodES256.Alg()}),
+		jwt.WithIssuedAt(),
+		jwt.WithAudience("thekeeper"),
+		jwt.WithExpirationRequired(),
+		jwt.WithIssuer("self"),
+	)
 	if err != nil {
 		return stateID, err
 	}
