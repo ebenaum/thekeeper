@@ -154,6 +154,8 @@ func POSTState(db *sqlx.DB, eventRegistry EventRegistry) http.HandlerFunc {
 		type EventRequest struct {
 			Key  string          `json:"key"`
 			Data json.RawMessage `json:"data"`
+
+			Error string `json:"error,omitempty"`
 		}
 
 		var eventsRequests []EventRequest
@@ -198,20 +200,27 @@ func POSTState(db *sqlx.DB, eventRegistry EventRegistry) http.HandlerFunc {
 
 		var state State
 
-		for _, event := range events {
-			state, err = Step(eventRegistry, db, stateID, event)
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
+		state, rejectedIndexes, rejectedErrors, err := Step(eventRegistry, db, stateID, events)
+		for i, rejectedIndex := range rejectedIndexes {
+			eventsRequests[rejectedIndex].Error = rejectedErrors[i].Error()
+		}
 
-				log.Println(err)
-				fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
 
-				return
-			}
+			log.Println(err)
+			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+
+			return
+		}
+
+		type Response struct {
+			State  State          `json:"state"`
+			Events []EventRequest `json:"events"`
 		}
 
 		encoder := json.NewEncoder(w)
-		err = encoder.Encode(state)
+		err = encoder.Encode(Response{state, eventsRequests})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 
@@ -243,7 +252,7 @@ func main() {
 	eventRegistry := EventRegistry{}
 	err = eventRegistry.Register(
 		func() Event { return &Seed{} },
-		func() Event { return &SetFirstname{} },
+		func() Event { return &SetName{} },
 	)
 	if err != nil {
 		log.Fatal(err)

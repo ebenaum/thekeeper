@@ -45,24 +45,34 @@ func Apply(state State, events []Event) (State, []int, []error) {
 	return state, rejectedIndexes, errors
 }
 
-func Step(eventRegistry EventRegistry, db *sqlx.DB, stateID int64, event Event) (State, error) {
-	id, err := InsertEvent(db, stateID, event)
+func Step(eventRegistry EventRegistry, db *sqlx.DB, stateID int64, events []Event) (State, []int, []error, error) {
+	ids, err := InsertEvents(db, stateID, events)
 	if err != nil {
-		return State{}, fmt.Errorf("insert event: %w", err)
+		return State{}, nil, nil, fmt.Errorf("insert events: %w", err)
 	}
 
 	state, rejectedIds, rejectedErrors, err := LastState(eventRegistry, db, stateID)
 	if err != nil {
-		return State{}, fmt.Errorf("last state: %w", err)
+		return State{}, nil, nil, fmt.Errorf("last state: %w", err)
 	}
 
+	var (
+		ownRejectedIndexes []int
+		ownRejectedErrors  []error
+	)
+
 	for i, rejectedId := range rejectedIds {
-		if rejectedId == id {
-			return State{}, fmt.Errorf("could not apply event: %w", rejectedErrors[i])
+		for j, id := range ids {
+			if rejectedId == id {
+				ownRejectedIndexes = append(ownRejectedIndexes, j)
+				ownRejectedErrors = append(ownRejectedErrors, rejectedErrors[i])
+
+				break
+			}
 		}
 	}
 
-	return state, nil
+	return state, ownRejectedIndexes, ownRejectedErrors, nil
 }
 
 func LastState(eventRegistry EventRegistry, db *sqlx.DB, stateID int64) (State, []int64, []error, error) {

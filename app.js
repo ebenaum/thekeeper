@@ -24,8 +24,6 @@ if (!key) {
 const privateKey = await window.crypto.subtle.importKey("jwk", key.private, { name: 'ECDSA', namedCurve: 'P-256' }, false, ["sign"]);
 const publicKey = await window.crypto.subtle.importKey("jwk", key.public, { name: 'ECDSA', namedCurve: 'P-256' }, true, ["verify"]);
 
-console.log(publicKey, privateKey)
-
 const jwt = await new jose.SignJWT({ 'urn:example:claim': true })
     .setProtectedHeader({
         alg: 'ES256',
@@ -44,15 +42,24 @@ await fetch("http://localhost:8081/state", {
     },
 })
 
-/*
-await fetch("http://localhost:8081/state", {
-    method: "POST",
-    headers: {
-        "Authorization": jwt,
-    },
-    body: JSON.stringify([
-        { key: "seed" },
-        { key: "set-firstname", data: { "firstname": "Jean-Loup" } },
-    ]),
-})
-*/
+const form = document.getElementById("form");
+
+form.addEventListener("submit", async function(event) {
+    event.preventDefault();
+    const formData = Object.fromEntries(new FormData(form));
+console.log(formData)
+    const events = [];
+
+    events.push(
+        {key: "set-name", data: formData},
+        {key: "set-name", data: formData},
+    )
+
+    await fetch("http://localhost:8081/state", {
+        method: "POST",
+        headers: {
+            "Authorization": jwt,
+        },
+        body: JSON.stringify(events),
+    })
+});

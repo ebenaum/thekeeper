@@ -63,24 +63,43 @@ func GetState(db *sqlx.DB, publicKey []byte) (StateRecord, error) {
 	return record, nil
 }
 
-func InsertEvent(db *sqlx.DB, stateID int64, event Event) (int64, error) {
-	data, err := json.Marshal(event)
+func InsertEvents(db *sqlx.DB, stateID int64, events []Event) ([]int64, error) {
+	tx, err := db.Beginx()
 	if err != nil {
-		return 0, fmt.Errorf("marshalling event to JSON: %w", err)
+		return nil, fmt.Errorf("begin: %w", err)
 	}
 
-	result, err := db.Exec(
-		"INSERT INTO events (ts, state_id, key, data, status) VALUES (?,?,?,?,0)",
-		time.Now().UTC().UnixMilli(),
-		stateID,
-		event.Key(),
-		data,
-	)
-	if err != nil {
-		return 0, fmt.Errorf("exec: %w", err)
+	ids := make([]int64, len(events))
+
+	for i, event := range events {
+		data, err := json.Marshal(event)
+		if err != nil {
+			return nil, fmt.Errorf("marshalling event to JSON: %w", err)
+		}
+
+		result, err := tx.Exec(
+			"INSERT INTO events (ts, state_id, key, data, status) VALUES (?,?,?,?,0)",
+			time.Now().UTC().UnixMilli(),
+			stateID,
+			event.Key(),
+			data,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("exec: %w", err)
+		}
+
+		ids[i], err = result.LastInsertId()
+		if err != nil {
+			return nil, fmt.Errorf("last insert id: %w", err)
+		}
 	}
 
-	return result.LastInsertId()
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("tx commit: %w", err)
+	}
+
+	return ids, nil
 }
 
 type EventRecordStatus uint8
