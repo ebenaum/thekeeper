@@ -16,15 +16,10 @@ const (
 )
 
 type State struct {
-	ID int64
+	ID int64 `json:"-"`
 
-	Email     string
-	DiscordID string
-
-	Firstname    string
-	Lastname     string
-	AgeSegment   AgeSegment
-	CityOfOrigin string
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
 }
 
 func Apply(state State, events []Event) (State, []int, []error) {
