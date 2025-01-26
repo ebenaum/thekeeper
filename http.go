@@ -66,7 +66,7 @@ func auth(db *sqlx.DB, tokenString string) (int64, error) {
 	return stateID, err
 }
 
-func GETState(db *sqlx.DB, eventRegistry EventRegistry[State]) http.HandlerFunc {
+func GETState(db *sqlx.DB, eventRegistry EventRegistry[Top]) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method != http.MethodGet && r.Method != http.MethodOptions {
@@ -124,7 +124,7 @@ func GETState(db *sqlx.DB, eventRegistry EventRegistry[State]) http.HandlerFunc 
 	}
 }
 
-func POSTState(db *sqlx.DB, eventRegistry EventRegistry[State]) http.HandlerFunc {
+func POSTState(db *sqlx.DB, eventRegistry EventRegistry[Top]) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.WriteHeader(http.StatusNotFound)
@@ -174,7 +174,7 @@ func POSTState(db *sqlx.DB, eventRegistry EventRegistry[State]) http.HandlerFunc
 			return
 		}
 
-		events := make([]Event[State], len(eventsRequests))
+		events := make([]Event[Top], len(eventsRequests))
 		for i := range events {
 			event, exists := eventRegistry.Get(eventsRequests[i].Key)
 			if !exists {
@@ -201,7 +201,7 @@ func POSTState(db *sqlx.DB, eventRegistry EventRegistry[State]) http.HandlerFunc
 			events[i] = event
 		}
 
-		var state State
+		var state Top
 
 		state, rejectedIndexes, rejectedErrors, err := Step(eventRegistry, db, stateID, events)
 		for i, rejectedIndex := range rejectedIndexes {
@@ -218,7 +218,7 @@ func POSTState(db *sqlx.DB, eventRegistry EventRegistry[State]) http.HandlerFunc
 		}
 
 		type Response struct {
-			State  State          `json:"state"`
+			State  Top            `json:"state"`
 			Events []EventRequest `json:"events"`
 		}
 
@@ -252,10 +252,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	eventRegistry := EventRegistry[State]{}
+	eventRegistry := EventRegistry[Top]{}
 	err = eventRegistry.Register(
-		func() Event[State] { return &Seed{} },
-		func() Event[State] { return &SetName{} },
+		func() Event[Top] { return &SetName{} },
+		func() Event[Top] { return &Seed{} },
 	)
 	if err != nil {
 		log.Fatal(err)

@@ -7,21 +7,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type AgeSegment string
-
-const (
-	Below12 AgeSegment = "-12"
-	Below18 AgeSegment = "-18"
-	Below99 AgeSegment = "-99"
-)
-
-type State struct {
-	ID int64 `json:"-"`
-
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
-}
-
 func Apply[T any](state T, events []Event[T]) (T, []int, []error) {
 	var errors []error
 	var rejectedIndexes []int

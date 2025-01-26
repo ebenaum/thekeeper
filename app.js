@@ -44,15 +44,14 @@ await fetch("http://localhost:8081/state", {
 
 const form = document.getElementById("form");
 
-form.addEventListener("submit", async function(event) {
+form.addEventListener("submit", async function (event) {
     event.preventDefault();
     const formData = Object.fromEntries(new FormData(form));
-console.log(formData)
     const events = [];
 
     events.push(
-        {key: "set-name", data: formData},
-        {key: "set-name", data: formData},
+        { key: "seed", data: { index: 1 } },
+        { key: "set-name", data: { ...formData, index: 1 } },
     )
 
     await fetch("http://localhost:8081/state", {
