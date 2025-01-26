@@ -52,6 +52,9 @@ func auth(db *sqlx.DB, tokenString string) (int64, error) {
 		return &publicKey, nil
 
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodES256.Alg()}))
+	if err != nil {
+		return stateID, err
+	}
 
 	record, err := GetState(db, append(publicKey.X.Bytes(), publicKey.Y.Bytes()...))
 	if err != nil {
@@ -63,7 +66,7 @@ func auth(db *sqlx.DB, tokenString string) (int64, error) {
 	return stateID, err
 }
 
-func GETState(db *sqlx.DB, eventRegistry EventRegistry) http.HandlerFunc {
+func GETState(db *sqlx.DB, eventRegistry EventRegistry[State]) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method != http.MethodGet && r.Method != http.MethodOptions {
@@ -121,7 +124,7 @@ func GETState(db *sqlx.DB, eventRegistry EventRegistry) http.HandlerFunc {
 	}
 }
 
-func POSTState(db *sqlx.DB, eventRegistry EventRegistry) http.HandlerFunc {
+func POSTState(db *sqlx.DB, eventRegistry EventRegistry[State]) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.WriteHeader(http.StatusNotFound)
@@ -171,7 +174,7 @@ func POSTState(db *sqlx.DB, eventRegistry EventRegistry) http.HandlerFunc {
 			return
 		}
 
-		events := make([]Event, len(eventsRequests))
+		events := make([]Event[State], len(eventsRequests))
 		for i := range events {
 			event, exists := eventRegistry.Get(eventsRequests[i].Key)
 			if !exists {
@@ -249,10 +252,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	eventRegistry := EventRegistry{}
+	eventRegistry := EventRegistry[State]{}
 	err = eventRegistry.Register(
-		func() Event { return &Seed{} },
-		func() Event { return &SetName{} },
+		func() Event[State] { return &Seed{} },
+		func() Event[State] { return &SetName{} },
 	)
 	if err != nil {
 		log.Fatal(err)

@@ -63,7 +63,7 @@ func GetState(db *sqlx.DB, publicKey []byte) (StateRecord, error) {
 	return record, nil
 }
 
-func InsertEvents(db *sqlx.DB, stateID int64, events []Event) ([]int64, error) {
+func InsertEvents[T any](db *sqlx.DB, stateID int64, events []Event[T]) ([]int64, error) {
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, fmt.Errorf("begin: %w", err)

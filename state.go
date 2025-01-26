@@ -22,7 +22,7 @@ type State struct {
 	Lastname  string `json:"lastname"`
 }
 
-func Apply(state State, events []Event) (State, []int, []error) {
+func Apply[T any](state T, events []Event[T]) (T, []int, []error) {
 	var errors []error
 	var rejectedIndexes []int
 
@@ -40,15 +40,17 @@ func Apply(state State, events []Event) (State, []int, []error) {
 	return state, rejectedIndexes, errors
 }
 
-func Step(eventRegistry EventRegistry, db *sqlx.DB, stateID int64, events []Event) (State, []int, []error, error) {
+func Step[T any](eventRegistry EventRegistry[T], db *sqlx.DB, stateID int64, events []Event[T]) (T, []int, []error, error) {
+	var state T
+
 	ids, err := InsertEvents(db, stateID, events)
 	if err != nil {
-		return State{}, nil, nil, fmt.Errorf("insert events: %w", err)
+		return state, nil, nil, fmt.Errorf("insert events: %w", err)
 	}
 
 	state, rejectedIds, rejectedErrors, err := LastState(eventRegistry, db, stateID)
 	if err != nil {
-		return State{}, nil, nil, fmt.Errorf("last state: %w", err)
+		return state, nil, nil, fmt.Errorf("last state: %w", err)
 	}
 
 	var (
@@ -70,29 +72,31 @@ func Step(eventRegistry EventRegistry, db *sqlx.DB, stateID int64, events []Even
 	return state, ownRejectedIndexes, ownRejectedErrors, nil
 }
 
-func LastState(eventRegistry EventRegistry, db *sqlx.DB, stateID int64) (State, []int64, []error, error) {
+func LastState[T any](eventRegistry EventRegistry[T], db *sqlx.DB, stateID int64) (T, []int64, []error, error) {
+	var state T
+
 	eventsRecords, err := GetEvents(db, stateID)
 	if err != nil {
-		return State{}, nil, nil, fmt.Errorf("get events: %w", err)
+		return state, nil, nil, fmt.Errorf("get events: %w", err)
 	}
 
-	events := make([]Event, len(eventsRecords))
+	events := make([]Event[T], len(eventsRecords))
 
 	for i, record := range eventsRecords {
 		event, exist := eventRegistry.Get(record.Key)
 		if !exist {
-			return State{}, nil, nil, fmt.Errorf("no event %q in registry", record.Key)
+			return state, nil, nil, fmt.Errorf("no event %q in registry", record.Key)
 		}
 
 		err = json.Unmarshal(record.Data, &event)
 		if err != nil {
-			return State{}, nil, nil, fmt.Errorf("unmarshal event type %q: %w", event.Key(), err)
+			return state, nil, nil, fmt.Errorf("unmarshal event type %q: %w", event.Key(), err)
 		}
 
 		events[i] = event
 	}
 
-	state, rejectedIndexes, rejectedErrors := Apply(State{}, events)
+	state, rejectedIndexes, rejectedErrors := Apply(state, events)
 
 	rejectedIds := make([]int64, len(rejectedIndexes))
 	for i := range rejectedIndexes {
@@ -100,33 +104,4 @@ func LastState(eventRegistry EventRegistry, db *sqlx.DB, stateID int64) (State, 
 	}
 
 	return state, rejectedIds, rejectedErrors, nil
-}
-
-type Event interface {
-	Key() string
-	Validate(State) error
-	Mutate(State) State
-}
-
-type EventRegistry map[string]func() Event
-
-func (e EventRegistry) Register(eventFns ...func() Event) error {
-	for _, eventFn := range eventFns {
-		if _, exists := e[eventFn().Key()]; exists {
-			return fmt.Errorf("duplicate event key %q", eventFn().Key())
-		}
-
-		e[eventFn().Key()] = eventFn
-	}
-
-	return nil
-}
-
-func (e EventRegistry) Get(key string) (Event, bool) {
-	eventFn, exists := e[key]
-	if !exists {
-		return nil, false
-	}
-
-	return eventFn(), true
 }
