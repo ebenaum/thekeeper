@@ -1,9 +1,9 @@
 package main
 
-import "fmt"
-
 type SetName struct {
-	Index     int    `json:"index"`
+	BaseEvent
+
+	PlayerID  string `json:"id"`
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
 }
@@ -12,16 +12,12 @@ func (s SetName) Key() string {
 	return "set-name"
 }
 
-func (s SetName) Validate(top Top) error {
-	if len(top.Players) <= s.Index {
-		return fmt.Errorf("no player at index %d", s.Index)
-	}
+func (s SetName) Index() string {
+	return s.Key()
+}
 
-	if top.Players[s.Index].Firstname != "" && top.Players[s.Index].Lastname != "" {
-		return fmt.Errorf("already set")
-	}
-
-	return nil
+func (s SetName) ValidateSpace() ([]string, []any) {
+	return []string{"index1=?"}, []any{Seed{ID: s.PlayerID}.Index()}
 }
 
 func (s SetName) Mutate(top Top) Top {

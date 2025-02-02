@@ -8,6 +8,10 @@ type Event[T any] interface {
 	Mutate(T) T
 }
 
+type BaseEvent struct {
+	SourceActorID int `json:"-"`
+}
+
 type EventRegistry[T any] map[string]func() Event[T]
 
 func (e EventRegistry[T]) Register(eventFns ...func() Event[T]) error {

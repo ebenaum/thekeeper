@@ -1,0 +1,12 @@
+syntax = "proto3";
+package tutorial;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = ".";
+
+message EventSetName {
+   string playerId = 1;
+   string firstname = 2;
+   string lastname = 3;
+}
