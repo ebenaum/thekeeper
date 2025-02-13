@@ -1,0 +1,8 @@
+syntax = "proto3";
+package tutorial;
+
+option go_package = "github.com/ebenaum/thekeeper/proto;proto";
+
+message EventSeed {
+   string playerId = 1;
+}

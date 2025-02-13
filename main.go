@@ -27,10 +27,7 @@ func main() {
 	}
 
 	eventRegistry := EventRegistry[Top]{}
-	err = eventRegistry.Register(
-		func() Event[Top] { return &SetName{} },
-		func() Event[Top] { return &Seed{} },
-	)
+	err = eventRegistry.Register()
 	if err != nil {
 		log.Fatal(err)
 	}
