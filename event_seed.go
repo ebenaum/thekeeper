@@ -7,10 +7,6 @@ import (
 type Seed struct {
 }
 
-func (s Seed) Key() string {
-	return "seed"
-}
-
 func (s *Seed) ValidationSpace(event *proto.EventSeed) {
 	a := proto.Events{}
 	a.Events[0].Msg.(*proto.Event_Permission)

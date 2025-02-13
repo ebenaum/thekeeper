@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+const RootActorID = 0
+
 type Event[T any] interface {
 	Key() string
 	Validate(T) error

@@ -1,6 +1,10 @@
+PRAGMA foreign_keys = ON;
+
 CREATE TABLE actors (
     id INTEGER PRIMARY KEY
 );
+
+INSERT INTO actors (id) VALUES (0);
 
 CREATE TABLE public_keys (
     id INTEGER PRIMARY KEY,
@@ -14,7 +18,8 @@ CREATE TABLE actors_public_keys (
     public_key_id INTEGER,
 
     FOREIGN KEY(actor_id) REFERENCES actors(id),
-    FOREIGN KEY(public_key_id) REFERENCES public_keys(id)
+    FOREIGN KEY(public_key_id) REFERENCES public_keys(id),
+    CHECK (actor_id != 0)
 );
 
 CREATE TABLE events (
