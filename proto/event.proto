@@ -2,19 +2,22 @@ syntax = "proto3";
 package tutorial;
 
 import "permission.proto";
-import "seed.proto";
+import "seed_player.proto";
+import "seed_actor.proto";
 
 option go_package = "github.com/ebenaum/thekeeper/proto;proto";
 
 enum EventType {
   EventTypePermission = 0;
-  EventTypeSeed = 1;
+  EventTypeSeedPlayer = 1;
+  EventTypeSeedActor = 2;
 }
 
 message Event {
   oneof msg {
     EventPermission Permission = 2;
-    EventSeed       Seed = 3;
+    EventSeedPlayer       SeedPlayer = 3;
+    EventSeedActor SeedActor= 4;
   }
 }
 
