@@ -1,1 +1,1 @@
-protoc --proto_path=/usr/local/include/ -I=. --go_out=paths=source_relative:. *.proto
+rm *.go && protoc --proto_path=/usr/local/include/ -I=. --go_out=paths=source_relative:. *.proto
