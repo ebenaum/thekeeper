@@ -1,0 +1,16 @@
+syntax = "proto3";
+package tutorial;
+
+option go_package = "github.com/ebenaum/thekeeper/proto;proto";
+
+message EventPlayerPerson {
+   string playerId              = 1;
+   string surname               = 2;
+   string age                   = 3;
+   string cityOfOrigin          = 4;
+   string phoneNumber           = 5;
+   string healthDeclaration     = 6;
+   string additionalInformation = 7;
+   string peopleToPlayWith      = 8;
+   string skill                 = 9;
+}
