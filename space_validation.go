@@ -20,8 +20,8 @@ type SpaceValidation struct {
 }
 
 type Handles struct {
-	m      map[string]int64
-	actors map[int64]string
+	HandleToID map[string]int64
+	IDToHandle map[int64]string
 }
 
 func (h Handles) Process(sourceActorID int64, event *proto.EventSeedActor) error {
@@ -29,16 +29,16 @@ func (h Handles) Process(sourceActorID int64, event *proto.EventSeedActor) error
 		return fmt.Errorf("invalid handle")
 	}
 
-	if _, exists := h.m[event.Handle]; exists {
+	if _, exists := h.HandleToID[event.Handle]; exists {
 		return fmt.Errorf("handle already exists")
 	}
 
-	if _, exists := h.actors[sourceActorID]; exists {
+	if _, exists := h.IDToHandle[sourceActorID]; exists {
 		return fmt.Errorf("handle already exists")
 	}
 
-	h.m[event.Handle] = sourceActorID
-	h.actors[sourceActorID] = event.Handle
+	h.HandleToID[event.Handle] = sourceActorID
+	h.IDToHandle[sourceActorID] = event.Handle
 
 	return nil
 }
@@ -50,12 +50,12 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 	case *proto.Event_Permission:
 		return s.Permission.Process(sourceActorID, v.Permission)
 	case *proto.Event_SeedPlayer:
-		actorID, exists := s.Handles.m[v.SeedPlayer.Handle]
+		actorID, exists := s.Handles.HandleToID[v.SeedPlayer.Handle]
 		if !exists {
 			return fmt.Errorf("not authorized")
 		}
 
-		if sourceActorID != actorID && s.Permission.actors[sourceActorID] != PermissionOrga {
+		if sourceActorID != actorID && s.Permission.Actors[sourceActorID] != PermissionOrga {
 			return fmt.Errorf("not authorized")
 		}
 
@@ -71,7 +71,7 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 		if !exists {
 			return fmt.Errorf("player does not exist")
 		}
-		if sourceActorID != player.ActorID && s.Permission.actors[sourceActorID] != PermissionOrga {
+		if sourceActorID != player.ActorID && s.Permission.Actors[sourceActorID] != PermissionOrga {
 			return fmt.Errorf("not authorized")
 		}
 
@@ -82,22 +82,24 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 }
 
 type SpacePlayer struct {
-	Handles    Handles
-	Permission Permission
-	ActorID    int64
-	Events     []*proto.Event
-	PlayerIDs  map[string]struct{}
+	Handle    string
+	ActorID   int64
+	Events    []*proto.Event
+	PlayerIDs map[string]struct{}
 }
 
 func (s *SpacePlayer) Process(sourceActorID int64, event *proto.Event) error {
 	switch v := event.Msg.(type) {
 	case *proto.Event_SeedActor:
-		return s.Handles.Process(sourceActorID, v.SeedActor)
-	case *proto.Event_Permission:
-		return s.Permission.Process(sourceActorID, v.Permission)
+		if sourceActorID == s.ActorID {
+			s.Handle = v.SeedActor.Handle
+			s.Events = append(s.Events, event)
+		}
+
+		return nil
+
 	case *proto.Event_SeedPlayer:
-		actorID := s.Handles.m[v.SeedPlayer.Handle]
-		if actorID == s.ActorID || s.Permission.actors[s.ActorID] == PermissionOrga {
+		if s.Handle == v.SeedPlayer.Handle {
 			s.Events = append(s.Events, event)
 			s.PlayerIDs[v.SeedPlayer.PlayerId] = struct{}{}
 		}
@@ -108,6 +110,8 @@ func (s *SpacePlayer) Process(sourceActorID int64, event *proto.Event) error {
 			s.Events = append(s.Events, event)
 		}
 
+		return nil
+	case *proto.Event_Permission:
 		return nil
 	default:
 		return fmt.Errorf("event %v not handled", v)
