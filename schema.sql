@@ -2,6 +2,7 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE actors (
     id INTEGER PRIMARY KEY
+    space TEXT CHECK( space IN ('orga','player') ) NOT NULL DEFAULT 'player',
 );
 
 INSERT INTO actors (id) VALUES (0);
@@ -23,12 +24,10 @@ CREATE TABLE actors_public_keys (
 );
 
 CREATE TABLE events (
-  id INTEGER PRIMARY KEY,
-  ts INTEGER NOT NULL,
+  ts INTEGER PRIMARY KEY,
   source_actor_id INTEGER NOT NULL,
-  key TEXT NOT NULL,
   data BLOB,
-  status INTEGER NOT NULL, -- 0 pending, 1 accepted, 2 rejected, 3 stuttering
+  status INTEGER CHECK( status IN (0, 1, 2, 3) ) NOT NULL, -- 0 pending, 1 accepted, 2 rejected, 3 stuttering
 
   FOREIGN KEY source_actor_id REFERENCES actors(id)
-);
+) WITHOUT ROWID;

@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"encoding/gob"
 	"testing"
+	"time"
+
+	"math/rand"
 
 	"github.com/ebenaum/thekeeper/proto"
 	"github.com/google/go-cmp/cmp"
@@ -248,4 +251,12 @@ func TestGobEncodeDecode(t *testing.T) {
 	t.Log(space)
 	t.Log(cmp.Diff(cpy, space))
 
+}
+
+func TestTimestamp(t *testing.T) {
+	now := time.Now().UTC()
+	t.Log(now.UnixMilli(), now.UnixMicro())
+
+	random := rand.Int63n(1000)
+	t.Log(random, now.UnixMilli()*1000+random)
 }
