@@ -13,11 +13,15 @@ import (
 	protolib "google.golang.org/protobuf/proto"
 )
 
-type EventRecordStatus uint8
+type EventRecordStatus uint64
 
 const (
-	EventRecordStatusPending  EventRecordStatus = 0
-	EventRecordStatusAccepted EventRecordStatus = 1
+	EventRecordStatusPending EventRecordStatus = 1 << iota
+	EventRecordStatusAccepted
+	EventRecordStatusRejected
+	EventRecordStatusStuttered
+
+	EventRecordStatusAll = EventRecordStatusStuttered | EventRecordStatusAccepted | EventRecordStatusAccepted | EventRecordStatusPending
 )
 
 func GetState(db *sqlx.DB, publicKey []byte) (int64, error) {
@@ -115,7 +119,7 @@ type EventRecord struct {
 	Status        EventRecordStatus
 }
 
-func GetEvents(db *sqlx.DB, stateID int64, from int64) ([]EventRecord, error) {
+func GetEvents(db *sqlx.DB, from int64, statusMask EventRecordStatus) ([]EventRecord, error) {
 	var events []EventRecord
 
 	result, err := db.Queryx(
@@ -128,10 +132,10 @@ func GetEvents(db *sqlx.DB, stateID int64, from int64) ([]EventRecord, error) {
 		WHERE
 		  ts > ?
 		AND
-		  status = ?
+		  status & ? != 0
 		ORDER BY ts ASC`,
 		from,
-		EventRecordStatusAccepted,
+		statusMask,
 	)
 	if err != nil {
 		return events, fmt.Errorf("query: %w", err)

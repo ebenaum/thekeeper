@@ -19,6 +19,23 @@ type SpaceValidation struct {
 	}
 }
 
+func NewSpaceValidation() SpaceValidation {
+	return SpaceValidation{
+		Handles: Handles{
+			HandleToID: map[string]int64{},
+			IDToHandle: map[int64]string{
+				0: "",
+			},
+		},
+		Permission: Permission{
+			Actors: map[int64]string{
+				0: PermissionRoot,
+			},
+		},
+		PlayersIDs: map[string]struct{ ActorID int64 }{},
+	}
+}
+
 type Handles struct {
 	HandleToID map[string]int64
 	IDToHandle map[int64]string

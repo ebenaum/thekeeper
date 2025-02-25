@@ -27,7 +27,7 @@ CREATE TABLE events (
   ts INTEGER PRIMARY KEY,
   source_actor_id INTEGER NOT NULL,
   data BLOB,
-  status INTEGER CHECK( status IN (0, 1, 2, 3) ) NOT NULL, -- 0 pending, 1 accepted, 2 rejected, 3 stuttering
+  status INTEGER CHECK( status IN (1, 2, 4, 8) ) NOT NULL, -- 1 pending, 2 accepted, 4 rejected, 8 stuttering
 
   FOREIGN KEY source_actor_id REFERENCES actors(id)
 ) WITHOUT ROWID;
