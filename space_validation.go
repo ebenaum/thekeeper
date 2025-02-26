@@ -105,6 +105,13 @@ type SpacePlayer struct {
 	PlayerIDs map[string]struct{}
 }
 
+func NewSpacePlayer(actorID int64) SpacePlayer {
+	return SpacePlayer{
+		ActorID:   actorID,
+		PlayerIDs: map[string]struct{}{},
+	}
+}
+
 func (s *SpacePlayer) Process(sourceActorID int64, event *proto.Event) error {
 	switch v := event.Msg.(type) {
 	case *proto.Event_SeedActor:

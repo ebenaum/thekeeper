@@ -16,6 +16,7 @@ enum EventType {
 }
 
 message Event {
+  int64 ts = 1;
   oneof msg {
     EventPermission Permission = 2;
     EventSeedPlayer SeedPlayer = 3;

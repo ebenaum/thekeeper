@@ -82,14 +82,18 @@ func InsertEvents(db *sqlx.DB, sourceActorID int64, events []*proto.Event) ([]in
 	ids := make([]int64, len(events))
 
 	for i, event := range events {
+		ts := time.Now().UnixMilli()*1000 + rand.Int63n(1000)
+
+		event.Ts = ts
+
 		data, err := protolib.Marshal(event)
 		if err != nil {
 			return nil, fmt.Errorf("marshalling event to proto: %w", err)
 		}
 
-		result, err := tx.Exec(
+		_, err = tx.Exec(
 			"INSERT INTO events (ts, source_actor_id, data, status) VALUES (?,?,?,?)",
-			time.Now().UnixMilli()*1000+rand.Int63n(1000),
+			ts,
 			sourceActorID,
 			data,
 			EventRecordStatusPending,
@@ -98,10 +102,7 @@ func InsertEvents(db *sqlx.DB, sourceActorID int64, events []*proto.Event) ([]in
 			return nil, fmt.Errorf("exec: %w", err)
 		}
 
-		ids[i], err = result.LastInsertId()
-		if err != nil {
-			return nil, fmt.Errorf("last insert id: %w", err)
-		}
+		ids[i] = ts
 	}
 
 	err = tx.Commit()
@@ -113,7 +114,6 @@ func InsertEvents(db *sqlx.DB, sourceActorID int64, events []*proto.Event) ([]in
 }
 
 type EventRecord struct {
-	Ts            int64
 	SourceActorID int64
 	Event         *proto.Event
 	Status        EventRecordStatus
@@ -124,7 +124,6 @@ func GetEvents(db *sqlx.DB, from int64, statusMask EventRecordStatus) ([]EventRe
 
 	result, err := db.Queryx(
 		`SELECT
-		   ts,
 		   source_actor_id,
 		   data,
 		   status
@@ -147,7 +146,6 @@ func GetEvents(db *sqlx.DB, from int64, statusMask EventRecordStatus) ([]EventRe
 		var data []byte
 
 		err = result.Rows.Scan(
-			&event.Ts,
 			&event.SourceActorID,
 			&data,
 			&event.Status,
