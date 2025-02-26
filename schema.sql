@@ -1,8 +1,8 @@
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE actors (
-    id INTEGER PRIMARY KEY
-    space TEXT CHECK( space IN ('orga','player') ) NOT NULL DEFAULT 'player',
+    id INTEGER PRIMARY KEY,
+    space TEXT CHECK( space IN ('orga','player') ) NOT NULL DEFAULT 'player'
 );
 
 INSERT INTO actors (id) VALUES (0);
@@ -29,5 +29,5 @@ CREATE TABLE events (
   data BLOB,
   status INTEGER CHECK( status IN (1, 2, 4, 8) ) NOT NULL, -- 1 pending, 2 accepted, 4 rejected, 8 stuttering
 
-  FOREIGN KEY source_actor_id REFERENCES actors(id)
+  FOREIGN KEY(source_actor_id) REFERENCES actors(id)
 ) WITHOUT ROWID;
