@@ -26,13 +26,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	eventRegistry := EventRegistry[Top]{}
-	err = eventRegistry.Register()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	http.HandleFunc("/state", GETState(db, eventRegistry))
+	http.HandleFunc("/state", GETState(db))
 	log.Fatal(http.ListenAndServe(":8081", nil))
 
 }

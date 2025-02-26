@@ -5,14 +5,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
+	"github.com/ebenaum/thekeeper/proto"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jmoiron/sqlx"
 	"github.com/lestrrat-go/jwx/jwk"
 	_ "github.com/mattn/go-sqlite3"
+	protolib "google.golang.org/protobuf/proto"
 )
 
 type Error struct {
@@ -24,8 +28,9 @@ func (e Error) Error() string {
 	return e.Private.Error()
 }
 
-func auth(db *sqlx.DB, tokenString string) (int64, error) {
-	var stateID int64
+func auth(db *sqlx.DB, tokenString string) (int64, string, error) {
+	var actorID int64
+	var actorSpace string
 	var publicKey ecdsa.PublicKey
 
 	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -59,24 +64,22 @@ func auth(db *sqlx.DB, tokenString string) (int64, error) {
 		jwt.WithIssuer("self"),
 	)
 	if err != nil {
-		return stateID, err
+		return actorID, actorSpace, err
 	}
 
-	record, err := GetState(db, append(publicKey.X.Bytes(), publicKey.Y.Bytes()...))
+	actorID, actorSpace, err = GetState(db, append(publicKey.X.Bytes(), publicKey.Y.Bytes()...))
 	if err != nil {
-		return stateID, Error{errors.New("invalid public key"), fmt.Errorf("get state: %w", err)}
+		return actorID, actorSpace, Error{errors.New("invalid public key"), fmt.Errorf("get state: %w", err)}
 	}
 
-	stateID = record.ID
-
-	return stateID, err
+	return actorID, actorSpace, err
 }
 
-func GETState(db *sqlx.DB, eventRegistry EventRegistry[Top]) http.HandlerFunc {
+func GETState(db *sqlx.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method != http.MethodGet && r.Method != http.MethodOptions {
-			POSTState(db, eventRegistry)(w, r)
+			POSTState(db)(w, r)
 
 			return
 		}
@@ -90,7 +93,7 @@ func GETState(db *sqlx.DB, eventRegistry EventRegistry[Top]) http.HandlerFunc {
 			return
 		}
 
-		stateID, err := auth(db, r.Header.Get("Authorization"))
+		actorID, _, err := auth(db, r.Header.Get("Authorization"))
 		if err != nil {
 			var errplus Error
 
@@ -109,7 +112,15 @@ func GETState(db *sqlx.DB, eventRegistry EventRegistry[Top]) http.HandlerFunc {
 			return
 		}
 
-		state, _, _, err := LastState(eventRegistry, db, stateID)
+		from, err := strconv.ParseInt(r.URL.Query().Get("from"), 10, 64)
+		if err != nil {
+			log.Println(err)
+			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+
+			return
+		}
+
+		events, err := FetchEvents(db, actorID, from)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 
@@ -118,8 +129,11 @@ func GETState(db *sqlx.DB, eventRegistry EventRegistry[Top]) http.HandlerFunc {
 			return
 		}
 
-		encoder := json.NewEncoder(w)
-		err = encoder.Encode(state)
+		response := &proto.Events{
+			Events: events,
+		}
+
+		responseEncoded, err := protolib.Marshal(response)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 
@@ -127,10 +141,21 @@ func GETState(db *sqlx.DB, eventRegistry EventRegistry[Top]) http.HandlerFunc {
 
 			return
 		}
+
+		_, err = fmt.Fprint(w, responseEncoded)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+
+			log.Println(err)
+
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/octet-stream")
 	}
 }
 
-func POSTState(db *sqlx.DB, eventRegistry EventRegistry[Top]) http.HandlerFunc {
+func POSTState(db *sqlx.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.WriteHeader(http.StatusNotFound)
@@ -142,7 +167,7 @@ func POSTState(db *sqlx.DB, eventRegistry EventRegistry[Top]) http.HandlerFunc {
 		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
 
 		start := time.Now()
-		stateID, err := auth(db, r.Header.Get("Authorization"))
+		actorID, _, err := auth(db, r.Header.Get("Authorization"))
 		fmt.Println("AUTH", time.Since(start))
 		if err != nil {
 			var errplus Error
@@ -167,17 +192,9 @@ func POSTState(db *sqlx.DB, eventRegistry EventRegistry[Top]) http.HandlerFunc {
 			fmt.Println("APP", time.Since(start))
 		}()
 
-		type EventRequest struct {
-			Key  string          `json:"key"`
-			Data json.RawMessage `json:"data"`
+		var eventsRequests *proto.Events
 
-			Error string `json:"error,omitempty"`
-		}
-
-		var eventsRequests []EventRequest
-
-		dec := json.NewDecoder(r.Body)
-		err = dec.Decode(&eventsRequests)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 
@@ -187,40 +204,17 @@ func POSTState(db *sqlx.DB, eventRegistry EventRegistry[Top]) http.HandlerFunc {
 			return
 		}
 
-		events := make([]Event[Top], len(eventsRequests))
-		for i := range events {
-			event, exists := eventRegistry.Get(eventsRequests[i].Key)
-			if !exists {
-				w.WriteHeader(http.StatusBadRequest)
+		err = protolib.Unmarshal(body, eventsRequests)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
 
-				log.Printf("no event %q", eventsRequests[i].Key)
-				fmt.Fprintf(w, `{"message": "no event %q"}`, eventsRequests[i].Key)
+			log.Println(err)
+			fmt.Fprint(w, `{"message": "bad input"}`)
 
-				return
-			}
-
-			if len(eventsRequests[i].Data) != 0 {
-				err = json.Unmarshal(eventsRequests[i].Data, event)
-				if err != nil {
-					w.WriteHeader(http.StatusBadRequest)
-
-					log.Println(err)
-					fmt.Fprint(w, `{"message": "bad input"}`)
-
-					return
-				}
-			}
-
-			events[i] = event
+			return
 		}
 
-		var state Top
-
-		state, rejectedIndexes, rejectedErrors, err := Step(eventRegistry, db, stateID, events)
-		for i, rejectedIndex := range rejectedIndexes {
-			eventsRequests[rejectedIndex].Error = rejectedErrors[i].Error()
-		}
-
+		result, err := InsertAndCheckEvents(db, -1, actorID, eventsRequests.Events)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 
@@ -230,13 +224,8 @@ func POSTState(db *sqlx.DB, eventRegistry EventRegistry[Top]) http.HandlerFunc {
 			return
 		}
 
-		type Response struct {
-			State  Top            `json:"state"`
-			Events []EventRequest `json:"events"`
-		}
-
 		encoder := json.NewEncoder(w)
-		err = encoder.Encode(Response{state, eventsRequests})
+		err = encoder.Encode(result)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 

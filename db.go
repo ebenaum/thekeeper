@@ -24,53 +24,56 @@ const (
 	EventRecordStatusAll = EventRecordStatusStuttered | EventRecordStatusAccepted | EventRecordStatusAccepted | EventRecordStatusPending
 )
 
-func GetState(db *sqlx.DB, publicKey []byte) (int64, error) {
+func GetState(db *sqlx.DB, publicKey []byte) (int64, string, error) {
 	var id int64
+	var space string
 
 	err := db.QueryRowx(`
 	SELECT
-	  actors_public_keys.actor_id
+	  actors_public_keys.actor_id,
+	  actors.space
 	FROM actors_public_key
 	JOIN public_keys ON public_keys.id = actors_public_keys.public_key_id
+	JOIN actors ON actors.id = actors_public_keys.actor_id
 	WHERE public_keys.public_key=?`,
 		publicKey,
-	).Scan(&id)
+	).Scan(&id, &space)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return -1, fmt.Errorf("query: %w", err)
+		return -1, "", fmt.Errorf("query: %w", err)
 	}
 
 	if err == nil {
-		return id, nil
+		return id, space, nil
 	}
 
 	tx, err := db.Beginx()
 	if err != nil {
-		return -1, fmt.Errorf("begin: %w", err)
+		return -1, "", fmt.Errorf("begin: %w", err)
 	}
 
 	var publicKeyID int64
 	err = tx.QueryRowx(`INSERT INTO public_keys (public_key) VALUES (?) RETURNING id`, publicKey).Scan(&publicKeyID)
 	if err != nil {
-		return -1, fmt.Errorf("insert public key: %w", err)
+		return -1, "", fmt.Errorf("insert public key: %w", err)
 	}
 
-	err = tx.QueryRowx(`INSERT INTO actors DEFAULT VALUES RETURNING id`).Scan(&id)
+	err = tx.QueryRowx(`INSERT INTO actors DEFAULT VALUES RETURNING id, space`).Scan(&id, &space)
 	if err != nil {
-		return -1, fmt.Errorf("insert actor: %w", err)
+		return -1, "", fmt.Errorf("insert actor: %w", err)
 	}
 
 	_, err = tx.Exec(`INSERT INTO actors_public_keys (actor_id, public_key_id) VALUES (?, ?)`, id, publicKeyID)
 	if err != nil {
-		return -1, fmt.Errorf("insert actors_public_keys: %w", err)
+		return -1, "", fmt.Errorf("insert actors_public_keys: %w", err)
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return -1, fmt.Errorf("commit: %w", err)
+		return -1, "", fmt.Errorf("commit: %w", err)
 	}
 
-	return id, nil
+	return id, space, nil
 }
 
 func InsertEvents(db *sqlx.DB, sourceActorID int64, events []*proto.Event) ([]int64, error) {
