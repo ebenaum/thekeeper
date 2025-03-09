@@ -19,9 +19,8 @@ const (
 	EventRecordStatusPending EventRecordStatus = 1 << iota
 	EventRecordStatusAccepted
 	EventRecordStatusRejected
-	EventRecordStatusStuttered
 
-	EventRecordStatusAll = EventRecordStatusStuttered | EventRecordStatusAccepted | EventRecordStatusAccepted | EventRecordStatusPending
+	EventRecordStatusAll = EventRecordStatusAccepted | EventRecordStatusRejected | EventRecordStatusPending
 )
 
 func GetState(db *sqlx.DB, publicKey []byte) (int64, string, error) {
