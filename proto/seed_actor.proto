@@ -4,5 +4,5 @@ package tutorial;
 option go_package = "github.com/ebenaum/thekeeper/proto;proto";
 
 message EventSeedActor {
-   string Handle = 1;
+   string handle = 1;
 }

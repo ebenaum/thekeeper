@@ -85,7 +85,7 @@ func GETState(db *sqlx.DB) http.HandlerFunc {
 		}
 
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type")
 
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
@@ -111,6 +111,11 @@ func GETState(db *sqlx.DB) http.HandlerFunc {
 
 			return
 		}
+
+		start := time.Now()
+		defer func() {
+			fmt.Println("APP", time.Since(start))
+		}()
 
 		from, err := strconv.ParseInt(r.URL.Query().Get("from"), 10, 64)
 		if err != nil {
@@ -142,7 +147,9 @@ func GETState(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		_, err = fmt.Fprint(w, responseEncoded)
+		//		w.Header().Set("Content-Type", "application/x-protobuf")
+
+		_, err = w.Write(responseEncoded)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 
@@ -151,7 +158,6 @@ func GETState(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/octet-stream")
 	}
 }
 
@@ -209,6 +215,14 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 
 			log.Println(err)
+			fmt.Fprint(w, `{"message": "bad input"}`)
+
+			return
+		}
+
+		if len(eventsRequests.Events) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+
 			fmt.Fprint(w, `{"message": "bad input"}`)
 
 			return

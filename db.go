@@ -32,7 +32,7 @@ func GetState(db *sqlx.DB, publicKey []byte) (int64, string, error) {
 	SELECT
 	  actors_public_keys.actor_id,
 	  actors.space
-	FROM actors_public_key
+	FROM actors_public_keys
 	JOIN public_keys ON public_keys.id = actors_public_keys.public_key_id
 	JOIN actors ON actors.id = actors_public_keys.actor_id
 	WHERE public_keys.public_key=?`,
@@ -118,7 +118,7 @@ func InsertEvents(db *sqlx.DB, sourceActorID int64, events []*proto.Event) ([]in
 
 type EventRecord struct {
 	SourceActorID int64
-	Event         *proto.Event
+	Event         proto.Event
 	Status        EventRecordStatus
 }
 
@@ -157,7 +157,7 @@ func GetEvents(db *sqlx.DB, from int64, statusMask EventRecordStatus) ([]EventRe
 			return events, fmt.Errorf("scan: %w", err)
 		}
 
-		err = protolib.Unmarshal(data, event.Event)
+		err = protolib.Unmarshal(data, &event.Event)
 		if err != nil {
 			return events, fmt.Errorf("proto unmarshall: %w", err)
 		}

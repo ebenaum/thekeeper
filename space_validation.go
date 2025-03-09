@@ -69,11 +69,11 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 	case *proto.Event_SeedPlayer:
 		actorID, exists := s.Handles.HandleToID[v.SeedPlayer.Handle]
 		if !exists {
-			return fmt.Errorf("not authorized")
+			return fmt.Errorf("not authorized: actor does not exist")
 		}
 
 		if sourceActorID != actorID && s.Permission.Actors[sourceActorID] != PermissionOrga {
-			return fmt.Errorf("not authorized")
+			return fmt.Errorf("not authorized: missing permission")
 		}
 
 		if _, exists := s.PlayersIDs[v.SeedPlayer.PlayerId]; exists {

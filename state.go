@@ -26,12 +26,11 @@ func Run(db *sqlx.DB, tsResultsToInclude map[int64]bool) ([]RunEventResult, erro
 	toUpdate := map[int64]EventRecordStatus{}
 
 	for _, record := range records {
-		err := space.Process(record.SourceActorID, record.Event)
+		err := space.Process(record.SourceActorID, &record.Event)
 		if err != nil && record.Status&(EventRecordStatusPending|EventRecordStatusRejected) != 0 {
 			return nil, fmt.Errorf(
-				"corrupted state: event %d %+v has status %v. Process returned %w",
+				"corrupted state: event %d has status %v. Process returned: %w",
 				record.Event.Ts,
-				record.Event,
 				record.Status,
 				err,
 			)
@@ -83,12 +82,11 @@ func FetchEvents(db *sqlx.DB, sourceActorID int64, from int64) ([]*proto.Event, 
 	}
 
 	for _, record := range records {
-		err := space.Process(record.SourceActorID, record.Event)
+		err := space.Process(record.SourceActorID, &record.Event)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"corrupted state: event %d %+v has status %v. Process returned %w",
+				"corrupted state: event %d has status %v. Process returned: %w",
 				record.Event.Ts,
-				record.Event,
 				record.Status,
 				err,
 			)

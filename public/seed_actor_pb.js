@@ -8,7 +8,7 @@ import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv1";
  * Describes the file seed_actor.proto.
  */
 export const file_seed_actor = /*@__PURE__*/
-  fileDesc("ChBzZWVkX2FjdG9yLnByb3RvEgh0dXRvcmlhbCIgCg5FdmVudFNlZWRBY3RvchIOCgZIYW5kbGUYASABKAlCKlooZ2l0aHViLmNvbS9lYmVuYXVtL3RoZWtlZXBlci9wcm90bztwcm90b2IGcHJvdG8z");
+  fileDesc("ChBzZWVkX2FjdG9yLnByb3RvEgh0dXRvcmlhbCIgCg5FdmVudFNlZWRBY3RvchIOCgZoYW5kbGUYASABKAlCKlooZ2l0aHViLmNvbS9lYmVuYXVtL3RoZWtlZXBlci9wcm90bztwcm90b2IGcHJvdG8z");
 
 /**
  * Describes the message tutorial.EventSeedActor.
