@@ -1,4 +1,23 @@
 import * as jose from 'jose';
+import { create, toJson, toBinary } from "@bufbuild/protobuf";
+import { EventSchema } from "./event_pb.js";
+
+
+let user = create(EventSchema, {
+    msg: {
+        case: "SeedActor",
+        value: {
+            Handle: "yo"
+        }
+    }
+});
+
+const bytes = toBinary(EventSchema, user);
+const json = toJson(EventSchema, user);
+
+console.log(user);
+console.log(bytes);
+console.log(json);  
 
 function buf2hex(buffer) { // buffer is an ArrayBuffer
     return [...new Uint8Array(buffer)]

@@ -192,7 +192,7 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 			fmt.Println("APP", time.Since(start))
 		}()
 
-		var eventsRequests *proto.Events
+		var eventsRequests proto.Events
 
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -204,7 +204,7 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		err = protolib.Unmarshal(body, eventsRequests)
+		err = protolib.Unmarshal(body, &eventsRequests)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 
