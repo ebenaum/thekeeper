@@ -8,9 +8,9 @@ import (
 )
 
 type RunEventResult struct {
-	Ts     int64
-	Status EventRecordStatus
-	Error  string
+	Ts     int64             `json:"ts"`
+	Status EventRecordStatus `json:"status"`
+	Error  string            `json:"error,omitempty"`
 }
 
 func Run(db *sqlx.DB, tsResultsToInclude map[int64]bool) ([]RunEventResult, error) {
@@ -94,7 +94,7 @@ func FetchEvents(db *sqlx.DB, sourceActorID int64, from int64) ([]*proto.Event, 
 	}
 
 	var cursor int
-	for cursor := range space.Events {
+	for cursor = range space.Events {
 		if space.Events[cursor].Ts > from {
 			break
 		}

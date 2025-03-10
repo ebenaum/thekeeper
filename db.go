@@ -23,6 +23,19 @@ const (
 	EventRecordStatusAll = EventRecordStatusAccepted | EventRecordStatusRejected | EventRecordStatusPending
 )
 
+func (e EventRecordStatus) MarshalJSON() ([]byte, error) {
+	switch e {
+	case EventRecordStatusAccepted:
+		return []byte(`"accepted"`), nil
+	case EventRecordStatusPending:
+		return []byte(`"pending"`), nil
+	case EventRecordStatusRejected:
+		return []byte(`"rejected"`), nil
+	default:
+		return nil, fmt.Errorf("EventRecordStatus %d not supported", e)
+	}
+}
+
 func GetState(db *sqlx.DB, publicKey []byte) (int64, string, error) {
 	var id int64
 	var space string
