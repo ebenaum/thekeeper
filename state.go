@@ -101,7 +101,7 @@ func FetchEvents(db *sqlx.DB, sourceActorID int64, from int64) ([]*proto.Event, 
 		}
 	}
 
-	if cursor == len(space.Events)-1 {
+	if space.Events[cursor].Ts == from {
 		return nil, nil
 	}
 

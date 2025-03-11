@@ -132,7 +132,7 @@ async function sync(state) {
     new Uint8Array(await response.arrayBuffer()),
   );
 
-  console.log(msg)
+  console.log(msg);
   msg.events.forEach(function (event) {
     processEvent(state.data, event.msg.case, event.msg.value);
     state.cursor = event.ts;
@@ -146,9 +146,6 @@ const state = await getState();
 
 console.log(state.cursor);
 await sync(state);
-
-
-
 
 function processEvent(data, eventType, eventValue) {
   switch (eventType) {
@@ -181,8 +178,6 @@ let seed = create(EventsSchema, {
   ],
 });
 
-
-
 const response = await fetch("http://localhost:8081/state", {
   method: "POST",
   headers: {
@@ -193,4 +188,5 @@ const response = await fetch("http://localhost:8081/state", {
 });
 
 console.log(await response.json(), toJson(EventsSchema, seed));
+
 await sync(state);
