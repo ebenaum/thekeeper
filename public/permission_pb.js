@@ -7,13 +7,16 @@ import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv1";
 /**
  * Describes the file permission.proto.
  */
-export const file_permission = /*@__PURE__*/
-  fileDesc("ChBwZXJtaXNzaW9uLnByb3RvEgh0dXRvcmlhbCI3Cg9FdmVudFBlcm1pc3Npb24SEgoKcGVybWlzc2lvbhgBIAEoCRIQCghhY3Rvcl9pZBgCIAEoA0IqWihnaXRodWIuY29tL2ViZW5hdW0vdGhla2VlcGVyL3Byb3RvO3Byb3RvYgZwcm90bzM");
+export const file_permission =
+  /*@__PURE__*/
+  fileDesc(
+    "ChBwZXJtaXNzaW9uLnByb3RvEgh0dXRvcmlhbCI3Cg9FdmVudFBlcm1pc3Npb24SEgoKcGVybWlzc2lvbhgBIAEoCRIQCghhY3Rvcl9pZBgCIAEoA0IqWihnaXRodWIuY29tL2ViZW5hdW0vdGhla2VlcGVyL3Byb3RvO3Byb3RvYgZwcm90bzM",
+  );
 
 /**
  * Describes the message tutorial.EventPermission.
  * Use `create(EventPermissionSchema)` to create a new message.
  */
-export const EventPermissionSchema = /*@__PURE__*/
+export const EventPermissionSchema =
+  /*@__PURE__*/
   messageDesc(file_permission, 0);
-

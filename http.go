@@ -114,7 +114,7 @@ func GETState(db *sqlx.DB) http.HandlerFunc {
 
 		start := time.Now()
 		defer func() {
-			fmt.Println("APP", time.Since(start))
+			fmt.Println("APP GET", time.Since(start))
 		}()
 
 		from, err := strconv.ParseInt(r.URL.Query().Get("from"), 10, 64)
@@ -195,7 +195,7 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 
 		start = time.Now()
 		defer func() {
-			fmt.Println("APP", time.Since(start))
+			fmt.Println("APP POST", time.Since(start))
 		}()
 
 		var eventsRequests proto.Events

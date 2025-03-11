@@ -63,11 +63,18 @@ async function init() {
 
   localStorage.setItem("state", JSON.stringify(storeEntry));
   localStorage.setItem("cursor", jsonResponse[0].ts);
+  localStorage.setItem(
+    "data",
+    JSON.stringify({
+      players: {},
+    }),
+  );
 }
 
 async function getState() {
   const state = JSON.parse(localStorage.getItem("state"));
   const cursor = localStorage.getItem("cursor");
+  const data = JSON.parse(localStorage.getItem("data"));
 
   if (!state) {
     await init();
@@ -77,6 +84,7 @@ async function getState() {
 
   return {
     handle: state.handle,
+    data: data,
     cursor: cursor,
     privateKey: await window.crypto.subtle.importKey(
       "jwk",
@@ -108,28 +116,56 @@ async function auth(privateKey, publicKey) {
     .sign(privateKey);
 }
 
+async function sync(state) {
+  const response = await fetch(
+    "http://localhost:8081/state?from=" + state.cursor,
+    {
+      method: "GET",
+      headers: {
+        Authorization: await auth(state.privateKey, state.publicKey),
+      },
+    },
+  );
+
+  const msg = await fromBinary(
+    EventsSchema,
+    new Uint8Array(await response.arrayBuffer()),
+  );
+
+  console.log(msg)
+  msg.events.forEach(function (event) {
+    processEvent(state.data, event.msg.case, event.msg.value);
+    state.cursor = event.ts;
+  });
+
+  localStorage.setItem("cursor", state.cursor);
+  localStorage.setItem("data", JSON.stringify(state.data));
+}
+
 const state = await getState();
 
-const response = await fetch(
-  "http://localhost:8081/state?from=" + state.cursor,
-  {
-    method: "GET",
-    headers: {
-      Authorization: await auth(state.privateKey, state.publicKey),
-    },
-  },
-);
+console.log(state.cursor);
+await sync(state);
 
-const protobufObject = await fromBinary(
-  EventsSchema,
-  new Uint8Array(await response.arrayBuffer()),
-);
 
-console.log(protobufObject.events);
 
-state.cursor = protobufObject.events[protobufObject.events.length - 1].ts;
 
-localStorage.setItem("cursor", state.cursor);
+function processEvent(data, eventType, eventValue) {
+  switch (eventType) {
+    case "SeedPlayer":
+      if (data.players[eventValue.playerId]) {
+        throw Error(`player ${eventValue.playerId} already exists`);
+      }
+
+      data.players[eventValue.playerId] = {};
+
+      break;
+    case "SeedActor":
+      break;
+    default:
+      console.log(`unknown event ${eventType} ${eventValue}`);
+  }
+}
 
 let seed = create(EventsSchema, {
   events: [
@@ -145,9 +181,9 @@ let seed = create(EventsSchema, {
   ],
 });
 
-console.log(toJson(EventsSchema, seed));
 
-await fetch("http://localhost:8081/state", {
+
+const response = await fetch("http://localhost:8081/state", {
   method: "POST",
   headers: {
     Authorization: await auth(state.privateKey, state.publicKey),
@@ -156,29 +192,5 @@ await fetch("http://localhost:8081/state", {
   body: toBinary(EventsSchema, seed),
 });
 
-/*
-
-
-const form = document.getElementById("form");
-
-form.addEventListener("submit", async function (event) {
-    event.preventDefault();
-    const formData = Object.fromEntries(new FormData(form));
-    const events = [];
-
-    events.push(
-        { key: "seed", data: { index: 0 } },
-        { key: "set-name", data: { ...formData, index: 0 } },
-    )
-
-
-
-    await fetch("http://localhost:8081/state", {
-        method: "POST",
-        headers: {
-            "Authorization": await auth(privateKey, publicKey),
-        },
-        body: JSON.stringify(events),
-    })
-});
-*/
+console.log(await response.json(), toJson(EventsSchema, seed));
+await sync(state);

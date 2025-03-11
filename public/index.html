@@ -1,34 +1,32 @@
 <!doctype html>
 <html>
-
-<head>
-  <title>This is the title of the webpage!</title>
-  <script type="importmap">
-        {
-          "imports": {
-            "jose": "https://cdnjs.cloudflare.com/ajax/libs/jose/5.9.6/index.js",
-            "@bufbuild/protobuf": "https://cdn.skypack.dev/@bufbuild/protobuf",
-            "@bufbuild/protobuf/": "https://cdn.skypack.dev/@bufbuild/protobuf/"
-          }
+  <head>
+    <title>This is the title of the webpage!</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "jose": "https://cdnjs.cloudflare.com/ajax/libs/jose/5.9.6/index.js",
+          "@bufbuild/protobuf": "https://cdn.skypack.dev/@bufbuild/protobuf",
+          "@bufbuild/protobuf/": "https://cdn.skypack.dev/@bufbuild/protobuf/"
         }
+      }
     </script>
-  <script type="module" src="app.js"></script>
-</head>
+    <script type="module" src="app.js"></script>
+  </head>
 
-<body>
-  <form id="form">
-    <p>
-      <label for="name">Prénom :</label>
-      <input type="text" id="firstname" name="firstname" />
-    </p>
-    <p>
-      <label for="name">Nom :</label>
-      <input type="text" id="lastname" name="lastname" />
-    </p>
-    <p class="button">
-      <button type="submit">Envoyer</button>
-    </p>
-  </form>
-</body>
-
+  <body>
+    <form id="form">
+      <p>
+        <label for="name">Prénom :</label>
+        <input type="text" id="firstname" name="firstname" />
+      </p>
+      <p>
+        <label for="name">Nom :</label>
+        <input type="text" id="lastname" name="lastname" />
+      </p>
+      <p class="button">
+        <button type="submit">Envoyer</button>
+      </p>
+    </form>
+  </body>
 </html>
