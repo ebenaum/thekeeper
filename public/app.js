@@ -23,6 +23,12 @@ function buf2hex(buffer) {
 
 const localStorage = window.localStorage;
 
+function newData() {
+  return {
+    players: {},
+  };
+}
+
 async function init() {
   const storeEntry = {};
 
@@ -63,12 +69,7 @@ async function init() {
 
   localStorage.setItem("state", JSON.stringify(storeEntry));
   localStorage.setItem("cursor", jsonResponse[0].ts);
-  localStorage.setItem(
-    "data",
-    JSON.stringify({
-      players: {},
-    }),
-  );
+  localStorage.setItem("data", JSON.stringify(newData()));
 }
 
 async function getState() {
@@ -116,27 +117,31 @@ async function auth(privateKey, publicKey) {
     .sign(privateKey);
 }
 
-async function sync(state) {
-  const response = await fetch(
-    "http://localhost:8081/state?from=" + state.cursor,
-    {
-      method: "GET",
-      headers: {
-        Authorization: await auth(state.privateKey, state.publicKey),
-      },
+async function sync(state, reset) {
+  const cursor = reset ? -1 : state.cursor;
+
+  if (reset) {
+    state.data = newData();
+  }
+
+  const response = await fetch("http://localhost:8081/state?from=" + cursor, {
+    method: "GET",
+    headers: {
+      Authorization: await auth(state.privateKey, state.publicKey),
     },
-  );
+  });
 
   const msg = await fromBinary(
     EventsSchema,
     new Uint8Array(await response.arrayBuffer()),
   );
 
-  console.log(msg);
   msg.events.forEach(function (event) {
     processEvent(state.data, event.msg.case, event.msg.value);
     state.cursor = event.ts;
   });
+
+  console.log("sync", msg.events, Object.keys(state.data.players).length);
 
   localStorage.setItem("cursor", state.cursor);
   localStorage.setItem("data", JSON.stringify(state.data));
@@ -144,8 +149,7 @@ async function sync(state) {
 
 const state = await getState();
 
-console.log(state.cursor);
-await sync(state);
+await sync(state, true);
 
 function processEvent(data, eventType, eventValue) {
   switch (eventType) {
@@ -189,4 +193,4 @@ const response = await fetch("http://localhost:8081/state", {
 
 console.log(await response.json(), toJson(EventsSchema, seed));
 
-await sync(state);
+await sync(state, false);

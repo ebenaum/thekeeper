@@ -1,5 +1,5 @@
 syntax = "proto3";
-package tutorial;
+package thekeeper;
 
 option go_package = "github.com/ebenaum/thekeeper/proto;proto";
 
