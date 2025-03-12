@@ -1,0 +1,291 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  @font-face {
+    font-family: "IM Fell";
+    src:
+      url("/fonts/IM_FELL_English_Roman.woff2") format("woff2"),
+      /* Super Modern Browsers */ url("/fonts/IM_FELL_English_Roman.woff")
+        format("woff"),
+      /* Modern Browsers */ url("/fonts/IMFellEnglish-Regular.ttf")
+        format("truetype"); /* Safari, Android, iOS */
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: "IM Fell";
+    src:
+      url("/fonts/IM_FELL_English_Italic.woff2") format("woff2"),
+      /* Super Modern Browsers */ url("/fonts/IM_FELL_English_Italic.woff")
+        format("woff"),
+      /* Modern Browsers */ url("/fonts/IMFellEnglish-Italic.ttf")
+        format("truetype"); /* Safari, Android, iOS */
+    font-weight: normal;
+    font-style: italic;
+  }
+}
+
+@layer base {
+  html {
+    font-family: "IM Fell", system-ui, sans-serif;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .ability-branch.full {
+    display: block;
+  }
+
+  .ability-branch.full .level {
+    display: inline-block;
+  }
+}
+
+html {
+  box-sizing: border-box;
+  height: 100%;
+}
+
+body {
+  font-family: "IM Fell", serif;
+  font-weight: 400;
+  font-size: 1.2em;
+}
+
+ul {
+  list-style-type: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:hover {
+  color: inherit;
+}
+
+a:focus {
+  color: inherit;
+}
+
+input[type="text"],
+textarea {
+  border: none;
+  box-shadow: none !important;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  outline: none;
+  border-bottom: solid 2px black;
+  padding: 5px;
+  font-family: "IM Fell", serif;
+  font-weight: 400;
+  font-size: 1.2em;
+  resize: none;
+}
+
+input.q-response-text {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.q-text {
+  position: relative;
+  right: 11px;
+}
+
+.q-select {
+  margin-bottom: 10px;
+  border-collapse: separate;
+  border-spacing: 5px;
+}
+
+.q-select ul {
+  vertical-align: top;
+}
+
+.q-response-select {
+  padding: 0;
+}
+
+.q-response-select > :last-child {
+  margin-bottom: 0;
+}
+
+.q-response-select .input-select-choice {
+  position: relative;
+  border: solid 4px black;
+  padding: 10px 50px 10px 10px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.q-response-select .input-select-choice:before {
+  content: " ";
+  position: absolute;
+  z-index: -1;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border: 2px solid #000000;
+}
+
+.q-response-select .input-select-choice .description {
+  padding-left: 10px;
+  font-size: 0.9em;
+  margin-top: 5px;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.description.hidden {
+  display: none;
+}
+
+.q-response-select .input-select-choice.disabled {
+  opacity: 0.3;
+}
+
+.q-response-select .input-select-choice.active {
+  cursor: pointer;
+}
+
+.q-response-select .input-select-choice.active:hover {
+  border: solid 4px black;
+  background-color: black;
+  color: white;
+}
+
+.q-response-select .selected {
+  border: solid 4px black;
+  background-color: black;
+  color: white;
+}
+
+.q-response-select .selected:hover {
+  border: solid 4px black;
+  background-color: black;
+  color: white;
+}
+
+.q-response-select .checkmark {
+  position: absolute;
+  top: 18px;
+  right: 10px;
+  fill: white;
+}
+
+textarea {
+  resize: none;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 5px;
+}
+
+#head {
+  margin-top: 100px;
+  height: 90vh;
+  height: calc(var(--vh, 1vh) * 100);
+  margin-right: auto;
+  margin-left: auto;
+  text-align: center;
+}
+
+.form-button {
+  display: inline-block;
+  background-color: black;
+  border: solid 2px black;
+  border-radius: 2px;
+  color: white;
+  padding: 5px 20px;
+  margin-right: 5px;
+}
+
+.u-link {
+  position: relative;
+  font-weight: 700;
+  font-size: 1.2em;
+}
+
+.u-link:after {
+  display: block;
+  content: "";
+  width: 100%;
+  height: 2px;
+  background: black;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.history {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.social-media .icon {
+  margin-right: 30px;
+  width: 40px;
+}
+
+.form-element {
+  opacity: 0;
+  transition: opacity 1.5s ease-out;
+  height: 0;
+  overflow: hidden;
+}
+
+.form-element.active {
+  opacity: 1;
+  height: auto;
+  padding-top: 20vh;
+}
+
+#character-form {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+#character-form::-webkit-scrollbar {
+  display: none;
+}
+
+.input-name .input-text {
+  display: inline-block;
+  margin-right: 5px;
+  margin-left: 5px;
+}

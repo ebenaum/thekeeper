@@ -141,8 +141,6 @@ async function sync(state, reset) {
     state.cursor = event.ts;
   });
 
-  console.log("sync", msg.events, Object.keys(state.data.players).length);
-
   localStorage.setItem("cursor", state.cursor);
   localStorage.setItem("data", JSON.stringify(state.data));
 }
@@ -190,7 +188,5 @@ const response = await fetch("http://localhost:8081/state", {
   },
   body: toBinary(EventsSchema, seed),
 });
-
-console.log(await response.json(), toJson(EventsSchema, seed));
 
 await sync(state, false);
