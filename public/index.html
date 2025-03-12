@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <title>This is the title of the webpage!</title>
@@ -17,17 +17,51 @@
 
   <body>
     <form id="form">
-      <p>
-        <label for="name">Prénom :</label>
-        <input type="text" id="firstname" name="firstname" />
-      </p>
-      <p>
-        <label for="name">Nom :</label>
-        <input type="text" id="lastname" name="lastname" />
-      </p>
-      <p class="button">
-        <button type="submit">Envoyer</button>
-      </p>
+      <div class="form-element active">
+        <div class="input-text">
+          <label for="name">Prénom & Nom :</label>
+          <input type="text" id="name" name="name" />
+        </div>
+        <div class="q-select">
+          <ul class="q-response-select">
+          <li
+            class="input-select-choice selected active"
+          >
+          <div>
+            HEAD
+          </div>
+          <p class="description">
+            Select 1 description
+          </p>
+          </li>
+          <li
+          class="input-select-choice active"
+        >
+        <div>
+          HEAD
+        </div>
+        <p class="description">
+          Select 2 description
+        </p>
+        </li>
+          </ul>
+        </div>
+        <div class="input-text">
+          <div>
+            <label for="name">Nom :</label>
+          </div>
+          <textarea class="q-response-text" cols="40" rows="10"></textarea>
+        </div>
+        <p class="button">
+          <button type="submit" class="form-button">Envoyer</button>
+        </p>
+        <p class="button">
+          <button type="button" class="form-button">Lier une addresse e-mail</button>
+        </p>
+        <p class="button">
+          <button type="button" class="form-button">Créer un personnage</button>
+        </p>
+      </div>
     </form>
   </body>
 </html>
