@@ -63,7 +63,6 @@ func Run(db *sqlx.DB, tsResultsToInclude map[int64]bool) ([]RunEventResult, erro
 		}
 	}
 
-	fmt.Println(toUpdate)
 	for ts, status := range toUpdate {
 		err = UpdateEventStatus(db, ts, status)
 		if err != nil {
