@@ -154,7 +154,7 @@ input.q-response-text {
 }
 
 .q-response-select .selected {
-  border: solid 2px black;
+  border: solid 3px black;
   background-color: black;
   color: white;
 }
