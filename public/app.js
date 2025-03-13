@@ -190,3 +190,36 @@ const response = await fetch("http://localhost:8081/state", {
 });
 
 await sync(state, false);
+
+
+
+/*
+setInterval(function(){
+  const matches = document.querySelectorAll("input");
+  matches.forEach(function(match) {
+    console.log(match.className, match.attributes, match.value,  match.checked)
+  })
+}, 2000)
+*/
+
+const matches = document.querySelectorAll(".q-select li");
+matches.forEach(function(match) {
+  match.addEventListener("click", function (e) {
+   let classes = e.target.getAttribute("class").split(" ")
+   var index = classes.indexOf("selected");
+   if (index !== -1) {
+    classes.splice(index, 1);
+   } else {
+    classes.push("selected");
+   }
+
+   e.target.setAttribute("class", classes.join(" "))
+  })
+})
+
+setInterval(function(){
+  const matches = document.querySelectorAll(".q-select li");
+  matches.forEach(function(match) {
+    console.log(match.className, match.attributes, match.value,  match.checked)
+  })
+}, 2000)
