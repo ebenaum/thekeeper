@@ -1,31 +1,26 @@
+/* Base Variables */
 :root {
+  /* Colors */
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 255, 255, 255;
   --background-end-rgb: 255, 255, 255;
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 0, 0, 0;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
+  /* Spacing */
+  --spacing-sm: 5px;
+  --spacing-md: 10px;
+  --spacing-lg: 20px;
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
+  /* Border */
+  --border-width: 2px;
+  --border-width-thick: 4px;
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  /* Transitions */
+  --transition-speed: 1.5s;
+
+  /* Grid */
+  --grid-gap-sm: 1rem;
+  --grid-gap-md: 2rem;
+  --grid-gap-lg: 3rem;
 }
 
 @layer base {
@@ -60,28 +55,13 @@ body {
   }
 }
 
-@media screen and (max-width: 800px) {
-  .ability-branch.full {
-    display: block;
-  }
-
-  .ability-branch.full .level {
-    display: inline-block;
-  }
-}
-
-html {
-  box-sizing: border-box;
-  height: 100%;
-}
-
 body {
   font-weight: 400;
-  font-size: 1.2em;
 }
 
 ul {
   list-style-type: none;
+  margin: 0;
 }
 
 a {
@@ -107,23 +87,17 @@ textarea {
   border-bottom: solid 2px black;
   padding: 5px;
   font-weight: 400;
-  font-size: 1.2em;
   resize: none;
 }
 
 input.q-response-text {
   margin-bottom: 10px;
-  width: 100%;
 }
 
 .q-select {
-  margin-bottom: 10px;
   border-collapse: separate;
   border-spacing: 5px;
-}
-
-.q-select ul {
-  vertical-align: top;
+  margin-bottom: 10px;
 }
 
 .q-response-select {
@@ -136,8 +110,8 @@ input.q-response-text {
 
 .q-response-select .input-select-choice {
   position: relative;
-  border: solid 4px black;
-  padding: 10px 50px 10px 10px;
+  border: solid 3px black;
+  padding: 10px 10px 10px 10px;
   margin-bottom: 10px;
   text-align: left;
 }
@@ -174,19 +148,19 @@ input.q-response-text {
 }
 
 .q-response-select .input-select-choice.active:hover {
-  border: solid 4px black;
+  border: solid 3px black;
   background-color: black;
   color: white;
 }
 
 .q-response-select .selected {
-  border: solid 4px black;
+  border: solid 2px black;
   background-color: black;
   color: white;
 }
 
 .q-response-select .selected:hover {
-  border: solid 4px black;
+  border: solid 2px black;
   background-color: black;
   color: white;
 }
@@ -205,15 +179,6 @@ textarea {
   padding: 5px;
 }
 
-#head {
-  margin-top: 100px;
-  height: 90vh;
-  height: calc(var(--vh, 1vh) * 100);
-  margin-right: auto;
-  margin-left: auto;
-  text-align: center;
-}
-
 .form-button {
   cursor: pointer;
   display: inline-block;
@@ -228,7 +193,6 @@ textarea {
 .u-link {
   position: relative;
   font-weight: 700;
-  font-size: 1.2em;
 }
 
 .u-link:after {
@@ -247,13 +211,8 @@ textarea {
   padding-bottom: 3rem;
 }
 
-.social-media .icon {
-  margin-right: 30px;
-  width: 40px;
-}
-
 .form-element {
-  opacity: 0;
+  opacity: 0.3;
   transition: opacity 1.5s ease-out;
   height: 0;
   overflow: hidden;
@@ -262,20 +221,77 @@ textarea {
 .form-element.active {
   opacity: 1;
   height: auto;
-  padding-top: 20vh;
 }
 
-#character-form {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-#character-form::-webkit-scrollbar {
-  display: none;
-}
-
-.input-name .input-text {
+.input-text {
   display: inline-block;
-  margin-right: 5px;
-  margin-left: 5px;
+  margin-bottom: 10px;
+}
+
+.input-checkbox {
+  display: inline-block;
+  margin-bottom: 10px;
+}
+input[type="checkbox"] {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  font-size: 2rem;
+  padding: 1px;
+  border: 3px solid black;
+}
+
+input[type="checkbox"]::before {
+  content: "";
+  width: 1rem;
+  height: 1rem;
+  clip-path: polygon(
+    20% 0%,
+    0% 20%,
+    30% 50%,
+    0% 80%,
+    20% 100%,
+    50% 70%,
+    80% 100%,
+    100% 80%,
+    70% 50%,
+    100% 20%,
+    80% 0%,
+    50% 30%
+  );
+  transform: scale(0);
+  background-color: black;
+}
+
+input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+.administrative {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.player-group-input {
+  width: 80%;
+}
+
+.d-inline {
+  display: inline-block;
+}
+
+.d-block {
+  display: block;
 }

@@ -1,6 +1,8 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>This is the title of the webpage!</title>
     <link href="style.css" rel="stylesheet" />
     <script type="importmap">
@@ -16,52 +18,87 @@
   </head>
 
   <body>
-    <form id="form">
-      <div class="form-element active">
-        <div class="input-text">
-          <label for="name">Prénom & Nom :</label>
-          <input type="text" id="name" name="name" />
-        </div>
-        <div class="q-select">
-          <ul class="q-response-select">
-          <li
-            class="input-select-choice selected active"
-          >
-          <div>
-            HEAD
+    <div class="container">
+      <form id="form">
+        <fieldset class="administrative form-element active">
+          <legend>Informations administratives</legend>
+
+          <div class="input-text">
+            <label for="fullname">Prénom & Nom :</label>
+            <input type="text" name="fullname" required />
           </div>
-          <p class="description">
-            Select 1 description
-          </p>
-          </li>
-          <li
-          class="input-select-choice active"
-        >
-        <div>
-          HEAD
-        </div>
-        <p class="description">
-          Select 2 description
-        </p>
-        </li>
-          </ul>
-        </div>
-        <div class="input-text">
-          <div>
-            <label for="name">Nom :</label>
+
+          <div class="input-text">
+            <label for="contact">Contact (email, téléphone) :</label>
+            <input type="text" name="contact" required />
           </div>
-          <textarea class="q-response-text" cols="40" rows="10"></textarea>
-        </div>
-        <p class="button">
-          <button type="submit" class="form-button">Envoyer</button>
-        </p>
-        <p class="button">
-          <button type="button" class="form-button">Lier une addresse e-mail</button>
-        </p>
-        <p class="button">
-          <button type="button" class="form-button">Créer un personnage</button>
-        </p>
-      </div>
-    </form>
+
+          <div class="input-text">
+            <label for="urgency-tel">Contact d'urgence (téléphone) :</label>
+            <input type="text" name="urgency-tel" required />
+          </div>
+
+          <div class="q-select">
+            <label for="age">Age :</label>
+            <ul class="q-response-select d-inline">
+              <li class="input-select-choice active d-inline">- de 12 ans</li>
+              <li class="input-select-choice active d-inline">- de 18 ans</li>
+              <li class="input-select-choice active d-inline">- de 99 ans</li>
+            </ul>
+          </div>
+
+          <div class="input-text">
+            <label for="city-of-origin">Ville d'origine :</label>
+            <input type="text" name="city-of-origin" required />
+          </div>
+
+          <div class="input-text">
+            <label for="health"
+              >Informations de santé (allergies, troubles, pathologies,
+              difficultés psychologiques, traitements, régimes...) :</label
+            >
+            <textarea
+              name="health"
+              class="q-response-text"
+              cols="50"
+              rows="5"
+            ></textarea>
+          </div>
+
+          <div class="input-text">
+            <label for="player-group"
+              >Avec quelles autres personnes voulez-vous vraiment jouer ?</label
+            >
+            <input class="player-group-input" type="text" name="player-group" />
+          </div>
+
+          <div class="input-text">
+            <label class="d-block" for="skills"
+              >Avez-vous des compétences particulières quelconques ?</label
+            >
+            <textarea
+              name="skills"
+              class="q-response-text"
+              cols="50"
+              rows="5"
+            ></textarea>
+          </div>
+
+          <div class="input-checkbox">
+            <label class="d-block" for="conditions"
+              >En participant à l'événement, vous acceptez de respecter les
+              consignes des livres de règles, de sécurité ainsi que celles
+              données par les membres d'organisation lors de l'évènement</label
+            >
+            <input type="checkbox" name="conditions" required />
+          </div>
+
+          <div class="button-group">
+            <button type="submit" class="form-button primary">Envoyer</button>
+          </div>
+
+        </fieldset>
+      </form>
+    </div>
   </body>
 </html>
