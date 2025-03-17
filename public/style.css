@@ -287,7 +287,7 @@ input[type="checkbox"]:checked::before {
 
 .carac {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
 }
 
 .player-group-input {
@@ -300,4 +300,44 @@ input[type="checkbox"]:checked::before {
 
 .d-block {
   display: block;
+}
+
+.ability {
+  border: solid 8px black;
+  width: fit-content;
+  block-size: fit-content;
+  text-align: center;
+  width: 60px;
+  height: 60px;
+  font-size: 2rem;
+  border-radius: 60px;
+}
+
+textarea:focus,
+input:focus {
+  outline: none;
+}
+
+.caracs {
+  background-color: black;
+  width: 60px;
+}
+
+.carac {
+  display: grid;
+  grid-template-columns: 1fr 1fr 8fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.carac label {
+  font-size: 1.2rem;
+}
+
+input[type="number"]::-webkit-inner-spin-button {
+  opacity: 1;
+}
+
+.bg-black {
+  background-color: black;
 }

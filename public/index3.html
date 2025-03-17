@@ -20,21 +20,30 @@
   <body>
     <div class="container">
       <p>
-        Pour le jeu de cet été les groupes seront en opposition directe et très concrète même si vos personnages seront libres de leurs choix et d'en changer.
-        Il y aura donc moins d'interventions pnjesques, et plus de conflits et d'enjeux entre joueurs.
-        Évidemment, nous arrivons peu à peu sur une fin de cycle, l'ambiance va s'assombrir bien qu'avec toujours une approche décalée...
+        Pour le jeu de cet été les groupes seront en opposition directe et très
+        concrète même si vos personnages seront libres de leurs choix et d'en
+        changer. Il y aura donc moins d'interventions pnjesques, et plus de
+        conflits et d'enjeux entre joueurs. Évidemment, nous arrivons peu à peu
+        sur une fin de cycle, l'ambiance va s'assombrir bien qu'avec toujours
+        une approche décalée...
       </p>
       <p>
-        Contrairement aux épisodes précédents, l'histoire de celui ci ne se passera pas juste après la fin du dernier scénario, mais un peu après.
-        La chymeyre blanche a été absorbée et est prisonnière d'un vieux portail qui ouvre désormais un tunnel permanent vers le monde d’Erenthyrm.
-        Mais la Dame blanche avait elle même capturé Nycanoc, la cueuilleuse d'âmes, et sa persistence est toujours un Fléau pour les Dieux et la magie d'ebenaum.
-        Ce qui arrange bien une partie des vivants, notamment ceux d'Erenthyrm, qui voient le chaos et les non morts se répandre en Ebenaum.
-        Nombreux sont ceux qui voient d'un mauvais œil cette découverte d'un nouveau monde et des armées se sont mises en place de chaque côté du portail avec un mot d'ordre très simple : dead or Alive.
+        Contrairement aux épisodes précédents, l'histoire de celui ci ne se
+        passera pas juste après la fin du dernier scénario, mais un peu après.
+        La chymeyre blanche a été absorbée et est prisonnière d'un vieux portail
+        qui ouvre désormais un tunnel permanent vers le monde d’Erenthyrm. Mais
+        la Dame blanche avait elle même capturé Nycanoc, la cueuilleuse d'âmes,
+        et sa persistence est toujours un Fléau pour les Dieux et la magie
+        d'ebenaum. Ce qui arrange bien une partie des vivants, notamment ceux
+        d'Erenthyrm, qui voient le chaos et les non morts se répandre en
+        Ebenaum. Nombreux sont ceux qui voient d'un mauvais œil cette découverte
+        d'un nouveau monde et des armées se sont mises en place de chaque côté
+        du portail avec un mot d'ordre très simple : dead or Alive.
       </p>
       <form id="form">
         <fieldset class="form-element active">
           <legend>Création de personnage</legend>
-          
+
           <div class="q-select">
             <label for="group">Groupe de jeu</label>
             <ul class="q-response-select d-block">
@@ -64,85 +73,67 @@
           </div>
 
           <div class="carac">
-
-          <div class="q-select">
-            <label for="carac-1">Carac 1</label>
-            <ul class="q-response-select d-block">
-              <li class="input-select-choice active d-block">
-                -2
-                <p class="description">Handicap</p>
-              </li>
-              <li class="input-select-choice active d-block">
-                -2
-                <p class="description">Handicap</p>
-              </li>
-              <li class="input-select-choice active d-block">
-                -1
-                <p class="description">Handicap</p>
-              </li>
-              <li class="input-select-choice active d-block">
-                -0
-                <p class="description">Handicap</p>
-              </li>
-              <li class="input-select-choice active d-block">
-                +1
-                <p class="description">Descriptio</p>
-              </li>
-              <li class="input-select-choice active d-block">
-                +2
-                <p class="description">Description</p>
-              </li>
-              <li class="input-select-choice active d-block">
-                +3
-                <p class="description">Description</p>
-              </li>
-              <li class="input-select-choice active d-block">
-                +4
-                <p class="description">Description</p>
-              </li>
-            </ul>
+            <div class="bg-black">
+              <input
+                type="number"
+                min="-2"
+                max="4"
+                value="0"
+                class="ability"
+                name="corps"
+                required
+              />
+            </div>
+            <label for="corps">Corps</label>
+            <div class="description d-inline">5 PV</div>
           </div>
-
-          <div class="q-select">
-            <label for="carac-2">Carac 2</label>
-            <ul class="q-response-select d-block">
-              <li class="input-select-choice active d-block">
-                -2
-                <p class="description">Handicap</p>
-              </li>
-              <li class="input-select-choice active d-block">
-                -2
-                <p class="description">Handicap</p>
-              </li>
-              <li class="input-select-choice active d-block">
-                -1
-                <p class="description">Handicap</p>
-              </li>
-              <li class="input-select-choice active d-block">
-                -0
-                <p class="description">Handicap</p>
-              </li>
-              <li class="input-select-choice active d-block">
-                +1
-                <p class="description">Descriptio</p>
-              </li>
-              <li class="input-select-choice active d-block">
-                +2
-                <p class="description">Description</p>
-              </li>
-              <li class="input-select-choice active d-block">
-                +3
-                <p class="description">Description</p>
-              </li>
-              <li class="input-select-choice active d-block">
-                +4
-                <p class="description">Description</p>
-              </li>
-            </ul>
+          <div class="carac">
+            <div class="bg-black">
+              <input
+                type="number"
+                min="-2"
+                max="4"
+                value="0"
+                class="ability"
+                name="corps"
+                required
+              />
+            </div>
+            <label for="corps">Savoir</label>
+            <div class="description d-inline">4 points de compétence</div>
           </div>
-
-        </div>
-
+          <div class="carac">
+            <div class="bg-black">
+              <input
+                type="number"
+                min="-2"
+                max="4"
+                value="-2"
+                class="ability"
+                name="corps"
+                required
+              />
+            </div>
+            <label for="corps">Dextérité</label>
+            <div class="description d-inline">
+              Vous avez une Dette et vous ne pouvez pas manier d’armes.
+            </div>
+          </div>
+          <div class="carac">
+            <div class="bg-black">
+              <input
+                type="number"
+                min="-2"
+                max="4"
+                value="0"
+                class="ability"
+                name="corps"
+                required
+              />
+            </div>
+            <label for="corps">Influence</label>
+            <div class="description d-inline">Réputation +3</div>
+          </div>
         </fieldset>
       </form>
     </div>
