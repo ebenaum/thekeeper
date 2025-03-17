@@ -131,6 +131,7 @@ input.q-response-text {
   padding-left: 10px;
   font-size: 0.9em;
   margin-top: 5px;
+  margin-bottom: 5px;
   text-align: justify;
   text-justify: inter-word;
 }
@@ -282,6 +283,11 @@ input[type="checkbox"]:checked::before {
 .administrative {
   display: grid;
   grid-template-columns: 1fr;
+}
+
+.carac {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
 }
 
 .player-group-input {

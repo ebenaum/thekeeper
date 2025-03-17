@@ -205,7 +205,7 @@ setInterval(function(){
 const matches = document.querySelectorAll(".q-select li");
 matches.forEach(function(match) {
   match.addEventListener("click", function (e) {
-   let classes = e.target.getAttribute("class").split(" ")
+   let classes = e.currentTarget.getAttribute("class").split(" ")
    var index = classes.indexOf("selected");
    if (index !== -1) {
     classes.splice(index, 1);
@@ -213,7 +213,7 @@ matches.forEach(function(match) {
     classes.push("selected");
    }
 
-   e.target.setAttribute("class", classes.join(" "))
+   e.currentTarget.setAttribute("class", classes.join(" "))
   })
 })
 
