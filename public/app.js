@@ -1,7 +1,16 @@
-import * as jose from "jose";
+// @ts-check
+
+// @ts-ignore
+import * as jose from "jose"; 
+// @ts-ignore
 import { create, toJson, toBinary, fromBinary } from "@bufbuild/protobuf";
 import { EventsSchema } from "./event_pb.js";
 
+/**
+ * 
+ * @param {number} length 
+ * @returns {string}
+ */
 function createRandomString(length) {
   const chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -72,10 +81,25 @@ async function init() {
   localStorage.setItem("data", JSON.stringify(newData()));
 }
 
+/**
+ * @typedef {Object} State 
+ * @property {string} handle 
+ * @property {{players: Object.<string, {playerId: string}>}} data 
+ * @property {number} cursor 
+ * @prop {CryptoKey} privateKey
+ * @prop {CryptoKey} publicKey
+ */
+
+/**
+ * 
+ * @returns {Promise<State>}
+ */
 async function getState() {
-  const state = JSON.parse(localStorage.getItem("state"));
-  const cursor = localStorage.getItem("cursor");
-  const data = JSON.parse(localStorage.getItem("data"));
+  const state = JSON.parse( /** @type {string} */ (localStorage.getItem("state")));
+  const cursor =  Number(/** @type {string} */ (localStorage.getItem("cursor")));
+
+  
+  const data = JSON.parse( /** @type {string} */ (localStorage.getItem("data")));
 
   if (!state) {
     await init();
@@ -104,6 +128,12 @@ async function getState() {
   };
 }
 
+/**
+ * 
+ * @param {CryptoKey} privateKey 
+ * @param {CryptoKey} publicKey 
+ * @returns 
+ */
 async function auth(privateKey, publicKey) {
   return await new jose.SignJWT({})
     .setProtectedHeader({
@@ -117,6 +147,11 @@ async function auth(privateKey, publicKey) {
     .sign(privateKey);
 }
 
+/**
+ * 
+ * @param {State} state 
+ * @param {boolean} reset 
+ */
 async function sync(state, reset) {
   const cursor = reset ? -1 : state.cursor;
 
@@ -141,7 +176,7 @@ async function sync(state, reset) {
     state.cursor = event.ts;
   });
 
-  localStorage.setItem("cursor", state.cursor);
+  localStorage.setItem("cursor", state.cursor.toString());
   localStorage.setItem("data", JSON.stringify(state.data));
 }
 
@@ -203,21 +238,17 @@ setInterval(function(){
 const matches = document.querySelectorAll(".q-select li");
 matches.forEach(function (match) {
   match.addEventListener("click", function (e) {
-    let classes = e.currentTarget.getAttribute("class").split(" ");
-    var index = classes.indexOf("selected");
+    let classes = /** @type {Element} */(e.currentTarget).getAttribute("class")?.split(" ") || [];
+
+    const index = classes.indexOf("selected");
     if (index !== -1) {
       classes.splice(index, 1);
     } else {
       classes.push("selected");
     }
 
-    e.currentTarget.setAttribute("class", classes.join(" "));
+     /** @type {Element} */(e.currentTarget).setAttribute("class", classes.join(" "));
   });
 });
 
-setInterval(function () {
-  const matches = document.querySelectorAll(".q-select li");
-  matches.forEach(function (match) {
-    console.log(match.className, match.attributes, match.value, match.checked);
-  });
-}, 2000);
+

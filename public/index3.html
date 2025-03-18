@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -44,6 +44,12 @@
         <fieldset class="form-element active">
           <legend>Création de personnage</legend>
 
+          <div class="input-text">
+            <label for="pseudo"
+              >Quel est le nom de votre personnage ?</label>
+            <input type="text" name="pseudo" required />
+          </div>
+
           <div class="q-select">
             <label for="group">Groupe de jeu</label>
             <ul class="q-response-select d-block">
@@ -68,6 +74,20 @@
               <li class="input-select-choice active d-block">
                 Erenthyrm
                 <p class="description">De l'autre côté du portail</p>
+              </li>
+            </ul>
+          </div>
+
+          <div class="q-select">
+            <label for="vdv">Voie de Vie</label>
+            <ul class="q-response-select d-block">
+              <li class="input-select-choice active d-block">
+                Lame du Claymore
+                <p class="description">Le Claymore est souvent un paysan devenu guerrier. Ce sont des piliers dans un combat, endurants et puissants. Moins sauvages que les berserks. Disons qu'ils cuisent la viande avant de la manger. Les Claymores se moquent des tirs ennemis, et leur courage est exemplaire. Un Claymore doit forger sa propre lame pour gagner ce titre.</p>
+              </li>
+              <li class="input-select-choice active d-block">
+                Lycée Annexe
+                <p class="description">On y forme les Sorciers et ensorceleurs. Ils étudient l’énergie vitale, dans toute sa complexité, depuis la naissance jusqu’à.. après la mort. Oui. Ce ne sont pas les gens les plus gais du monde d'Ebenaum. Leur art consiste donc à corrompre l'esprit de la cible pour l'ensorceler, la drainer ou la guérir.</p>
               </li>
             </ul>
           </div>
