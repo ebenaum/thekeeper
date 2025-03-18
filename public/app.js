@@ -1,14 +1,14 @@
 // @ts-check
 
 // @ts-ignore
-import * as jose from "jose"; 
+import * as jose from "jose";
 // @ts-ignore
 import { create, toJson, toBinary, fromBinary } from "@bufbuild/protobuf";
 import { EventsSchema } from "./event_pb.js";
 
 /**
- * 
- * @param {number} length 
+ *
+ * @param {number} length
  * @returns {string}
  */
 function createRandomString(length) {
@@ -82,24 +82,25 @@ async function init() {
 }
 
 /**
- * @typedef {Object} State 
- * @property {string} handle 
- * @property {{players: Object.<string, {playerId: string}>}} data 
- * @property {number} cursor 
+ * @typedef {Object} State
+ * @property {string} handle
+ * @property {{players: Object.<string, {playerId: string}>}} data
+ * @property {number} cursor
  * @prop {CryptoKey} privateKey
  * @prop {CryptoKey} publicKey
  */
 
 /**
- * 
+ *
  * @returns {Promise<State>}
  */
 async function getState() {
-  const state = JSON.parse( /** @type {string} */ (localStorage.getItem("state")));
-  const cursor =  Number(/** @type {string} */ (localStorage.getItem("cursor")));
+  const state = JSON.parse(
+    /** @type {string} */ (localStorage.getItem("state")),
+  );
+  const cursor = Number(/** @type {string} */ (localStorage.getItem("cursor")));
 
-  
-  const data = JSON.parse( /** @type {string} */ (localStorage.getItem("data")));
+  const data = JSON.parse(/** @type {string} */ (localStorage.getItem("data")));
 
   if (!state) {
     await init();
@@ -129,10 +130,10 @@ async function getState() {
 }
 
 /**
- * 
- * @param {CryptoKey} privateKey 
- * @param {CryptoKey} publicKey 
- * @returns 
+ *
+ * @param {CryptoKey} privateKey
+ * @param {CryptoKey} publicKey
+ * @returns
  */
 async function auth(privateKey, publicKey) {
   return await new jose.SignJWT({})
@@ -148,9 +149,9 @@ async function auth(privateKey, publicKey) {
 }
 
 /**
- * 
- * @param {State} state 
- * @param {boolean} reset 
+ *
+ * @param {State} state
+ * @param {boolean} reset
  */
 async function sync(state, reset) {
   const cursor = reset ? -1 : state.cursor;
@@ -238,7 +239,10 @@ setInterval(function(){
 const matches = document.querySelectorAll(".q-select li");
 matches.forEach(function (match) {
   match.addEventListener("click", function (e) {
-    let classes = /** @type {Element} */(e.currentTarget).getAttribute("class")?.split(" ") || [];
+    let classes =
+      /** @type {Element} */ (e.currentTarget)
+        .getAttribute("class")
+        ?.split(" ") || [];
 
     const index = classes.indexOf("selected");
     if (index !== -1) {
@@ -247,8 +251,9 @@ matches.forEach(function (match) {
       classes.push("selected");
     }
 
-     /** @type {Element} */(e.currentTarget).setAttribute("class", classes.join(" "));
+    /** @type {Element} */ (e.currentTarget).setAttribute(
+      "class",
+      classes.join(" "),
+    );
   });
 });
-
-

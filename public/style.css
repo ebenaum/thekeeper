@@ -334,10 +334,10 @@ input:focus {
   font-size: 1.2rem;
 }
 
-input[type='number']::-webkit-inner-spin-button, 
-input[type='number']::-webkit-outer-spin-button { 
-      opacity: 0;
-      margin-left: -10px;
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 0;
+  margin-left: -10px;
 }
 
 .bg-black {
