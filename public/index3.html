@@ -49,8 +49,9 @@
             <input type="text" name="pseudo" required />
           </div>
 
+          <h2>Groupe de jeu</h2>
           <div class="q-select">
-            <label for="group">Groupe de jeu</label>
+            <label class="d-none" for="group">Groupe de jeu</label>
             <ul class="q-response-select d-block">
               <li class="input-select-choice active d-block">
                 Ebenaum
@@ -63,8 +64,9 @@
             </ul>
           </div>
 
+          <h2>Race</h2>
           <div class="q-select">
-            <label for="race">Race</label>
+            <label class="d-none" for="race">Race</label>
             <ul class="q-response-select d-block">
               <li class="input-select-choice active d-block">
                 Ebenaum
@@ -77,8 +79,9 @@
             </ul>
           </div>
 
+          <h2>Voie de Vie</h2>
           <div class="q-select">
-            <label for="vdv">Voie de Vie</label>
+            <label class="d-none" for="vdv">Voie de Vie</label>
             <ul class="q-response-select d-block">
               <li class="input-select-choice active d-block">
                 Lame du Claymore
@@ -105,6 +108,7 @@
             </ul>
           </div>
 
+          <h2>Caractéristiques</h2>
           <div class="carac">
             <div class="bg-black">
               <input
@@ -168,7 +172,67 @@
             <div class="description d-inline">Réputation +3</div>
           </div>
 
-          <div></div>
+          <h2>Compétences</h2>
+          <div class="skills">
+            <p>Points restants: 0</p>
+            <div class="skill skill--active skill--level-2">
+              <div class="skill__title">Skill 1 - Coût : 1</div>
+              <div class="skill__content">
+                <p class="skill__description">
+                  Le Claymore est souvent un paysan devenu guerrier. Ce sont des
+                  piliers dans un combat, endurants et puissants. Moins sauvages
+                  que les berserks. Disons qu'ils cuisent la viande avant de la
+                  manger. Les Claymores se moquent des tirs ennemis, et leur
+                  courage est exemplaire. Un Claymore doit forger sa propre lame
+                  pour gagner ce titre.
+                </p>
+                <div class="skill__level">
+                  <div>
+                    <span class="skill__level__plus"
+                      ><svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M17.6569 11.2929L16.2427 12.7071L12 8.46444L7.75735 12.7071L6.34314 11.2929L12 5.63605L17.6569 11.2929Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M17.6569 16.9497L16.2427 18.3639L12 14.1213L7.75735 18.364L6.34314 16.9498L12 11.2929L17.6569 16.9497Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                    <p>
+                      Niveau 0/3<br />
+                      Novice<br />
+                    </p>
+                    <span class="skill__level__minus">
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M7.75735 5.63605L6.34314 7.05026L12 12.7071L17.6569 7.05029L16.2427 5.63608L12 9.87872L7.75735 5.63605Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M6.34314 12.7071L7.75735 11.2929L12 15.5356L16.2427 11.2929L17.6569 12.7071L12 18.364L6.34314 12.7071Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </fieldset>
       </form>
     </div>

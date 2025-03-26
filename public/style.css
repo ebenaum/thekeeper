@@ -285,11 +285,6 @@ input[type="checkbox"]:checked::before {
   grid-template-columns: 1fr;
 }
 
-.carac {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-}
-
 .player-group-input {
   width: 80%;
 }
@@ -300,6 +295,10 @@ input[type="checkbox"]:checked::before {
 
 .d-block {
   display: block;
+}
+
+.d-none {
+  display: none;
 }
 
 .ability {
@@ -342,4 +341,113 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .bg-black {
   background-color: black;
+}
+
+.skill {
+  position: relative;
+  border: solid 3px black;
+  padding: 10px 10px 10px 10px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.skill__content {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  grid-gap: 20px;
+}
+
+.skill__description {
+  text-align: justify;
+}
+
+.skill__level {
+  text-align: center;
+  align-items: center;
+  display: flex;
+}
+
+.skill__level__plus {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.4rem;
+}
+
+.skill__level__minus {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.4rem;
+}
+
+.skill:before {
+  content: " ";
+  position: absolute;
+  z-index: -1;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border: 2px solid #000000;
+}
+
+.skill--active {
+  opacity: 1;
+}
+
+.skill--no-level--selected {
+  background: none;
+  border: solid 3px black;
+  background-color: black;
+  color: white;
+}
+
+.skill--level-1 {
+  border: solid 3px black;
+  --dot-bg: white;
+  --dot-color: rgb(140, 140, 140);
+  --dot-size: 1px;
+  --dot-space: 20px;
+  background:
+    linear-gradient(
+        90deg,
+        var(--dot-bg) calc(var(--dot-space) - var(--dot-size)),
+        transparent 1%
+      )
+      center / var(--dot-space) var(--dot-space),
+    linear-gradient(
+        var(--dot-bg) calc(var(--dot-space) - var(--dot-size)),
+        transparent 1%
+      )
+      center / var(--dot-space) var(--dot-space),
+    var(--dot-color);
+  color: black;
+}
+
+.skill--level-2 {
+  border: solid 3px black;
+  --dot-bg: white;
+  --dot-color: rgb(140, 140, 140);
+  --dot-size: 1px;
+  --dot-space: 3px;
+  background:
+    linear-gradient(
+        90deg,
+        var(--dot-bg) calc(var(--dot-space) - var(--dot-size)),
+        transparent 1%
+      )
+      center / var(--dot-space) var(--dot-space),
+    linear-gradient(
+        var(--dot-bg) calc(var(--dot-space) - var(--dot-size)),
+        transparent 1%
+      )
+      center / var(--dot-space) var(--dot-space),
+    var(--dot-color);
+  color: black;
+}
+
+.skill--level-3 {
+  background: none;
+  border: solid 3px black;
+  background-color: black;
+  color: white;
 }
