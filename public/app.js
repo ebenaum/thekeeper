@@ -236,23 +236,63 @@ if (!raceTemplate) {
 
 const /** @type {HTMLTemplateElement | null} */ skillTemplate =
     document.querySelector("#template__skill");
-if (!raceTemplate) {
+if (!skillTemplate) {
   throw new Error("cannot retrieve skill template");
 }
-/* TEMPLATES */
+/* TEMPLATES               */
 
 const universResponse = await fetch("http://localhost:8080/univers.json");
 const univers = await universResponse.json();
 const races = univers.filter((entry) => entry.tags.includes("race"));
 const skills = univers.filter((entry) => entry.tags.includes("skill"));
 
-skills.forEach((skill)=> {
-  console.log(skill.key, univers.filter((entry) => entry.tags.includes("skill:" + skill.key cmmmmmmmm
+skills.forEach((skill) => {
+  skill.levels = univers.filter((entry) =>
+    entry.tags.includes("skill:" + skill.key),
+  );
+  skill.levels = skill.levels.map((level) => {
+    level.tags.forEach((tag) => {
+      const parts = tag.split(":");
+      if (parts.length === 2) {
+        level[parts[0]] = parts[1];
+      }
+    });
 
+    return level;
+  });
+});
 
-    
-  )));
-})
+console.log(skills);
+
+const skillSelect = document.querySelector(".skills");
+skills.forEach((skill) => {
+  const clone = skillTemplate.content.cloneNode(true);
+  clone.querySelector(".skill__title").textContent = skill.label ;
+  clone.querySelector(".skill__content__description").textContent = skill.description;
+  clone.querySelector(".skill__content__level__span1").textContent = "Rang 0/" + skill.levels.length;
+  clone.querySelector(".skill__content__next-level").textContent = "Rang suivant - Coût "+ skill.levels[0].cost +" : " + skill.levels[0].description;
+
+  skillSelect?.appendChild(clone);
+
+  skill.levels.forEach((level, index) => {
+    const clone = skillTemplate.content.cloneNode(true);
+    clone.querySelector(".skill__title").textContent = level.label + " - Coût : " + skill.levels.slice(0, index+1).reduce((cost, level)=> cost + (level.cost |0), 0);
+    clone.querySelector(".skill__content__description").textContent = level.description;
+    clone.querySelector(".skill__content__level__span1").textContent = "Rang " + (index + 1) + "/" + skill.levels.length;
+    clone.querySelector(".skill__content__level__span2").textContent = [
+      "",
+      "Novice",
+      "Expert",
+      "Maître",
+    ][index + 1];
+
+    if (index < skill.levels.length - 1) {
+      clone.querySelector(".skill__content__next-level").textContent = "Rang suivant - Coût "+ skill.levels[index+1].cost +" : " + skill.levels[index+1].description;
+    }
+
+    skillSelect?.appendChild(clone);
+  });
+});
 
 const raceSelect = document.querySelector(".race-select");
 races.forEach((race) => {
