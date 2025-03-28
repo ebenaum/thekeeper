@@ -233,11 +233,26 @@ const /** @type {HTMLTemplateElement | null} */ raceTemplate =
 if (!raceTemplate) {
   throw new Error("cannot retrieve race-option template");
 }
+
+const /** @type {HTMLTemplateElement | null} */ skillTemplate =
+    document.querySelector("#template__skill");
+if (!raceTemplate) {
+  throw new Error("cannot retrieve skill template");
+}
 /* TEMPLATES */
 
 const universResponse = await fetch("http://localhost:8080/univers.json");
 const univers = await universResponse.json();
 const races = univers.filter((entry) => entry.tags.includes("race"));
+const skills = univers.filter((entry) => entry.tags.includes("skill"));
+
+skills.forEach((skill)=> {
+  console.log(skill.key, univers.filter((entry) => entry.tags.includes("skill:" + skill.key cmmmmmmmm
+
+
+    
+  )));
+})
 
 const raceSelect = document.querySelector(".race-select");
 races.forEach((race) => {

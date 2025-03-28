@@ -25,6 +25,59 @@
       </li>
     </template>
 
+    <template id="template__skill">
+    <div class="skill skill--active skill--level-2">
+      <div class="skill__title"></div>
+      <div class="skill__content">
+        <p class="skill__content__description"></p>
+        <div class="skill__content__level">
+          <div>
+            <span>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17.6569 11.2929L16.2427 12.7071L12 8.46444L7.75735 12.7071L6.34314 11.2929L12 5.63605L17.6569 11.2929Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M17.6569 16.9497L16.2427 18.3639L12 14.1213L7.75735 18.364L6.34314 16.9498L12 11.2929L17.6569 16.9497Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </span>
+            <p>
+              <span class="skill__content__level__span1"></span><br />
+              <span class="skill__content__level__span2"></span><br />
+            </p>
+            <span>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7.75735 5.63605L6.34314 7.05026L12 12.7071L17.6569 7.05029L16.2427 5.63608L12 9.87872L7.75735 5.63605Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M6.34314 12.7071L7.75735 11.2929L12 15.5356L16.2427 11.2929L17.6569 12.7071L12 18.364L6.34314 12.7071Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    </template>
+
     <div class="container">
       <p>
         Pour le jeu de cet été les groupes seront en opposition directe et très
@@ -178,7 +231,7 @@
             <div class="skill skill--active skill--level-2">
               <div class="skill__title">Skill 1 - Coût : 1</div>
               <div class="skill__content">
-                <p class="skill__description">
+                <p class="skill__content__description">
                   Le Claymore est souvent un paysan devenu guerrier. Ce sont des
                   piliers dans un combat, endurants et puissants. Moins sauvages
                   que les berserks. Disons qu'ils cuisent la viande avant de la
@@ -186,7 +239,7 @@
                   courage est exemplaire. Un Claymore doit forger sa propre lame
                   pour gagner ce titre.
                 </p>
-                <div class="skill__level">
+                <div class="skill__content__level">
                   <div>
                     <span class="skill__level__plus"
                       ><svg

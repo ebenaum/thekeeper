@@ -357,26 +357,14 @@ input[type="number"]::-webkit-outer-spin-button {
   grid-gap: 20px;
 }
 
-.skill__description {
+.skill__content__description {
   text-align: justify;
 }
 
-.skill__level {
+.skill__content__level {
   text-align: center;
   align-items: center;
   display: flex;
-}
-
-.skill__level__plus {
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 1.4rem;
-}
-
-.skill__level__minus {
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 1.4rem;
 }
 
 .skill:before {
