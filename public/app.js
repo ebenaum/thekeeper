@@ -228,7 +228,8 @@ const response = await fetch("http://localhost:8081/state", {
 await sync(state, false);
 
 /* TEMPLATES */
-const /** @type {HTMLTemplateElement | null} */ raceTemplate = document.querySelector("#template__race-option");
+const /** @type {HTMLTemplateElement | null} */ raceTemplate =
+    document.querySelector("#template__race-option");
 if (!raceTemplate) {
   throw new Error("cannot retrieve race-option template");
 }
@@ -238,14 +239,15 @@ const universResponse = await fetch("http://localhost:8080/univers.json");
 const univers = await universResponse.json();
 const races = univers.filter((entry) => entry.tags.includes("race"));
 
-
 const raceSelect = document.querySelector(".race-select");
 races.forEach((race) => {
   const clone = raceTemplate.content.cloneNode(true);
-  clone.querySelector(".race-select__race-option__title").textContent = race.label;
-  clone.querySelector(".race-select__race-option__description").textContent = race.description;
+  clone.querySelector(".race-select__race-option__title").textContent =
+    race.label;
+  clone.querySelector(".race-select__race-option__description").textContent =
+    race.description;
   raceSelect?.appendChild(clone);
-})
+});
 
 const matches = document.querySelectorAll(".q-select--unique");
 matches.forEach(function (match) {
@@ -265,12 +267,12 @@ matches.forEach(function (match) {
         classes.push("selected");
         lis.forEach((li2, j) => {
           if (i == j) return;
-          let classes = li2.getAttribute("class") ?.split(" ") || [];
+          let classes = li2.getAttribute("class")?.split(" ") || [];
           const index = classes.indexOf("selected");
           if (index !== -1) classes.splice(index, 1);
-          
-          li2.setAttribute(  "class", classes.join(" "),
-        );})
+
+          li2.setAttribute("class", classes.join(" "));
+        });
       }
 
       /** @type {Element} */ (e.currentTarget).setAttribute(
@@ -278,5 +280,5 @@ matches.forEach(function (match) {
         classes.join(" "),
       );
     });
-  })
+  });
 });
