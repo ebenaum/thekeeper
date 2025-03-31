@@ -367,6 +367,14 @@ input[type="number"]::-webkit-outer-spin-button {
   display: flex;
 }
 
+.skill__content__level__up {
+  cursor: pointer;
+}
+
+.skill__content__level__down {
+  cursor: pointer;
+}
+
 .skill:before {
   content: " ";
   position: absolute;

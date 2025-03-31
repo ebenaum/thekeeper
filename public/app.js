@@ -30,6 +30,36 @@ function buf2hex(buffer) {
     .join("");
 }
 
+/**
+ *
+ * @param {string} classes
+ * @param {string} classe
+ * @returns {string}
+ */
+function addClass(classes, classe) {
+  const classesArray = classes.split(" ");
+  if (classesArray.indexOf(classe) === -1) {
+    classesArray.push(classe);
+  }
+
+  return classesArray.join(" ");
+}
+
+/**
+ *
+ * @param {string} classes
+ * @param {string} classe
+ * @returns {string}
+ */
+function removeClass(classes, classe) {
+  const classesArray = classes.split(" ");
+  if (classesArray.indexOf(classe) !== -1) {
+    classesArray.splice(classesArray.indexOf(classe), 1);
+  }
+
+  return classesArray.join(" ");
+}
+
 const localStorage = window.localStorage;
 
 function newData() {
@@ -318,22 +348,43 @@ function skillBuild(skill, rank) {
 
 const skillSelect = document.querySelector(".skills");
 skills.forEach((skill) => {
-  for (let index = 0; index <= skill.rankMax; index++) {
-    const skillDesc = skillBuild(skill, index);
+  let lvl = 0;
 
-    const clone = skillTemplate.content.cloneNode(true);
-    clone.querySelector(".skill__title").textContent = skillDesc.title;
-    clone.querySelector(".skill__content__description").textContent =
+  const clone = skillTemplate.content.cloneNode(true);
+
+  const print = (el) => {
+    const skillDesc = skillBuild(skill, lvl);
+
+    el.querySelector(".skill__title").textContent = skillDesc.title;
+    el.querySelector(".skill__content__description").textContent =
       skillDesc.description;
-    clone.querySelector(".skill__content__level__span1").textContent =
+    el.querySelector(".skill__content__level__span1").textContent =
       skillDesc.rankDescription;
-    clone.querySelector(".skill__content__level__span2").textContent =
+    el.querySelector(".skill__content__level__span2").textContent =
       skillDesc.rankTitle;
-    clone.querySelector(".skill__content__next-level").textContent =
+    el.querySelector(".skill__content__next-level").textContent =
       skillDesc.nextRankDescription;
+  };
 
-    skillSelect?.appendChild(clone);
-  }
+  skillSelect?.appendChild(clone);
+  const node = skillSelect?.lastElementChild;
+  node
+    ?.querySelector(".skill__content__level__up")
+    .addEventListener("click", (e) => {
+      if (lvl < skill.rankMax) {
+        lvl++;
+        print(node);
+      }
+    });
+
+  node
+    ?.querySelector(".skill__content__level__down")
+    .addEventListener("click", (e) => {
+      if (lvl > 0) {
+        lvl--;
+        print(node);
+      }
+    });
 });
 
 const raceSelect = document.querySelector(".race-select");
