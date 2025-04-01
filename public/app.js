@@ -23,6 +23,9 @@ function createRandomString(length) {
   return result;
 }
 
+/**
+ * @param {any} buffer
+ */
 function buf2hex(buffer) {
   // buffer is an ArrayBuffer
   return [...new Uint8Array(buffer)]
@@ -202,10 +205,14 @@ async function sync(state, reset) {
     new Uint8Array(await response.arrayBuffer()),
   );
 
-  msg.events.forEach(function (event) {
-    processEvent(state.data, event.msg.case, event.msg.value);
-    state.cursor = event.ts;
-  });
+  msg.events.forEach(
+    function (
+      /** @type {{ msg: { case: any; value: any; }; ts: number; }} */ event,
+    ) {
+      processEvent(state.data, event.msg.case, event.msg.value);
+      state.cursor = event.ts;
+    },
+  );
 
   localStorage.setItem("cursor", state.cursor.toString());
   localStorage.setItem("data", JSON.stringify(state.data));
@@ -215,6 +222,11 @@ const state = await getState();
 
 await sync(state, true);
 
+/**
+ * @param {{ players: any; }} data
+ * @param {any} eventType
+ * @param {{ playerId: string | number; }} eventValue
+ */
 function processEvent(data, eventType, eventValue) {
   switch (eventType) {
     case "SeedPlayer":
@@ -352,7 +364,7 @@ skills.forEach((skill) => {
 
   const clone = skillTemplate.content.cloneNode(true);
 
-  const print = (el) => {
+  const print = (/** @type {Element} */ el) => {
     const skillDesc = skillBuild(skill, lvl);
 
     el.querySelector(".skill__title").textContent = skillDesc.title;
@@ -364,6 +376,26 @@ skills.forEach((skill) => {
       skillDesc.rankTitle;
     el.querySelector(".skill__content__next-level").textContent =
       skillDesc.nextRankDescription;
+
+    if (lvl === skill.rankMax) {
+      el.querySelector(".skill__content__level__up")?.classList.add(
+        "skill__content__level__up--max",
+      );
+    } else {
+      el.querySelector(".skill__content__level__up")?.classList.remove(
+        "skill__content__level__up--max",
+      );
+    }
+
+    if (lvl === 0) {
+      el.querySelector(".skill__content__level__down")?.classList.add(
+        "skill__content__level__down--min",
+      );
+    } else {
+      el.querySelector(".skill__content__level__down")?.classList.remove(
+        "skill__content__level__down--min",
+      );
+    }
   };
 
   skillSelect?.appendChild(clone);
@@ -385,6 +417,8 @@ skills.forEach((skill) => {
         print(node);
       }
     });
+
+  print(node);
 });
 
 const raceSelect = document.querySelector(".race-select");
