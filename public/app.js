@@ -358,6 +358,27 @@ function skillBuild(skill, rank) {
   };
 }
 
+let budget = 5;
+document.querySelector(".skills__budget").textContent = budget + "";
+
+/**
+ *
+ * @param {number} cost
+ */
+function onSkillPick(cost) {
+  budget += cost;
+  document.querySelector(".skills__budget").textContent = budget + "";
+  if (budget <= 0) {
+    document.querySelectorAll(".skill__content__level__up").forEach((el) => {
+      el.classList.add("skill__content__level__up--nobudget");
+    });
+  } else {
+    document.querySelectorAll(".skill__content__level__up").forEach((el) => {
+      el.classList.remove("skill__content__level__up--nobudget");
+    });
+  }
+}
+
 const skillSelect = document.querySelector(".skills");
 skills.forEach((skill) => {
   let lvl = 0;
@@ -403,8 +424,12 @@ skills.forEach((skill) => {
   node
     ?.querySelector(".skill__content__level__up")
     .addEventListener("click", (e) => {
+      if (budget <= 0) {
+        return;
+      }
       if (lvl < skill.rankMax) {
         lvl++;
+        onSkillPick(-skill.levels[lvl - 1].cost);
         print(node);
       }
     });
@@ -413,6 +438,7 @@ skills.forEach((skill) => {
     ?.querySelector(".skill__content__level__down")
     .addEventListener("click", (e) => {
       if (lvl > 0) {
+        onSkillPick(skill.levels[lvl - 1].cost);
         lvl--;
         print(node);
       }

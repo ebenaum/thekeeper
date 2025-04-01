@@ -453,6 +453,11 @@ input[type="number"]::-webkit-outer-spin-button {
   opacity: 0.3;
 }
 
+.skill__content__level__up--nobudget {
+  cursor: none;
+  opacity: 0.3;
+}
+
 .skill__content__level__down--min {
   cursor: none;
   opacity: 0.3;
