@@ -276,7 +276,8 @@ if (!raceTemplate) {
   throw new Error("cannot retrieve race-option template");
 }
 
-const /** @type {HTMLTemplateElement | null} */ skillTemplate =
+/** @type {HTMLTemplateElement | null} */ 
+const skillTemplate =
     document.querySelector("#template__skill");
 if (!skillTemplate) {
   throw new Error("cannot retrieve skill template");
@@ -359,15 +360,28 @@ function skillBuild(skill, rank) {
 }
 
 let budget = 5;
-document.querySelector(".skills__budget").textContent = budget + "";
+const pickedSkills = {};
+
+const budgetElement = /** @type {HTMLElement} */ (document.querySelector(".skills__budget"));
+
+budgetElement.textContent = budget + "";
 
 /**
  *
  * @param {number} cost
+ * @param {number} rank
+ * @param {string} skillKey
  */
-function onSkillPick(cost) {
+function onSkillPick(skillKey, rank, cost) {
   budget += cost;
-  document.querySelector(".skills__budget").textContent = budget + "";
+
+  if (rank > 0) {
+    pickedSkills[skillKey] = rank;
+  } else {
+    delete pickedSkills[skillKey];
+  }
+  console.log(pickedSkills);
+  budgetElement.textContent = budget + "";
   if (budget <= 0) {
     document.querySelectorAll(".skill__content__level__up").forEach((el) => {
       el.classList.add("skill__content__level__up--nobudget");
@@ -385,11 +399,11 @@ skills.forEach((skill) => {
 
   const clone = skillTemplate.content.cloneNode(true);
 
-  const print = (/** @type {Element} */ el) => {
+  const print = (/** @type {Element} */el) => {
     const skillDesc = skillBuild(skill, lvl);
 
-    el.querySelector(".skill__title").textContent = skillDesc.title;
-    el.querySelector(".skill__content__description").textContent =
+    /** @type {HTMLElement} */(el.querySelector(".skill__title")).textContent = skillDesc.title;
+    /** @type {HTMLElement} */(el.querySelector(".skill__content__description")).textContent =
       skillDesc.description;
     el.querySelector(".skill__content__level__span1").textContent =
       skillDesc.rankDescription;
@@ -429,7 +443,7 @@ skills.forEach((skill) => {
       }
       if (lvl < skill.rankMax) {
         lvl++;
-        onSkillPick(-skill.levels[lvl - 1].cost);
+        onSkillPick(skill.key, lvl, -skill.levels[lvl - 1].cost);
         print(node);
       }
     });
@@ -438,7 +452,7 @@ skills.forEach((skill) => {
     ?.querySelector(".skill__content__level__down")
     .addEventListener("click", (e) => {
       if (lvl > 0) {
-        onSkillPick(skill.levels[lvl - 1].cost);
+        onSkillPick(skill.key, lvl - 1, skill.levels[lvl - 1].cost);
         lvl--;
         print(node);
       }
