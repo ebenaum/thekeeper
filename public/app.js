@@ -276,9 +276,8 @@ if (!raceTemplate) {
   throw new Error("cannot retrieve race-option template");
 }
 
-/** @type {HTMLTemplateElement | null} */ 
-const skillTemplate =
-    document.querySelector("#template__skill");
+/** @type {HTMLTemplateElement | null} */
+const skillTemplate = document.querySelector("#template__skill");
 if (!skillTemplate) {
   throw new Error("cannot retrieve skill template");
 }
@@ -362,7 +361,9 @@ function skillBuild(skill, rank) {
 let budget = 5;
 const pickedSkills = {};
 
-const budgetElement = /** @type {HTMLElement} */ (document.querySelector(".skills__budget"));
+const budgetElement = /** @type {HTMLElement} */ (
+  document.querySelector(".skills__budget")
+);
 
 budgetElement.textContent = budget + "";
 
@@ -399,18 +400,30 @@ skills.forEach((skill) => {
 
   const clone = skillTemplate.content.cloneNode(true);
 
-  const print = (/** @type {Element} */el) => {
+  const print = (/** @type {Element} */ el) => {
     const skillDesc = skillBuild(skill, lvl);
 
-    /** @type {HTMLElement} */(el.querySelector(".skill__title")).textContent = skillDesc.title;
-    /** @type {HTMLElement} */(el.querySelector(".skill__content__description")).textContent =
-      skillDesc.description;
-    el.querySelector(".skill__content__level__span1").textContent =
-      skillDesc.rankDescription;
-    el.querySelector(".skill__content__level__span2").textContent =
-      skillDesc.rankTitle;
-    el.querySelector(".skill__content__next-level").textContent =
-      skillDesc.nextRankDescription;
+    const titleElement = /** @type {HTMLElement} */ (
+      el.querySelector(".skill__title")
+    );
+    const descriptionElement = /** @type {HTMLElement} */ (
+      el.querySelector(".skill__content__description")
+    );
+    const levelSpan1Element = /** @type {HTMLElement} */ (
+      el.querySelector(".skill__content__level__span1")
+    );
+    const levelSpan2Element = /** @type {HTMLElement} */ (
+      el.querySelector(".skill__content__level__span2")
+    );
+    const nextLevelElement = /** @type {HTMLElement} */ (
+      el.querySelector(".skill__content__next-level")
+    );
+
+    titleElement.textContent = skillDesc.title;
+    descriptionElement.textContent = skillDesc.description;
+    levelSpan1Element.textContent = skillDesc.rankDescription;
+    levelSpan2Element.textContent = skillDesc.rankTitle;
+    nextLevelElement.textContent = skillDesc.nextRankDescription;
 
     if (lvl === skill.rankMax) {
       el.querySelector(".skill__content__level__up")?.classList.add(
@@ -434,40 +447,52 @@ skills.forEach((skill) => {
   };
 
   skillSelect?.appendChild(clone);
-  const node = skillSelect?.lastElementChild;
-  node
-    ?.querySelector(".skill__content__level__up")
-    .addEventListener("click", (e) => {
-      if (budget <= 0) {
-        return;
-      }
-      if (lvl < skill.rankMax) {
-        lvl++;
-        onSkillPick(skill.key, lvl, -skill.levels[lvl - 1].cost);
-        print(node);
-      }
-    });
+  const node = /** @type {Element} */ (skillSelect?.lastElementChild);
+  const nodeRankUpElement = /** @type {HTMLElement} */ (
+    node.querySelector(".skill__content__level__up")
+  );
+  const nodeRankDownElement = /** @type {HTMLElement} */ (
+    node.querySelector(".skill__content__level__down")
+  );
 
-  node
-    ?.querySelector(".skill__content__level__down")
-    .addEventListener("click", (e) => {
-      if (lvl > 0) {
-        onSkillPick(skill.key, lvl - 1, skill.levels[lvl - 1].cost);
-        lvl--;
-        print(node);
-      }
-    });
+  nodeRankUpElement.addEventListener("click", (e) => {
+    if (budget <= 0) {
+      return;
+    }
+    if (lvl < skill.rankMax) {
+      lvl++;
+      onSkillPick(skill.key, lvl, -skill.levels[lvl - 1].cost);
+      print(node);
+    }
+  });
+
+  nodeRankDownElement.addEventListener("click", (e) => {
+    if (lvl > 0) {
+      onSkillPick(skill.key, lvl - 1, skill.levels[lvl - 1].cost);
+      lvl--;
+      print(node);
+    }
+  });
 
   print(node);
 });
 
 const raceSelect = document.querySelector(".race-select");
 races.forEach((race) => {
-  const clone = raceTemplate.content.cloneNode(true);
-  clone.querySelector(".race-select__race-option__title").textContent =
-    race.label;
-  clone.querySelector(".race-select__race-option__description").textContent =
-    race.description;
+  const clone = /** @type {DocumentFragment} */ (
+    raceTemplate.content.cloneNode(true)
+  );
+
+  const titleElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".race-select__race-option__title")
+  );
+  const descriptionElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".race-select__race-option__description")
+  );
+
+  titleElement.textContent = race.label;
+  descriptionElement.textContent = race.description;
+
   raceSelect?.appendChild(clone);
 });
 
