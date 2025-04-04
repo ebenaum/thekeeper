@@ -18,6 +18,16 @@
   </head>
 
   <body>
+    <template id="template__monde-option">
+      <li
+        class="monde-select__monde-option input-select-choice active d-block"
+        data-key="ebenaum"
+      >
+        <span class="monde-select__monde-option__title"></span>
+        <p class="monde-select__monde-option__description"></p>
+      </li>
+    </template>
+
     <template id="template__race-option">
       <li class="race-select__race-option input-select-choice active d-block">
         <span class="race-select__race-option__title"></span>
@@ -115,16 +125,7 @@
           <h2>Groupe de jeu</h2>
           <div class="q-select q-select--unique">
             <label class="d-none" for="group">Groupe de jeu</label>
-            <ul class="q-response-select d-block">
-              <li class="input-select-choice active d-block">
-                Ebenaum
-                <p class="description">D'un côté du portail</p>
-              </li>
-              <li class="input-select-choice active d-block">
-                Erenthyrm
-                <p class="description">De l'autre côté du portail</p>
-              </li>
-            </ul>
+            <ul class="monde-select q-response-select d-block"></ul>
           </div>
 
           <details>

@@ -270,6 +270,12 @@ const response = await fetch("http://localhost:8081/state", {
 await sync(state, false);
 
 /* TEMPLATES */
+/** @type {HTMLTemplateElement | null} */
+const mondeTemplate = document.querySelector("#template__monde-option");
+if (!mondeTemplate) {
+  throw new Error("cannot retrieve monde template");
+}
+
 const /** @type {HTMLTemplateElement | null} */ raceTemplate =
     document.querySelector("#template__race-option");
 if (!raceTemplate) {
@@ -294,6 +300,9 @@ if (!skillTemplate) {
 const universResponse = await fetch("http://localhost:8080/univers.json");
 const /** @type {UniversEntry[]} */ univers = await universResponse.json();
 const races = univers.filter((entry) => entry.tags.includes("race"));
+const mondes = univers.filter((entry) => entry.tags.includes("monde"));
+
+const formResult = { skills: {} };
 
 const skills = univers
   .filter((entry) => entry.tags.includes("skill"))
@@ -317,8 +326,6 @@ const skills = univers
 
     return { levels, rankMax: levels.length, ...skill };
   });
-
-console.log(skills);
 
 /**
  * @typedef {Object} Skill
@@ -359,7 +366,6 @@ function skillBuild(skill, rank) {
 }
 
 let budget = 5;
-const pickedSkills = {};
 
 const budgetElement = /** @type {HTMLElement} */ (
   document.querySelector(".skills__budget")
@@ -377,11 +383,11 @@ function onSkillPick(skillKey, rank, cost) {
   budget += cost;
 
   if (rank > 0) {
-    pickedSkills[skillKey] = rank;
+    formResult.skills[skillKey] = rank;
   } else {
-    delete pickedSkills[skillKey];
+    delete formResult.skills[skillKey];
   }
-  console.log(pickedSkills);
+  console.log(formResult);
   budgetElement.textContent = budget + "";
   if (budget <= 0) {
     document.querySelectorAll(".skill__content__level__up").forEach((el) => {
@@ -477,6 +483,27 @@ skills.forEach((skill) => {
   print(node);
 });
 
+const mondeSelect = document.querySelector(".monde-select");
+mondes.forEach((monde) => {
+  const clone = /** @type {DocumentFragment} */ (
+    mondeTemplate.content.cloneNode(true)
+  );
+
+  const titleElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".monde-select__monde-option__title")
+  );
+  const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
+  const descriptionElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".monde-select__monde-option__description")
+  );
+
+  titleElement.textContent = monde.label;
+  descriptionElement.textContent = monde.description;
+  liElement.setAttribute("data-key", monde.key);
+
+  mondeSelect?.appendChild(clone);
+});
+
 const raceSelect = document.querySelector(".race-select");
 races.forEach((race) => {
   const clone = /** @type {DocumentFragment} */ (
@@ -486,19 +513,24 @@ races.forEach((race) => {
   const titleElement = /** @type {HTMLElement} */ (
     clone.querySelector(".race-select__race-option__title")
   );
+  const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
   const descriptionElement = /** @type {HTMLElement} */ (
     clone.querySelector(".race-select__race-option__description")
   );
 
   titleElement.textContent = race.label;
   descriptionElement.textContent = race.description;
+  liElement.setAttribute("data-key", race.key);
 
   raceSelect?.appendChild(clone);
 });
 
 const matches = document.querySelectorAll(".q-select--unique");
 matches.forEach(function (match) {
+  const label = match.querySelector("label");
   const lis = match.querySelectorAll("li");
+
+  const forAttribute = label?.getAttribute("for");
 
   lis.forEach((li, i) => {
     li.addEventListener("click", function (e) {
@@ -510,8 +542,13 @@ matches.forEach(function (match) {
       const index = classes.indexOf("selected");
       if (index !== -1) {
         classes.splice(index, 1);
+        delete formResult[forAttribute];
+        console.log(formResult);
       } else {
         classes.push("selected");
+        formResult[forAttribute] = li.getAttribute("data-key");
+        console.log(formResult);
+
         lis.forEach((li2, j) => {
           if (i == j) return;
           let classes = li2.getAttribute("class")?.split(" ") || [];
