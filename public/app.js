@@ -585,6 +585,10 @@ function filterRacesByMonde(mondeKey) {
     raceSelect.classList.remove("race-select--disabled");
   }
   
+  // Find the selected monde's label
+  const selectedMonde = mondes.find(monde => monde.key === mondeKey);
+  const mondeLabel = selectedMonde ? selectedMonde.label : mondeKey;
+  
   // Filter races that match the monde key in their tags
   const filteredRaces = allRaces.filter((race) => race.tags.includes(mondeKey));
   
@@ -601,10 +605,17 @@ function filterRacesByMonde(mondeKey) {
     const descriptionElement = /** @type {HTMLElement} */ (
       clone.querySelector(".race-select__race-option__description")
     );
+    const mondeBadgeElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".race-select__monde-badge")
+    );
 
     titleElement.textContent = race.label;
     descriptionElement.textContent = race.description;
     liElement.setAttribute("data-key", race.key);
+    mondeBadgeElement.textContent = mondeLabel;
+    
+    // Add a data attribute for the monde key (useful for styling)
+    liElement.setAttribute("data-monde", mondeKey);
 
     raceSelect?.appendChild(clone);
   });
