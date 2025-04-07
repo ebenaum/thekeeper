@@ -484,6 +484,9 @@ skills.forEach((skill) => {
 });
 
 const mondeSelect = document.querySelector(".monde-select");
+// Store all races for filtering
+const allRaces = [...races];
+
 mondes.forEach((monde) => {
   const clone = /** @type {DocumentFragment} */ (
     mondeTemplate.content.cloneNode(true)
@@ -492,7 +495,9 @@ mondes.forEach((monde) => {
   const titleElement = /** @type {HTMLElement} */ (
     clone.querySelector(".monde-select__monde-option__title")
   );
-  const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
+  const liElement = /** @type {HTMLElement} */ (
+    clone.querySelector("li")
+  );
   const descriptionElement = /** @type {HTMLElement} */ (
     clone.querySelector(".monde-select__monde-option__description")
   );
@@ -500,57 +505,50 @@ mondes.forEach((monde) => {
   titleElement.textContent = monde.label;
   descriptionElement.textContent = monde.description;
   liElement.setAttribute("data-key", monde.key);
+  
+  // Add event listener to filter races on monde selection
+  liElement.addEventListener("click", function() {
+    // Check if this monde is being selected or deselected
+    const isSelected = liElement.classList.contains("selected");
+    
+    if (isSelected) {
+      // If deselected, reset race selection
+      resetRaceSelection();
+    } else {
+      // If selected, filter races based on selected monde
+      const mondeKey = monde.key;
+      filterRacesByMonde(mondeKey);
+    }
+  });
 
   mondeSelect?.appendChild(clone);
 });
 
-const raceSelect = document.querySelector(".race-select");
-races.forEach((race) => {
-  const clone = /** @type {DocumentFragment} */ (
-    raceTemplate.content.cloneNode(true)
-  );
-
-  const titleElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".race-select__race-option__title")
-  );
-  const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
-  const descriptionElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".race-select__race-option__description")
-  );
-
-  titleElement.textContent = race.label;
-  descriptionElement.textContent = race.description;
-  liElement.setAttribute("data-key", race.key);
-
-  raceSelect?.appendChild(clone);
-});
-
-const matches = document.querySelectorAll(".q-select--unique");
-matches.forEach(function (match) {
-  const label = match.querySelector("label");
-  const lis = match.querySelectorAll("li");
-
-  const forAttribute = label?.getAttribute("for");
-
-  lis.forEach((li, i) => {
+/**
+ * Attach click listeners to a list of selectable elements
+ * @param {NodeListOf<Element> | Element[]} elements - List elements to attach listeners to
+ * @param {string} formKey - Key to use in formResult object
+ */
+function attachSelectListeners(elements, formKey) {
+  elements.forEach((li, i) => {
     li.addEventListener("click", function (e) {
-      let classes =
-        /** @type {Element} */ (e.currentTarget)
-          .getAttribute("class")
-          ?.split(" ") || [];
+      let classes = /** @type {Element} */ (e.currentTarget)
+        .getAttribute("class")
+        ?.split(" ") || [];
 
       const index = classes.indexOf("selected");
       if (index !== -1) {
         classes.splice(index, 1);
-        delete formResult[forAttribute];
+        delete formResult[formKey];
         console.log(formResult);
       } else {
         classes.push("selected");
-        formResult[forAttribute] = li.getAttribute("data-key");
+        formResult[formKey] = li.getAttribute("data-key");
         console.log(formResult);
 
-        lis.forEach((li2, j) => {
-          if (i == j) return;
+        // Deselect all other elements in this group
+        elements.forEach((li2, j) => {
+          if (i === j) return;
           let classes = li2.getAttribute("class")?.split(" ") || [];
           const index = classes.indexOf("selected");
           if (index !== -1) classes.splice(index, 1);
@@ -561,8 +559,108 @@ matches.forEach(function (match) {
 
       /** @type {Element} */ (e.currentTarget).setAttribute(
         "class",
-        classes.join(" "),
+        classes.join(" ")
       );
     });
   });
+}
+
+/**
+ * Filter races based on the selected monde
+ * @param {string} mondeKey - The key of the selected monde
+ */
+function filterRacesByMonde(mondeKey) {
+  // Clear race selections
+  const selectedRace = raceSelect?.querySelector(".selected");
+  if (selectedRace) {
+    selectedRace.classList.remove("selected");
+    delete formResult["race"];
+  }
+  
+  // Clear current race options
+  if (raceSelect) {
+    raceSelect.innerHTML = "";
+    
+    // Remove the placeholder message and enable race selection
+    raceSelect.classList.remove("race-select--disabled");
+  }
+  
+  // Filter races that match the monde key in their tags
+  const filteredRaces = allRaces.filter((race) => race.tags.includes(mondeKey));
+  
+  // Populate race select with filtered races
+  filteredRaces.forEach((race) => {
+    const clone = /** @type {DocumentFragment} */ (
+      raceTemplate.content.cloneNode(true)
+    );
+
+    const titleElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".race-select__race-option__title")
+    );
+    const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
+    const descriptionElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".race-select__race-option__description")
+    );
+
+    titleElement.textContent = race.label;
+    descriptionElement.textContent = race.description;
+    liElement.setAttribute("data-key", race.key);
+
+    raceSelect?.appendChild(clone);
+  });
+  
+  // Attach listeners to the new race options
+  const raceLis = raceSelect?.querySelectorAll("li");
+  if (raceLis) {
+    attachSelectListeners(raceLis, "race");
+  }
+}
+
+// Initial race select setup - show placeholder message
+const raceSelect = document.querySelector(".race-select");
+if (raceSelect) {
+  // Add disabled class for styling
+  raceSelect.classList.add("race-select--disabled");
+  
+  // Create and add placeholder message
+  const placeholderElement = document.createElement("div");
+  placeholderElement.className = "race-select__placeholder";
+  placeholderElement.textContent = "Veuillez d'abord sélectionner un monde pour voir les races disponibles";
+  
+  raceSelect.appendChild(placeholderElement);
+}
+
+/**
+ * Reset race selection to initial state with placeholder
+ */
+function resetRaceSelection() {
+  // Clear race selections from formResult
+  delete formResult["race"];
+  
+  // Reset race selection UI
+  if (raceSelect) {
+    // Clear current race options
+    raceSelect.innerHTML = "";
+    
+    // Add disabled class for styling
+    raceSelect.classList.add("race-select--disabled");
+    
+    // Create and add placeholder message
+    const placeholderElement = document.createElement("div");
+    placeholderElement.className = "race-select__placeholder";
+    placeholderElement.textContent = "Veuillez d'abord sélectionner un monde pour voir les races disponibles";
+    
+    raceSelect.appendChild(placeholderElement);
+  }
+}
+
+const matches = document.querySelectorAll(".q-select--unique");
+matches.forEach(function (match) {
+  const label = match.querySelector("label");
+  const lis = match.querySelectorAll("li");
+
+  const forAttribute = label?.getAttribute("for");
+  if (forAttribute) {
+    attachSelectListeners(lis, forAttribute);
+  }
 });
