@@ -287,6 +287,14 @@ const skillTemplate = document.querySelector("#template__skill");
 if (!skillTemplate) {
   throw new Error("cannot retrieve skill template");
 }
+
+/** @type {HTMLTemplateElement | null} */
+const characteristicTemplate = document.querySelector(
+  "#template__characteristic",
+);
+if (!characteristicTemplate) {
+  throw new Error("cannot retrieve skill template");
+}
 /* TEMPLATES               */
 
 /**
@@ -326,6 +334,93 @@ const skills = univers
 
     return { levels, rankMax: levels.length, ...skill };
   });
+
+const characteristics = univers
+  .filter((entry) => entry.tags.includes("characteristic"))
+  .map((characteristic) => {
+    const levels = univers
+      .filter((entry) =>
+        entry.tags.includes("characteristic:" + characteristic.key),
+      )
+      .map((level) => {
+        const rank = level.tags
+          .find((tag) => tag.startsWith("level:"))
+          ?.split(":")[1];
+
+        if (!rank) {
+          throw new Error("missing rank on " + level.toString());
+        }
+
+        return { rank: parseInt(rank), ...level };
+      });
+
+    return { levels, ...characteristic };
+  });
+
+console.log(characteristics);
+
+let characteristicBudget = 4;
+
+const characteristicsSelect = document.querySelector(".characteristics");
+characteristics.forEach((characteristic) => {
+  const characteristicF = characteristic;
+  let lvl = 0;
+
+  const clone = characteristicTemplate.content.cloneNode(true);
+
+  const print = (/** @type {Element} */ el) => {
+    const characteristicDesc = characteristicF.levels[lvl + 2];
+    console.log(characteristicF, lvl, characteristicDesc);
+    const labelElement = /** @type {HTMLElement} */ (
+      el.querySelector(".characteristic__label")
+    );
+    const descriptionElement = /** @type {HTMLElement} */ (
+      el.querySelector(".characteristic__description")
+    );
+
+    const inputElement = /** @type {HTMLElement} */ (
+      el.querySelector(".characteristic__input")
+    );
+
+    labelElement.textContent = characteristicF.label;
+    labelElement.setAttribute("for", characteristicF.key);
+    inputElement.setAttribute("name", characteristicF.key);
+    descriptionElement.textContent = characteristicDesc.description;
+  };
+
+  characteristicsSelect?.appendChild(clone);
+  const node = /** @type {Element} */ (characteristicsSelect?.lastElementChild);
+
+  const nodeInput = /** @type {HTMLInputElement} */ (
+    node.querySelector(".characteristic__input")
+  );
+
+  nodeInput.addEventListener("input", (e) => {
+    const targetValue = parseInt(e.target?.value);
+
+    if (isNaN(targetValue)) return;
+
+    if (characteristicBudget <= 0) {
+      return;
+    }
+
+    lvl = targetValue;
+
+    if (targetValue > 4) {
+      e.target.value = 4;
+      lvl = 4;
+    }
+
+    if (targetValue < -2) {
+      e.target.value = -2;
+      lvl = -2;
+    }
+
+    print(node);
+  });
+
+  print(node);
+});
 
 /**
  * @typedef {Object} Skill
@@ -495,9 +590,7 @@ mondes.forEach((monde) => {
   const titleElement = /** @type {HTMLElement} */ (
     clone.querySelector(".monde-select__monde-option__title")
   );
-  const liElement = /** @type {HTMLElement} */ (
-    clone.querySelector("li")
-  );
+  const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
   const descriptionElement = /** @type {HTMLElement} */ (
     clone.querySelector(".monde-select__monde-option__description")
   );
@@ -505,12 +598,12 @@ mondes.forEach((monde) => {
   titleElement.textContent = monde.label;
   descriptionElement.textContent = monde.description;
   liElement.setAttribute("data-key", monde.key);
-  
+
   // Add event listener to filter races on monde selection
-  liElement.addEventListener("click", function() {
+  liElement.addEventListener("click", function () {
     // Check if this monde is being selected or deselected
     const isSelected = liElement.classList.contains("selected");
-    
+
     if (isSelected) {
       // If deselected, reset race selection
       resetRaceSelection();
@@ -532,9 +625,10 @@ mondes.forEach((monde) => {
 function attachSelectListeners(elements, formKey) {
   elements.forEach((li, i) => {
     li.addEventListener("click", function (e) {
-      let classes = /** @type {Element} */ (e.currentTarget)
-        .getAttribute("class")
-        ?.split(" ") || [];
+      let classes =
+        /** @type {Element} */ (e.currentTarget)
+          .getAttribute("class")
+          ?.split(" ") || [];
 
       const index = classes.indexOf("selected");
       if (index !== -1) {
@@ -559,7 +653,7 @@ function attachSelectListeners(elements, formKey) {
 
       /** @type {Element} */ (e.currentTarget).setAttribute(
         "class",
-        classes.join(" ")
+        classes.join(" "),
       );
     });
   });
@@ -576,22 +670,22 @@ function filterRacesByMonde(mondeKey) {
     selectedRace.classList.remove("selected");
     delete formResult["race"];
   }
-  
+
   // Clear current race options
   if (raceSelect) {
     raceSelect.innerHTML = "";
-    
+
     // Remove the placeholder message and enable race selection
     raceSelect.classList.remove("race-select--disabled");
   }
-  
+
   // Find the selected monde's label
-  const selectedMonde = mondes.find(monde => monde.key === mondeKey);
+  const selectedMonde = mondes.find((monde) => monde.key === mondeKey);
   const mondeLabel = selectedMonde ? selectedMonde.label : mondeKey;
-  
+
   // Filter races that match the monde key in their tags
   const filteredRaces = allRaces.filter((race) => race.tags.includes(mondeKey));
-  
+
   // Populate race select with filtered races
   filteredRaces.forEach((race) => {
     const clone = /** @type {DocumentFragment} */ (
@@ -613,13 +707,13 @@ function filterRacesByMonde(mondeKey) {
     descriptionElement.textContent = race.description;
     liElement.setAttribute("data-key", race.key);
     mondeBadgeElement.textContent = mondeLabel;
-    
+
     // Add a data attribute for the monde key (useful for styling)
     liElement.setAttribute("data-monde", mondeKey);
 
     raceSelect?.appendChild(clone);
   });
-  
+
   // Attach listeners to the new race options
   const raceLis = raceSelect?.querySelectorAll("li");
   if (raceLis) {
@@ -632,12 +726,13 @@ const raceSelect = document.querySelector(".race-select");
 if (raceSelect) {
   // Add disabled class for styling
   raceSelect.classList.add("race-select--disabled");
-  
+
   // Create and add placeholder message
   const placeholderElement = document.createElement("div");
   placeholderElement.className = "race-select__placeholder";
-  placeholderElement.textContent = "Veuillez d'abord sélectionner un monde pour voir les races disponibles";
-  
+  placeholderElement.textContent =
+    "Veuillez d'abord sélectionner un monde pour voir les races disponibles";
+
   raceSelect.appendChild(placeholderElement);
 }
 
@@ -647,20 +742,21 @@ if (raceSelect) {
 function resetRaceSelection() {
   // Clear race selections from formResult
   delete formResult["race"];
-  
+
   // Reset race selection UI
   if (raceSelect) {
     // Clear current race options
     raceSelect.innerHTML = "";
-    
+
     // Add disabled class for styling
     raceSelect.classList.add("race-select--disabled");
-    
+
     // Create and add placeholder message
     const placeholderElement = document.createElement("div");
     placeholderElement.className = "race-select__placeholder";
-    placeholderElement.textContent = "Veuillez d'abord sélectionner un monde pour voir les races disponibles";
-    
+    placeholderElement.textContent =
+      "Veuillez d'abord sélectionner un monde pour voir les races disponibles";
+
     raceSelect.appendChild(placeholderElement);
   }
 }

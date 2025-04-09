@@ -301,7 +301,7 @@ input[type="checkbox"]:checked::before {
   display: none;
 }
 
-.ability {
+.characteristic__input {
   border: solid 8px black;
   width: fit-content;
   block-size: fit-content;
@@ -322,14 +322,14 @@ input:focus {
   width: 60px;
 }
 
-.carac {
+.characteristic {
   display: grid;
   grid-template-columns: 1fr 1fr 8fr;
   gap: 10px;
   align-items: center;
 }
 
-.carac label {
+.characteristic label {
   font-size: 1.2rem;
 }
 

@@ -92,6 +92,24 @@
       </div>
     </template>
 
+    <template id="template__characteristic">
+      <div class="characteristic">
+        <div class="bg-black">
+          <input
+            type="number"
+            min="-2"
+            max="4"
+            value="0"
+            class="characteristic__input"
+            name="corps"
+            required
+          />
+        </div>
+        <label class="characteristic__label" for="corps"></label>
+        <div class="characteristic__description d-inline"></div>
+      </div>
+    </template>
+
     <div class="container">
       <p>
         Pour le jeu de cet été les groupes seront en opposition directe et très
@@ -167,68 +185,7 @@
           </div>
 
           <h2>Caractéristiques</h2>
-          <div class="carac">
-            <div class="bg-black">
-              <input
-                type="number"
-                min="-2"
-                max="4"
-                value="0"
-                class="ability"
-                name="corps"
-                required
-              />
-            </div>
-            <label for="corps">Corps</label>
-            <div class="description d-inline">5 PV</div>
-          </div>
-          <div class="carac">
-            <div class="bg-black">
-              <input
-                type="number"
-                min="-2"
-                max="4"
-                value="0"
-                class="ability"
-                name="corps"
-                required
-              />
-            </div>
-            <label for="corps">Savoir</label>
-            <div class="description d-inline">4 points de compétence</div>
-          </div>
-          <div class="carac">
-            <div class="bg-black">
-              <input
-                type="number"
-                min="-2"
-                max="4"
-                value="-2"
-                class="ability"
-                name="corps"
-                required
-              />
-            </div>
-            <label for="corps">Dextérité</label>
-            <div class="description d-inline">
-              Vous avez une Dette et vous ne pouvez pas manier d’armes.
-            </div>
-          </div>
-          <div class="carac">
-            <div class="bg-black">
-              <input
-                type="number"
-                min="-2"
-                max="4"
-                value="0"
-                class="ability"
-                name="corps"
-                required
-              />
-            </div>
-            <label for="corps">Influence</label>
-            <div class="description d-inline">Réputation +3</div>
-          </div>
+          <div class="characteristics"></div>
 
           <h2>Compétences</h2>
           <div class="skills">
