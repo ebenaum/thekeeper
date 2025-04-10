@@ -496,3 +496,9 @@ input[type="number"]::-webkit-outer-spin-button {
 .race-select__race-option[data-monde="erenthyrm"] .race-select__monde-badge {
   background-color: #d3e9e3;
 }
+
+/* Points Restants negative budget */
+.skills__budget--negative {
+  color: #ff0000;
+  font-weight: bold;
+}

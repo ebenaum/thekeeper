@@ -351,7 +351,11 @@ const characteristics = univers
           throw new Error("missing rank on " + level.toString());
         }
 
-        return { rank: parseInt(rank), ...level };
+        // Extract pc tag if it exists
+        const pcTag = level.tags.find((tag) => tag.startsWith("pc:"));
+        const pcValue = pcTag ? parseInt(pcTag.split(":")[1]) : null;
+
+        return { rank: parseInt(rank), pcValue, ...level };
       });
 
     return { levels, ...characteristic };
@@ -359,18 +363,36 @@ const characteristics = univers
 
 console.log(characteristics);
 
-let characteristicBudget = 4;
+const characteristicBudget = 4;
+let spentCharacteristicPoints = 0;
+
+let skillBudget = 5;
+const budgetElement = /** @type {HTMLElement} */ (
+  document.querySelector(".skills__budget")
+);
+const budgetCounterElement = /** @type {HTMLElement} */ (
+  document.querySelector(".skills__budget__counter")
+);
+budgetCounterElement.textContent = skillBudget + "";
+
+// Extract the default PC value from savoir characteristic level 0
+const savoirCharacteristic = characteristics.find(char => char.key === "savoir");
+const defaultSavoirLevel = savoirCharacteristic?.levels.find(level => level.rank === 0);
+const defaultSavoirPcValue = defaultSavoirLevel?.pcValue || 0; // Fallback to 1 if not found
 
 const characteristicsSelect = document.querySelector(".characteristics");
+const characteristicBudgetElement = document.querySelector(".characteristics__budget");
+
 characteristics.forEach((characteristic) => {
   const characteristicF = characteristic;
   let lvl = 0;
+  let previousLvl = 0;
+  let previousPcValue = characteristic.key === "savoir" ? defaultSavoirPcValue : null; // Initialize with default PC value for savoir
 
   const clone = characteristicTemplate.content.cloneNode(true);
 
   const print = (/** @type {Element} */ el) => {
     const characteristicDesc = characteristicF.levels[lvl + 2];
-    console.log(characteristicF, lvl, characteristicDesc);
     const labelElement = /** @type {HTMLElement} */ (
       el.querySelector(".characteristic__label")
     );
@@ -397,30 +419,107 @@ characteristics.forEach((characteristic) => {
 
   nodeInput.addEventListener("input", (e) => {
     const targetValue = parseInt(e.target?.value);
-
     if (isNaN(targetValue)) return;
-
-    if (characteristicBudget <= 0) {
+    
+    // Calculate cost of this change (positive values cost points)
+    const pointChange = targetValue - previousLvl;
+    
+    // Check if we have enough budget for this change
+    if (spentCharacteristicPoints + pointChange > characteristicBudget) {
+      // Revert to previous value if not enough budget
+      e.target.value = previousLvl.toString();
       return;
     }
-
-    lvl = targetValue;
-
-    if (targetValue > 4) {
-      e.target.value = 4;
-      lvl = 4;
+    
+    // Apply constraints
+    let newLvl = targetValue;
+    if (newLvl > 4) {
+      newLvl = 4;
+      e.target.value = "4";
     }
-
-    if (targetValue < -2) {
-      e.target.value = -2;
-      lvl = -2;
+    if (newLvl < -2) {
+      newLvl = -2;
+      e.target.value = "-2";
     }
-
+    
+    // Calculate actual point change after constraints
+    const actualPointChange = newLvl - previousLvl;
+    
+    // Update spent points
+    spentCharacteristicPoints += actualPointChange;
+    
+    // Update skillBudget if this is the savoir characteristic
+    if (characteristic.key === "savoir") {
+      // Find the new PC value
+      const levelIndex = newLvl + 2; // Adjust for -2 base index
+      const newPcValue = characteristicF.levels[levelIndex].pcValue;
+      
+      if (newPcValue !== null && previousPcValue !== null) {
+        // Calculate the difference in PC points
+        const pcDifference = newPcValue - previousPcValue;
+        
+        // Update the skill budget
+        skillBudget += pcDifference;
+        budgetCounterElement.textContent = skillBudget + "";
+        
+        // Update button states based on new budget
+        updateSkillButtonStates();
+        
+        // Store the new PC value for next change
+        previousPcValue = newPcValue;
+      }
+    }
+    
+    // Update previousLvl for next change
+    previousLvl = newLvl;
+    lvl = newLvl;
+    
+    // Update budget display
+    if (characteristicBudgetElement) {
+      characteristicBudgetElement.textContent = `${characteristicBudget - spentCharacteristicPoints}`;
+    }
+    
     print(node);
   });
 
   print(node);
 });
+
+/**
+ * Update the state of skill up/down buttons based on current budget
+ */
+function updateSkillButtonStates() {
+  if (skillBudget <= 0) {
+    document.querySelectorAll(".skill__content__level__up").forEach((el) => {
+      el.classList.add("skill__content__level__up--nobudget");
+    });
+  } else {
+    document.querySelectorAll(".skill__content__level__up").forEach((el) => {
+      el.classList.remove("skill__content__level__up--nobudget");
+    });
+  }
+  
+  // Update budget text color based on value
+  if (skillBudget < 0) {
+    budgetElement.classList.add("skills__budget--negative");
+  } else {
+    budgetElement.classList.remove("skills__budget--negative");
+  }
+}
+
+// Replace the budget check in onSkillPick with the new function
+function onSkillPick(skillKey, rank, cost) {
+  skillBudget += cost;
+
+  if (rank > 0) {
+    formResult.skills[skillKey] = rank;
+  } else {
+    delete formResult.skills[skillKey];
+  }
+  console.log(formResult);
+  budgetCounterElement.textContent = skillBudget + "";
+  updateSkillButtonStates();
+}
 
 /**
  * @typedef {Object} Skill
@@ -458,41 +557,6 @@ function skillBuild(skill, rank) {
           skill.levels[rank].description,
     rankTitle: ["", "Novice", "Expert", "Maître"][rank],
   };
-}
-
-let budget = 5;
-
-const budgetElement = /** @type {HTMLElement} */ (
-  document.querySelector(".skills__budget")
-);
-
-budgetElement.textContent = budget + "";
-
-/**
- *
- * @param {number} cost
- * @param {number} rank
- * @param {string} skillKey
- */
-function onSkillPick(skillKey, rank, cost) {
-  budget += cost;
-
-  if (rank > 0) {
-    formResult.skills[skillKey] = rank;
-  } else {
-    delete formResult.skills[skillKey];
-  }
-  console.log(formResult);
-  budgetElement.textContent = budget + "";
-  if (budget <= 0) {
-    document.querySelectorAll(".skill__content__level__up").forEach((el) => {
-      el.classList.add("skill__content__level__up--nobudget");
-    });
-  } else {
-    document.querySelectorAll(".skill__content__level__up").forEach((el) => {
-      el.classList.remove("skill__content__level__up--nobudget");
-    });
-  }
 }
 
 const skillSelect = document.querySelector(".skills");
@@ -557,7 +621,7 @@ skills.forEach((skill) => {
   );
 
   nodeRankUpElement.addEventListener("click", (e) => {
-    if (budget <= 0) {
+    if (skillBudget <= 0) {
       return;
     }
     if (lvl < skill.rankMax) {
