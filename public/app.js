@@ -322,6 +322,14 @@ const vdvs = univers.filter((entry) => entry.tags.includes("voie-de-vie"));
 
 const formResult = { skills: {}, characteristics: {} };
 
+const characterNameInputElement = /** @type {HTMLElement} */ (
+  document.querySelector(".character-name__input")
+);
+
+characterNameInputElement.addEventListener("input", (e) => {
+  formResult.name = e.target.value;
+});
+
 const skills = univers
   .filter((entry) => entry.tags.includes("skill"))
   .map((skill) => {
