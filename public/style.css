@@ -505,3 +505,9 @@ input[type="number"]::-webkit-outer-spin-button {
 .vdv__option[data-monde="erenthyrm"] .monde-badge {
   background-color: #d3e9e3;
 }
+
+/* Points Restants negative budget */
+.skills__budget--negative {
+  color: #ff0000;
+  font-weight: bold;
+}

@@ -6,6 +6,9 @@ import * as jose from "jose";
 import { create, toJson, toBinary, fromBinary } from "@bufbuild/protobuf";
 import { EventsSchema } from "./event_pb.js";
 
+const CHARACTERISTIC_BUDGET = 4;
+const SKILL_BUDGET = 4;
+
 /**
  *
  * @param {number} length
@@ -317,7 +320,7 @@ const races = univers.filter((entry) => entry.tags.includes("race"));
 const mondes = univers.filter((entry) => entry.tags.includes("monde"));
 const vdvs = univers.filter((entry) => entry.tags.includes("voie-de-vie"));
 
-const formResult = { skills: {} };
+const formResult = { skills: {}, characteristics: {} };
 
 const skills = univers
   .filter((entry) => entry.tags.includes("skill"))
@@ -368,12 +371,9 @@ const characteristics = univers
     return { levels, ...characteristic };
   });
 
-console.log(characteristics);
+let characteristicBudget = CHARACTERISTIC_BUDGET;
+let skillBudget = SKILL_BUDGET;
 
-const characteristicBudget = 4;
-let spentCharacteristicPoints = 0;
-
-let skillBudget = 5;
 const budgetElement = /** @type {HTMLElement} */ (
   document.querySelector(".skills__budget")
 );
@@ -439,7 +439,7 @@ characteristics.forEach((characteristic) => {
     const pointChange = targetValue - previousLvl;
 
     // Check if we have enough budget for this change
-    if (spentCharacteristicPoints + pointChange > characteristicBudget) {
+    if (characteristicBudget - pointChange < 0) {
       // Revert to previous value if not enough budget
       e.target.value = previousLvl.toString();
       return;
@@ -460,7 +460,7 @@ characteristics.forEach((characteristic) => {
     const actualPointChange = newLvl - previousLvl;
 
     // Update spent points
-    spentCharacteristicPoints += actualPointChange;
+    characteristicBudget -= actualPointChange;
 
     // Update skillBudget if this is the savoir characteristic
     if (characteristic.key === "savoir") {
@@ -488,9 +488,11 @@ characteristics.forEach((characteristic) => {
     previousLvl = newLvl;
     lvl = newLvl;
 
+    formResult.characteristics[characteristic.key] = lvl;
+
     // Update budget display
     if (characteristicBudgetElement) {
-      characteristicBudgetElement.textContent = `${characteristicBudget - spentCharacteristicPoints}`;
+      characteristicBudgetElement.textContent = `${characteristicBudget}`;
     }
 
     print(node);
