@@ -464,7 +464,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 /* Monde badge in race options */
-.race-select__monde-badge {
+.monde-badge {
   display: inline-block;
   font-size: 0.8em;
   padding: 2px 6px;
@@ -476,29 +476,32 @@ input[type="number"]::-webkit-outer-spin-button {
   vertical-align: middle;
 }
 
-.q-response-select .selected .race-select__monde-badge {
+.q-response-select .selected .monde-badge {
   background-color: #333;
   color: #fff;
   border-color: #fff;
 }
 
-.q-response-select .input-select-choice:hover .race-select__monde-badge {
+.q-response-select .input-select-choice:hover .monde-badge {
   background-color: #333;
   color: #fff;
   border-color: #fff;
 }
 
 /* Style for races from different mondes */
-.race-select__race-option[data-monde="ebenaum"] .race-select__monde-badge {
+.race-select__race-option[data-monde="ebenaum"] .monde-badge {
   background-color: #e9e3d3;
 }
 
-.race-select__race-option[data-monde="erenthyrm"] .race-select__monde-badge {
+.race-select__race-option[data-monde="erenthyrm"] .monde-badge {
   background-color: #d3e9e3;
 }
 
-/* Points Restants negative budget */
-.skills__budget--negative {
-  color: #ff0000;
-  font-weight: bold;
+/* Style for races from different mondes */
+.vdv__option[data-monde="ebenaum"] .monde-badge {
+  background-color: #e9e3d3;
+}
+
+.vdv__option[data-monde="erenthyrm"] .monde-badge {
+  background-color: #d3e9e3;
 }

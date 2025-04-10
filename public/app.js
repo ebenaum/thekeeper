@@ -293,7 +293,13 @@ const characteristicTemplate = document.querySelector(
   "#template__characteristic",
 );
 if (!characteristicTemplate) {
-  throw new Error("cannot retrieve skill template");
+  throw new Error("cannot retrieve characteristic template");
+}
+
+/** @type {HTMLTemplateElement | null} */
+const vdvTemplate = document.querySelector("#template__vdv");
+if (!vdvTemplate) {
+  throw new Error("cannot retrieve vdv template");
 }
 /* TEMPLATES               */
 
@@ -309,6 +315,7 @@ const universResponse = await fetch("http://localhost:8080/univers.json");
 const /** @type {UniversEntry[]} */ univers = await universResponse.json();
 const races = univers.filter((entry) => entry.tags.includes("race"));
 const mondes = univers.filter((entry) => entry.tags.includes("monde"));
+const vdvs = univers.filter((entry) => entry.tags.includes("voie-de-vie"));
 
 const formResult = { skills: {} };
 
@@ -376,18 +383,25 @@ const budgetCounterElement = /** @type {HTMLElement} */ (
 budgetCounterElement.textContent = skillBudget + "";
 
 // Extract the default PC value from savoir characteristic level 0
-const savoirCharacteristic = characteristics.find(char => char.key === "savoir");
-const defaultSavoirLevel = savoirCharacteristic?.levels.find(level => level.rank === 0);
+const savoirCharacteristic = characteristics.find(
+  (char) => char.key === "savoir",
+);
+const defaultSavoirLevel = savoirCharacteristic?.levels.find(
+  (level) => level.rank === 0,
+);
 const defaultSavoirPcValue = defaultSavoirLevel?.pcValue || 0; // Fallback to 1 if not found
 
 const characteristicsSelect = document.querySelector(".characteristics");
-const characteristicBudgetElement = document.querySelector(".characteristics__budget");
+const characteristicBudgetElement = document.querySelector(
+  ".characteristics__budget",
+);
 
 characteristics.forEach((characteristic) => {
   const characteristicF = characteristic;
   let lvl = 0;
   let previousLvl = 0;
-  let previousPcValue = characteristic.key === "savoir" ? defaultSavoirPcValue : null; // Initialize with default PC value for savoir
+  let previousPcValue =
+    characteristic.key === "savoir" ? defaultSavoirPcValue : null; // Initialize with default PC value for savoir
 
   const clone = characteristicTemplate.content.cloneNode(true);
 
@@ -420,17 +434,17 @@ characteristics.forEach((characteristic) => {
   nodeInput.addEventListener("input", (e) => {
     const targetValue = parseInt(e.target?.value);
     if (isNaN(targetValue)) return;
-    
+
     // Calculate cost of this change (positive values cost points)
     const pointChange = targetValue - previousLvl;
-    
+
     // Check if we have enough budget for this change
     if (spentCharacteristicPoints + pointChange > characteristicBudget) {
       // Revert to previous value if not enough budget
       e.target.value = previousLvl.toString();
       return;
     }
-    
+
     // Apply constraints
     let newLvl = targetValue;
     if (newLvl > 4) {
@@ -441,44 +455,44 @@ characteristics.forEach((characteristic) => {
       newLvl = -2;
       e.target.value = "-2";
     }
-    
+
     // Calculate actual point change after constraints
     const actualPointChange = newLvl - previousLvl;
-    
+
     // Update spent points
     spentCharacteristicPoints += actualPointChange;
-    
+
     // Update skillBudget if this is the savoir characteristic
     if (characteristic.key === "savoir") {
       // Find the new PC value
       const levelIndex = newLvl + 2; // Adjust for -2 base index
       const newPcValue = characteristicF.levels[levelIndex].pcValue;
-      
+
       if (newPcValue !== null && previousPcValue !== null) {
         // Calculate the difference in PC points
         const pcDifference = newPcValue - previousPcValue;
-        
+
         // Update the skill budget
         skillBudget += pcDifference;
         budgetCounterElement.textContent = skillBudget + "";
-        
+
         // Update button states based on new budget
         updateSkillButtonStates();
-        
+
         // Store the new PC value for next change
         previousPcValue = newPcValue;
       }
     }
-    
+
     // Update previousLvl for next change
     previousLvl = newLvl;
     lvl = newLvl;
-    
+
     // Update budget display
     if (characteristicBudgetElement) {
       characteristicBudgetElement.textContent = `${characteristicBudget - spentCharacteristicPoints}`;
     }
-    
+
     print(node);
   });
 
@@ -498,7 +512,7 @@ function updateSkillButtonStates() {
       el.classList.remove("skill__content__level__up--nobudget");
     });
   }
-  
+
   // Update budget text color based on value
   if (skillBudget < 0) {
     budgetElement.classList.add("skills__budget--negative");
@@ -645,6 +659,8 @@ skills.forEach((skill) => {
 const mondeSelect = document.querySelector(".monde-select");
 // Store all races for filtering
 const allRaces = [...races];
+// Store all vdvs for filtering
+const allVdvs = [...vdvs];
 
 mondes.forEach((monde) => {
   const clone = /** @type {DocumentFragment} */ (
@@ -735,6 +751,12 @@ function filterRacesByMonde(mondeKey) {
     delete formResult["race"];
   }
 
+  const selectedVdv = vdvSelect?.querySelector(".selected");
+  if (selectedVdv) {
+    selectedVdv.classList.remove("selected");
+    delete formResult["vdv"];
+  }
+
   // Clear current race options
   if (raceSelect) {
     raceSelect.innerHTML = "";
@@ -743,12 +765,21 @@ function filterRacesByMonde(mondeKey) {
     raceSelect.classList.remove("race-select--disabled");
   }
 
+  // Clear current vdv options
+  if (vdvSelect) {
+    vdvSelect.innerHTML = "";
+
+    // Remove the placeholder message and enable vdv selection
+    vdvSelect.classList.remove("vdv--disabled");
+  }
+
   // Find the selected monde's label
   const selectedMonde = mondes.find((monde) => monde.key === mondeKey);
   const mondeLabel = selectedMonde ? selectedMonde.label : mondeKey;
 
-  // Filter races that match the monde key in their tags
+  // Filter races and vdvs that match the monde key in their tags
   const filteredRaces = allRaces.filter((race) => race.tags.includes(mondeKey));
+  const filteredVdvs = allVdvs.filter((vdv) => vdv.tags.includes(mondeKey));
 
   // Populate race select with filtered races
   filteredRaces.forEach((race) => {
@@ -764,7 +795,7 @@ function filterRacesByMonde(mondeKey) {
       clone.querySelector(".race-select__race-option__description")
     );
     const mondeBadgeElement = /** @type {HTMLElement} */ (
-      clone.querySelector(".race-select__monde-badge")
+      clone.querySelector(".monde-badge")
     );
 
     titleElement.textContent = race.label;
@@ -779,9 +810,43 @@ function filterRacesByMonde(mondeKey) {
   });
 
   // Attach listeners to the new race options
-  const raceLis = raceSelect?.querySelectorAll("li");
-  if (raceLis) {
-    attachSelectListeners(raceLis, "race");
+  const raceList = raceSelect?.querySelectorAll("li");
+  if (raceList) {
+    attachSelectListeners(raceList, "race");
+  }
+
+  // Populate race select with filtered races
+  filteredVdvs.forEach((vdv) => {
+    const clone = /** @type {DocumentFragment} */ (
+      vdvTemplate.content.cloneNode(true)
+    );
+
+    const titleElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".vdv__option__title")
+    );
+    const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
+    const descriptionElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".vdv__option__description")
+    );
+    const mondeBadgeElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".monde-badge")
+    );
+
+    titleElement.textContent = vdv.label;
+    descriptionElement.textContent = vdv.description;
+    liElement.setAttribute("data-key", vdv.key);
+    mondeBadgeElement.textContent = mondeLabel;
+
+    // Add a data attribute for the monde key (useful for styling)
+    liElement.setAttribute("data-monde", mondeKey);
+
+    vdvSelect?.appendChild(clone);
+  });
+
+  // Attach listeners to the new vdv options
+  const vdvList = vdvSelect?.querySelectorAll("li");
+  if (vdvList) {
+    attachSelectListeners(vdvList, "vdv");
   }
 }
 
@@ -819,9 +884,46 @@ function resetRaceSelection() {
     const placeholderElement = document.createElement("div");
     placeholderElement.className = "race-select__placeholder";
     placeholderElement.textContent =
-      "Veuillez d'abord sélectionner un monde pour voir les races disponibles";
+      "Veuillez d'abord sélectionner un monde pour voir les Races disponibles";
 
     raceSelect.appendChild(placeholderElement);
+  }
+}
+
+// Initial race select setup - show placeholder message
+const vdvSelect = document.querySelector(".vdv");
+if (vdvSelect) {
+  // Add disabled class for styling
+  vdvSelect.classList.add("vdv--disabled");
+
+  // Create and add placeholder message
+  const placeholderElement = document.createElement("div");
+  placeholderElement.className = "vdv__placeholder";
+  placeholderElement.textContent =
+    "Veuillez d'abord sélectionner un monde pour voir les races disponibles";
+
+  vdvSelect.appendChild(placeholderElement);
+}
+
+function resetVdvSelection() {
+  // Clear race selections from formResult
+  delete formResult["vdv"];
+
+  // Reset race selection UI
+  if (vdvSelect) {
+    // Clear current race options
+    vdvSelect.innerHTML = "";
+
+    // Add disabled class for styling
+    vdvSelect.classList.add("vdv-select--disabled");
+
+    // Create and add placeholder message
+    const placeholderElement = document.createElement("div");
+    placeholderElement.className = "vdv-select__placeholder";
+    placeholderElement.textContent =
+      "Veuillez d'abord sélectionner un monde pour voir les Voies de Vie disponibles";
+
+    vdvSelect.appendChild(placeholderElement);
   }
 }
 

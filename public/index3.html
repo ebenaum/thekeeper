@@ -30,7 +30,7 @@
 
     <template id="template__race-option">
       <li class="race-select__race-option input-select-choice active d-block">
-        <span class="race-select__monde-badge"></span>
+        <span class="monde-badge"></span>
         <span class="race-select__race-option__title"></span>
         <p class="race-select__race-option__description"></p>
       </li>
@@ -110,6 +110,14 @@
       </div>
     </template>
 
+    <template id="template__vdv">
+      <li class="vdv__option input-select-choice active d-block">
+        <span class="monde-badge"></span>
+        <span class="vdv__option__title"></span>
+        <p class="vdv__option__description"></p>
+      </li>
+    </template>
+
     <div class="container">
       <p>
         Pour le jeu de cet été les groupes seront en opposition directe et très
@@ -155,43 +163,26 @@
             </div>
           </details>
 
-          <h2>Voie de Vie</h2>
-          <div class="q-select">
-            <label class="d-none" for="vdv">Voie de Vie</label>
-            <ul class="q-response-select d-block">
-              <li class="input-select-choice active d-block">
-                Lame du Claymore
-                <p class="description">
-                  Le Claymore est souvent un paysan devenu guerrier. Ce sont des
-                  piliers dans un combat, endurants et puissants. Moins sauvages
-                  que les berserks. Disons qu'ils cuisent la viande avant de la
-                  manger. Les Claymores se moquent des tirs ennemis, et leur
-                  courage est exemplaire. Un Claymore doit forger sa propre lame
-                  pour gagner ce titre.
-                </p>
-              </li>
-              <li class="input-select-choice active d-block">
-                Lycée Annexe
-                <p class="description">
-                  On y forme les Sorciers et ensorceleurs. Ils étudient
-                  l’énergie vitale, dans toute sa complexité, depuis la
-                  naissance jusqu’à.. après la mort. Oui. Ce ne sont pas les
-                  gens les plus gais du monde d'Ebenaum. Leur art consiste donc
-                  à corrompre l'esprit de la cible pour l'ensorceler, la drainer
-                  ou la guérir.
-                </p>
-              </li>
-            </ul>
-          </div>
+          <details>
+            <summary>Voie de Vie</summary>
+            <div class="q-select q-select--unique">
+              <label class="d-none" for="vdv">Voie de Vie</label>
+              <ul class="vdv q-response-select d-block"></ul>
+            </div>
+          </details>
 
           <h2>Caractéristiques</h2>
           <div class="characteristics">
-            <p>Points disponibles: <span class="characteristics__budget">4</span></p>
+            <p>
+              Points disponibles: <span class="characteristics__budget">4</span>
+            </p>
           </div>
 
           <h2>Compétences</h2>
           <div class="skills">
-            <p class="skills__budget">Points restants: <span class="skills__budget__counter">0</span></p>
+            <p class="skills__budget">
+              Points restants: <span class="skills__budget__counter">0</span>
+            </p>
           </div>
         </fieldset>
       </form>
