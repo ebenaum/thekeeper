@@ -489,20 +489,20 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 /* Style for races from different mondes */
-.race-select__race-option[data-monde="ebenaum"] .monde-badge {
+.race__select__option[data-monde="ebenaum"] .monde-badge {
   background-color: #e9e3d3;
 }
 
-.race-select__race-option[data-monde="erenthyrm"] .monde-badge {
+.race__select__option[data-monde="erenthyrm"] .monde-badge {
   background-color: #d3e9e3;
 }
 
 /* Style for races from different mondes */
-.vdv__option[data-monde="ebenaum"] .monde-badge {
+.vdv__select__option[data-monde="ebenaum"] .monde-badge {
   background-color: #e9e3d3;
 }
 
-.vdv__option[data-monde="erenthyrm"] .monde-badge {
+.vdv__select__option[data-monde="erenthyrm"] .monde-badge {
   background-color: #d3e9e3;
 }
 
@@ -510,4 +510,30 @@ input[type="number"]::-webkit-outer-spin-button {
 .skills__budget--negative {
   color: #ff0000;
   font-weight: bold;
+}
+
+h2 {
+  font-size: 1.5em;
+}
+
+.group__title {
+  font-size: 1.5em;
+}
+
+.race__title {
+  font-size: 1.5em;
+}
+
+.vdv__title {
+  font-size: 1.5em;
+}
+
+/* Selected option display next to summary */
+.selected-section {
+  font-size: 1.2em;
+  font-style: italic;
+}
+
+.selected-section:not(:empty)::before {
+  content: " - ";
 }

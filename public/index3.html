@@ -18,21 +18,21 @@
   </head>
 
   <body>
-    <template id="template__monde-option">
+    <template id="template__group-option">
       <li
-        class="monde-select__monde-option input-select-choice active d-block"
+        class="group__select__option input-select-choice active d-block"
         data-key="ebenaum"
       >
-        <span class="monde-select__monde-option__title"></span>
-        <p class="monde-select__monde-option__description"></p>
+        <span class="group__select__option__title"></span>
+        <p class="group__select__option__description"></p>
       </li>
     </template>
 
     <template id="template__race-option">
-      <li class="race-select__race-option input-select-choice active d-block">
+      <li class="race__select__option input-select-choice active d-block">
         <span class="monde-badge"></span>
-        <span class="race-select__race-option__title"></span>
-        <p class="race-select__race-option__description"></p>
+        <span class="race__select__option__title"></span>
+        <p class="race__select__option__description"></p>
       </li>
     </template>
 
@@ -111,10 +111,10 @@
     </template>
 
     <template id="template__vdv">
-      <li class="vdv__option input-select-choice active d-block">
+      <li class="vdv__select__option input-select-choice active d-block">
         <span class="monde-badge"></span>
-        <span class="vdv__option__title"></span>
-        <p class="vdv__option__description"></p>
+        <span class="vdv__select__option__title"></span>
+        <p class="vdv__select__option__description"></p>
       </li>
     </template>
 
@@ -154,25 +154,36 @@
             />
           </div>
 
-          <h2>Groupe de jeu</h2>
-          <div class="q-select q-select--unique">
-            <label class="d-none" for="group">Groupe de jeu</label>
-            <ul class="monde-select q-response-select d-block"></ul>
-          </div>
-
-          <details>
-            <summary>Race</summary>
+          <details class="group" open>
+            <summary>
+              <span class="group__title">Groupe de jeu</span
+              ><span data-key="group" class="selected-section"></span>
+            </summary>
             <div class="q-select q-select--unique">
-              <label class="d-none" for="race">Race</label>
-              <ul class="race-select q-response-select d-block"></ul>
+              <label class="d-none" for="group">Groupe de jeu</label>
+              <ul class="group__select q-response-select d-block"></ul>
             </div>
           </details>
 
-          <details>
-            <summary>Voie de Vie</summary>
+          <details class="race dependency-monde">
+            <summary>
+              <span class="race__title">Race</span
+              ><span class="selected-section"></span>
+            </summary>
+            <div class="q-select q-select--unique">
+              <label class="d-none" for="race">Race</label>
+              <ul class="race__select q-response-select d-block"></ul>
+            </div>
+          </details>
+
+          <details class="vdv dependency-monde">
+            <summary>
+              <span class="vdv__title">Voie de Vie</span
+              ><span class="selected-section"></span>
+            </summary>
             <div class="q-select q-select--unique">
               <label class="d-none" for="vdv">Voie de Vie</label>
-              <ul class="vdv q-response-select d-block"></ul>
+              <ul class="vdv__select q-response-select d-block"></ul>
             </div>
           </details>
 

@@ -274,7 +274,7 @@ await sync(state, false);
 
 /* TEMPLATES */
 /** @type {HTMLTemplateElement | null} */
-const mondeTemplate = document.querySelector("#template__monde-option");
+const mondeTemplate = document.querySelector("#template__group-option");
 if (!mondeTemplate) {
   throw new Error("cannot retrieve monde template");
 }
@@ -666,7 +666,7 @@ skills.forEach((skill) => {
   print(node);
 });
 
-const mondeSelect = document.querySelector(".monde-select");
+const mondeSelect = document.querySelector(".group__select");
 // Store all races for filtering
 const allRaces = [...races];
 // Store all vdvs for filtering
@@ -678,11 +678,11 @@ mondes.forEach((monde) => {
   );
 
   const titleElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".monde-select__monde-option__title")
+    clone.querySelector(".group__select__option__title")
   );
   const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
   const descriptionElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".monde-select__monde-option__description")
+    clone.querySelector(".group__select__option__description")
   );
 
   titleElement.textContent = monde.label;
@@ -694,13 +694,28 @@ mondes.forEach((monde) => {
     // Check if this monde is being selected or deselected
     const isSelected = liElement.classList.contains("selected");
 
+    document.querySelectorAll(".dependency-monde").forEach((el) => {
+      const selectedElement = el.querySelector(".selected-section");
+      if (selectedElement) {
+        selectedElement.textContent = "";
+      }
+    });
+
     if (isSelected) {
-      // If deselected, reset race selection
-      resetRaceSelection();
+      displayPickAWorldPlaceholders();
+
+      document.querySelectorAll(".dependency-monde").forEach((el) => {
+        el.removeAttribute("open");
+        delete formResult[el.querySelector("label")?.getAttribute("for")];
+      });
     } else {
+      document.querySelectorAll(".dependency-monde").forEach((el) => {
+        el.setAttribute("open", "");
+      });
+
       // If selected, filter races based on selected monde
       const mondeKey = monde.key;
-      filterRacesByMonde(mondeKey);
+      filterRacesAndVdvsByMonde(mondeKey);
     }
   });
 
@@ -713,6 +728,10 @@ mondes.forEach((monde) => {
  * @param {string} formKey - Key to use in formResult object
  */
 function attachSelectListeners(elements, formKey) {
+  const sectionElement = document.querySelector("." + formKey);
+  const selectedSectionElement =
+    sectionElement?.querySelector(".selected-section");
+
   elements.forEach((li, i) => {
     li.addEventListener("click", function (e) {
       let classes =
@@ -725,10 +744,25 @@ function attachSelectListeners(elements, formKey) {
         classes.splice(index, 1);
         delete formResult[formKey];
         console.log(formResult);
+
+        // If the section as a selected-section element, empty it.
+        if (selectedSectionElement) {
+          selectedSectionElement.textContent = "";
+        }
       } else {
         classes.push("selected");
         formResult[formKey] = li.getAttribute("data-key");
         console.log(formResult);
+
+        // If the section as a selected-section element, display the user choice there.
+        if (selectedSectionElement) {
+          const optionName = li.querySelector(
+            "." + formKey + "__select__option__title",
+          )?.textContent;
+          selectedSectionElement.textContent = optionName || "";
+
+          sectionElement?.removeAttribute("open");
+        }
 
         // Deselect all other elements in this group
         elements.forEach((li2, j) => {
@@ -753,35 +787,19 @@ function attachSelectListeners(elements, formKey) {
  * Filter races based on the selected monde
  * @param {string} mondeKey - The key of the selected monde
  */
-function filterRacesByMonde(mondeKey) {
+function filterRacesAndVdvsByMonde(mondeKey) {
   // Clear race selections
-  const selectedRace = raceSelect?.querySelector(".selected");
-  if (selectedRace) {
-    selectedRace.classList.remove("selected");
-    delete formResult["race"];
-  }
+  document.querySelectorAll(".dependency-monde").forEach((el) => {
+    const selected = el.querySelector(".selected");
+    if (selected) {
+      selected.classList.remove("selected");
+    }
 
-  const selectedVdv = vdvSelect?.querySelector(".selected");
-  if (selectedVdv) {
-    selectedVdv.classList.remove("selected");
-    delete formResult["vdv"];
-  }
-
-  // Clear current race options
-  if (raceSelect) {
-    raceSelect.innerHTML = "";
-
-    // Remove the placeholder message and enable race selection
-    raceSelect.classList.remove("race-select--disabled");
-  }
-
-  // Clear current vdv options
-  if (vdvSelect) {
-    vdvSelect.innerHTML = "";
-
-    // Remove the placeholder message and enable vdv selection
-    vdvSelect.classList.remove("vdv--disabled");
-  }
+    const ulElement = el.querySelector(".q-response-select");
+    if (ulElement) {
+      ulElement.innerHTML = "";
+    }
+  });
 
   // Find the selected monde's label
   const selectedMonde = mondes.find((monde) => monde.key === mondeKey);
@@ -798,11 +816,11 @@ function filterRacesByMonde(mondeKey) {
     );
 
     const titleElement = /** @type {HTMLElement} */ (
-      clone.querySelector(".race-select__race-option__title")
+      clone.querySelector(".race__select__option__title")
     );
     const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
     const descriptionElement = /** @type {HTMLElement} */ (
-      clone.querySelector(".race-select__race-option__description")
+      clone.querySelector(".race__select__option__description")
     );
     const mondeBadgeElement = /** @type {HTMLElement} */ (
       clone.querySelector(".monde-badge")
@@ -825,18 +843,18 @@ function filterRacesByMonde(mondeKey) {
     attachSelectListeners(raceList, "race");
   }
 
-  // Populate race select with filtered races
+  // Populate vdv select with filtered vdv
   filteredVdvs.forEach((vdv) => {
     const clone = /** @type {DocumentFragment} */ (
       vdvTemplate.content.cloneNode(true)
     );
 
     const titleElement = /** @type {HTMLElement} */ (
-      clone.querySelector(".vdv__option__title")
+      clone.querySelector(".vdv__select__option__title")
     );
     const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
     const descriptionElement = /** @type {HTMLElement} */ (
-      clone.querySelector(".vdv__option__description")
+      clone.querySelector(".vdv__select__option__description")
     );
     const mondeBadgeElement = /** @type {HTMLElement} */ (
       clone.querySelector(".monde-badge")
@@ -861,81 +879,27 @@ function filterRacesByMonde(mondeKey) {
 }
 
 // Initial race select setup - show placeholder message
-const raceSelect = document.querySelector(".race-select");
-if (raceSelect) {
-  // Add disabled class for styling
-  raceSelect.classList.add("race-select--disabled");
-
-  // Create and add placeholder message
-  const placeholderElement = document.createElement("div");
-  placeholderElement.className = "race-select__placeholder";
-  placeholderElement.textContent =
-    "Veuillez d'abord sélectionner un monde pour voir les races disponibles";
-
-  raceSelect.appendChild(placeholderElement);
-}
-
-/**
- * Reset race selection to initial state with placeholder
- */
-function resetRaceSelection() {
-  // Clear race selections from formResult
-  delete formResult["race"];
-
-  // Reset race selection UI
-  if (raceSelect) {
-    // Clear current race options
-    raceSelect.innerHTML = "";
-
-    // Add disabled class for styling
-    raceSelect.classList.add("race-select--disabled");
-
-    // Create and add placeholder message
-    const placeholderElement = document.createElement("div");
-    placeholderElement.className = "race-select__placeholder";
-    placeholderElement.textContent =
-      "Veuillez d'abord sélectionner un monde pour voir les Races disponibles";
-
-    raceSelect.appendChild(placeholderElement);
-  }
-}
-
+const raceSelect = document.querySelector(".race__select");
 // Initial race select setup - show placeholder message
-const vdvSelect = document.querySelector(".vdv");
-if (vdvSelect) {
-  // Add disabled class for styling
-  vdvSelect.classList.add("vdv--disabled");
+const vdvSelect = document.querySelector(".vdv__select");
 
-  // Create and add placeholder message
-  const placeholderElement = document.createElement("div");
-  placeholderElement.className = "vdv__placeholder";
-  placeholderElement.textContent =
-    "Veuillez d'abord sélectionner un monde pour voir les races disponibles";
+function displayPickAWorldPlaceholders() {
+  document.querySelectorAll(".dependency-monde").forEach((el) => {
+    const select = el.querySelector(".q-response-select");
 
-  vdvSelect.appendChild(placeholderElement);
+    if (select) {
+      select.innerHTML = "";
+      // Create and add placeholder message
+      const placeholderElement = document.createElement("div");
+      placeholderElement.textContent =
+        "Veuillez d'abord sélectionner un monde pour voir les choix disponibles";
+
+      select.appendChild(placeholderElement);
+    }
+  });
 }
 
-function resetVdvSelection() {
-  // Clear race selections from formResult
-  delete formResult["vdv"];
-
-  // Reset race selection UI
-  if (vdvSelect) {
-    // Clear current race options
-    vdvSelect.innerHTML = "";
-
-    // Add disabled class for styling
-    vdvSelect.classList.add("vdv-select--disabled");
-
-    // Create and add placeholder message
-    const placeholderElement = document.createElement("div");
-    placeholderElement.className = "vdv-select__placeholder";
-    placeholderElement.textContent =
-      "Veuillez d'abord sélectionner un monde pour voir les Voies de Vie disponibles";
-
-    vdvSelect.appendChild(placeholderElement);
-  }
-}
+displayPickAWorldPlaceholders();
 
 const matches = document.querySelectorAll(".q-select--unique");
 matches.forEach(function (match) {
