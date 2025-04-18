@@ -596,7 +596,7 @@ skills.forEach((skill) => {
       el.querySelector(".skill__title")
     );
     const descriptionElement = /** @type {HTMLElement} */ (
-      el.querySelector(".skill__content__description")
+      el.querySelector(".skill__content__main__description")
     );
     const levelSpan1Element = /** @type {HTMLElement} */ (
       el.querySelector(".skill__content__level__span1")
@@ -605,7 +605,7 @@ skills.forEach((skill) => {
       el.querySelector(".skill__content__level__span2")
     );
     const nextLevelElement = /** @type {HTMLElement} */ (
-      el.querySelector(".skill__content__next-level")
+      el.querySelector(".skill__content__main__next-level")
     );
 
     titleElement.textContent = skillDesc.title;
@@ -679,9 +679,9 @@ const allVdvs = [...vdvs];
  */
 function updateDependentSections(isSelected, mondeKey = null) {
   const dependentSections = document.querySelectorAll(".dependency-monde");
-  
+
   // Clear any previous selections
-  dependentSections.forEach(el => {
+  dependentSections.forEach((el) => {
     const selectedElement = el.querySelector(".selected-section");
     if (selectedElement) {
       selectedElement.textContent = "";
@@ -691,8 +691,8 @@ function updateDependentSections(isSelected, mondeKey = null) {
   if (isSelected) {
     // If deselecting a monde
     displayPickAWorldPlaceholders();
-    
-    dependentSections.forEach(el => {
+
+    dependentSections.forEach((el) => {
       el.removeAttribute("open");
       const labelElement = el.querySelector("label");
       if (labelElement) {
@@ -701,10 +701,10 @@ function updateDependentSections(isSelected, mondeKey = null) {
     });
   } else {
     // If selecting a monde
-    dependentSections.forEach(el => {
+    dependentSections.forEach((el) => {
       el.setAttribute("open", "");
     });
-    
+
     if (mondeKey) {
       filterRacesAndVdvsByMonde(mondeKey);
     }
@@ -716,14 +716,16 @@ mondes.forEach((monde) => {
 
   const titleElement = clone.querySelector(".group__select__option__title");
   const liElement = clone.querySelector("li");
-  const descriptionElement = clone.querySelector(".group__select__option__description");
+  const descriptionElement = clone.querySelector(
+    ".group__select__option__description",
+  );
 
   titleElement.textContent = monde.label;
   descriptionElement.textContent = monde.description;
   liElement.setAttribute("data-key", monde.key);
 
   // Add event listener to filter races on monde selection
-  liElement.addEventListener("click", function() {
+  liElement.addEventListener("click", function () {
     const isSelected = this.classList.contains("selected");
     updateDependentSections(isSelected, monde.key);
   });
@@ -804,7 +806,9 @@ function populateRaceOptions(filteredRaces, mondeKey, mondeLabel) {
 
     const titleElement = clone.querySelector(".race__select__option__title");
     const liElement = clone.querySelector("li");
-    const descriptionElement = clone.querySelector(".race__select__option__description");
+    const descriptionElement = clone.querySelector(
+      ".race__select__option__description",
+    );
     const mondeBadgeElement = clone.querySelector(".monde-badge");
 
     titleElement.textContent = race.label;
@@ -837,7 +841,9 @@ function populateVdvOptions(filteredVdvs, mondeKey, mondeLabel) {
 
     const titleElement = clone.querySelector(".vdv__select__option__title");
     const liElement = clone.querySelector("li");
-    const descriptionElement = clone.querySelector(".vdv__select__option__description");
+    const descriptionElement = clone.querySelector(
+      ".vdv__select__option__description",
+    );
     const mondeBadgeElement = clone.querySelector(".monde-badge");
 
     titleElement.textContent = vdv.label;

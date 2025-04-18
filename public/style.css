@@ -351,13 +351,18 @@ input[type="number"]::-webkit-outer-spin-button {
   text-align: left;
 }
 
+.skill__title {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
 .skill__content {
   display: grid;
-  grid-template-columns: repeat(2, auto);
+  grid-template-columns: 10fr 1fr;
   grid-gap: 20px;
 }
 
-.skill__content__description {
+.skill__content__main__description {
   text-align: justify;
 }
 
@@ -365,6 +370,7 @@ input[type="number"]::-webkit-outer-spin-button {
   text-align: center;
   align-items: center;
   display: flex;
+  justify-content: center;
 }
 
 .skill__content__level__up {
@@ -373,6 +379,11 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .skill__content__level__down {
   cursor: pointer;
+}
+
+.skill__content__main {
+  display: grid;
+  align-content: space-between;
 }
 
 .skill:before {
