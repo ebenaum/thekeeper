@@ -354,7 +354,32 @@ input[type="number"]::-webkit-outer-spin-button {
 .skill__title {
   font-size: 1.2rem;
   font-weight: bold;
+  /* Add space after badge if present */
 }
+
+.skill__title > .skill__badge:not([style*="display: none"]) + span {
+  margin-left: 8px;
+}
+
+/* VDV badge inside skill */
+.skill .skill__badge {
+  display: inline-block;
+  font-size: 0.8em;
+  padding: 2px 6px;
+  margin-right: 8px; /* Keep margin consistent */
+  border: 1px solid #000;
+  border-radius: 3px;
+  background-color: #f0f0f0; /* Default background */
+  opacity: 0.8;
+  vertical-align: middle;
+  font-weight: normal; /* Reset font weight */
+}
+
+/*
+.skill__badge[data-require="shaher"]  {
+  background-color: red; 
+}
+*/
 
 .skill__content {
   display: grid;

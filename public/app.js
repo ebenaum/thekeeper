@@ -547,9 +547,11 @@ function onSkillPick(skillKey, rank, cost) {
 
 /**
  * @typedef {Object} Skill
+ * @property {string} key
  * @property {string} label
  * @property {string} description
  * @property {number} rankMax
+ * @property {string[]} tags
  * @property {{cost: number, rank: number, label: string, description: string}[]} levels
  */
 
@@ -557,10 +559,37 @@ function onSkillPick(skillKey, rank, cost) {
  *
  * @param {Skill} skill
  * @param {number} rank
- * @return {{description: string, title: string, rankTitle: string, rankDescription: string, nextRankDescription: string | null}}}
+ * @return {{description: string, requirementType?: string, requirementEntry?: UniversEntry, title: string, rankTitle: string, rankDescription: string, nextRankDescription: string | null}}}
  */
 function skillBuild(skill, rank) {
+  const requirementTag = skill.tags.find((/** @type {string} */ tag) =>
+    tag.startsWith("require:"),
+  );
+
+  let /** @type {string | undefined} */ requirementType;
+  let /** @type {UniversEntry | undefined} */ requirementEntry;
+
+  if (requirementTag) {
+    const requirementParts = requirementTag.split(":");
+    requirementType = requirementParts[1];
+
+    switch (requirementType) {
+      case "voie-de-vie":
+        requirementEntry = vdvs.find((vdv) => vdv.key === requirementParts[2]);
+        break;
+      case "race":
+        requirementEntry = races.find(
+          (race) => race.key === requirementParts[2],
+        );
+        break;
+      default:
+        throw new Error("unknown requirement " + requirementParts);
+    }
+  }
+
   return {
+    requirementType: requirementType,
+    requirementEntry: requirementEntry,
     title:
       rank === 0
         ? skill.label
@@ -587,13 +616,25 @@ const skillSelect = document.querySelector(".skills");
 skills.forEach((skill) => {
   let lvl = 0;
 
+  const skillDesc = skillBuild(skill, lvl);
+
   const clone = skillTemplate.content.cloneNode(true);
 
-  const print = (/** @type {Element} */ el) => {
-    const skillDesc = skillBuild(skill, lvl);
+  // Store skill data (including tags) on the element for filtering
+  const skillElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".skill")
+  );
+  if (skillElement && skillDesc.requirementEntry && skillDesc.requirementType) {
+    skillElement.dataset.requireType = skillDesc.requirementType;
+    skillElement.dataset.requireKey = skillDesc.requirementEntry.key;
+  }
 
+  const print = (/** @type {Element} */ el) => {
     const titleElement = /** @type {HTMLElement} */ (
       el.querySelector(".skill__title")
+    );
+    const badgesElement = /** @type {HTMLElement} */ (
+      el.querySelector(".skill__badges")
     );
     const descriptionElement = /** @type {HTMLElement} */ (
       el.querySelector(".skill__content__main__description")
@@ -613,6 +654,19 @@ skills.forEach((skill) => {
     levelSpan1Element.textContent = skillDesc.rankDescription;
     levelSpan2Element.textContent = skillDesc.rankTitle;
     nextLevelElement.textContent = skillDesc.nextRankDescription;
+
+    if (skillDesc.requirementEntry && skillDesc.requirementType) {
+      const badgeElement = document.createElement("span");
+      badgeElement.classList.add("skill__badge");
+      badgeElement.textContent = skillDesc.requirementEntry.label;
+      badgeElement.setAttribute("data-require-type", skillDesc.requirementType);
+      badgeElement.setAttribute(
+        "data-require-key",
+        skillDesc.requirementEntry.key,
+      );
+
+      badgesElement.appendChild(badgeElement);
+    }
 
     if (lvl === skill.rankMax) {
       el.querySelector(".skill__content__level__up")?.classList.add(
@@ -665,6 +719,27 @@ skills.forEach((skill) => {
 
   print(node);
 });
+
+updateSkillList();
+
+// Function to update the visibility of skills based on the selected VDV
+function updateSkillList() {
+  const skillElements = skillSelect?.querySelectorAll(".skill");
+  skillElements?.forEach((el) => {
+    if (!el.dataset.requireType || !el.dataset.requireKey) {
+      return;
+    }
+
+    if (
+      formResult[el.dataset.requireType] &&
+      formResult[el.dataset.requireType] === el.dataset.requireKey
+    ) {
+      el.style.display = ""; // Show skill if VDV matches requirement
+    } else {
+      el.style.display = "none"; // Hide skill if VDV doesn't match or no VDV selected
+    }
+  });
+}
 
 const mondeSelect = document.querySelector(".group__select");
 // Store all races for filtering
@@ -745,15 +820,15 @@ function attachSelectListeners(elements, formKey) {
 
   elements.forEach((li, i) => {
     li.addEventListener("click", function (e) {
-      let classes =
-        /** @type {Element} */ (e.currentTarget)
-          .getAttribute("class")
-          ?.split(" ") || [];
+      const currentTarget = /** @type {Element} */ (e.currentTarget);
+      let classes = currentTarget.getAttribute("class")?.split(" ") || [];
 
       const index = classes.indexOf("selected");
       if (index !== -1) {
         classes.splice(index, 1);
         delete formResult[formKey];
+
+        updateSkillList();
         console.log(formResult);
 
         // If the section as a selected-section element, empty it.
@@ -763,6 +838,8 @@ function attachSelectListeners(elements, formKey) {
       } else {
         classes.push("selected");
         formResult[formKey] = li.getAttribute("data-key");
+
+        updateSkillList();
         console.log(formResult);
 
         // If the section as a selected-section element, display the user choice there.
@@ -786,10 +863,7 @@ function attachSelectListeners(elements, formKey) {
         });
       }
 
-      /** @type {Element} */ (e.currentTarget).setAttribute(
-        "class",
-        classes.join(" "),
-      );
+      currentTarget.setAttribute("class", classes.join(" "));
     });
   });
 }
@@ -860,7 +934,7 @@ function populateVdvOptions(filteredVdvs, mondeKey, mondeLabel) {
   // Attach listeners to the new VDV options
   const vdvList = vdvSelect?.querySelectorAll("li");
   if (vdvList) {
-    attachSelectListeners(vdvList, "vdv");
+    attachSelectListeners(vdvList, "voie-de-vie");
   }
 }
 
