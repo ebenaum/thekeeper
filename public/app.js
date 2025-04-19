@@ -318,7 +318,7 @@ const universResponse = await fetch("http://localhost:8080/univers.json");
 const /** @type {UniversEntry[]} */ univers = await universResponse.json();
 const races = univers.filter((entry) => entry.tags.includes("race"));
 const mondes = univers.filter((entry) => entry.tags.includes("monde"));
-const vdvs = univers.filter((entry) => entry.tags.includes("voie-de-vie"));
+const vdvs = univers.filter((entry) => entry.tags.includes("vdv"));
 
 const formResult = { skills: {}, characteristics: {} };
 
@@ -330,28 +330,63 @@ characterNameInputElement.addEventListener("input", (e) => {
   formResult.name = e.target.value;
 });
 
-const skills = univers
-  .filter((entry) => entry.tags.includes("skill"))
-  .map((skill) => {
-    const levels = univers
-      .filter((entry) => entry.tags.includes("skill:" + skill.key))
-      .map((level) => {
-        const cost = level.tags
-          .find((tag) => tag.startsWith("cost:"))
-          ?.split(":")[1];
-        const rank = level.tags
-          .find((tag) => tag.startsWith("level:"))
-          ?.split(":")[1];
+const /** @type {Skill[]} */ skills = univers
+    .filter((entry) => entry.tags.includes("skill"))
+    .map((skill) => {
+      const levels = univers
+        .filter((entry) => entry.tags.includes("skill:" + skill.key))
+        .map((level) => {
+          const cost = level.tags
+            .find((tag) => tag.startsWith("cost:"))
+            ?.split(":")[1];
+          const rank = level.tags
+            .find((tag) => tag.startsWith("level:"))
+            ?.split(":")[1];
 
-        if (!cost || !rank) {
-          throw new Error("missing cost or rank on " + level.toString());
+          if (!cost || !rank) {
+            throw new Error("missing cost or rank on " + level.toString());
+          }
+
+          return { cost: parseInt(cost), rank: parseInt(rank), ...level };
+        });
+
+      const requirementTag = skill.tags.find((/** @type {string} */ tag) =>
+        tag.startsWith("require:"),
+      );
+
+      let /** @type {string | null} */ requirementType;
+      let /** @type {UniversEntry | null} */ requirementEntry;
+
+      if (requirementTag) {
+        const requirementParts = requirementTag.split(":");
+        requirementType = requirementParts[1];
+
+        switch (requirementType) {
+          case "vdv":
+            requirementEntry = vdvs.find(
+              (vdv) => vdv.key === requirementParts[2],
+            );
+            break;
+          case "race":
+            requirementEntry = races.find(
+              (race) => race.key === requirementParts[2],
+            );
+            break;
+          default:
+            throw new Error("unknown requirement " + requirementParts);
         }
+      }
 
-        return { cost: parseInt(cost), rank: parseInt(rank), ...level };
-      });
-
-    return { levels, rankMax: levels.length, ...skill };
-  });
+      return {
+        levels,
+        rankMax: levels.length,
+        requirementType: requirementType,
+        requirementEntry: requirementEntry,
+        availableToSorcerer:
+          skill.tags.findIndex((tag) => tag === "available-to-sorcerer") !== -1,
+        ...skill,
+      };
+    });
 
 const characteristics = univers
   .filter((entry) => entry.tags.includes("characteristic"))
@@ -552,6 +587,9 @@ function onSkillPick(skillKey, rank, cost) {
  * @property {string} description
  * @property {number} rankMax
  * @property {string[]} tags
+ * @property {boolean} availableToSorcerer
+ * @property {string?} requirementType
+ * @property {UniversEntry?} requirementEntry
  * @property {{cost: number, rank: number, label: string, description: string}[]} levels
  */
 
@@ -559,37 +597,10 @@ function onSkillPick(skillKey, rank, cost) {
  *
  * @param {Skill} skill
  * @param {number} rank
- * @return {{description: string, requirementType?: string, requirementEntry?: UniversEntry, title: string, rankTitle: string, rankDescription: string, nextRankDescription: string | null}}}
+ * @return {{description: string, title: string, rankTitle: string, rankDescription: string, nextRankDescription: string | null}}}
  */
 function skillBuild(skill, rank) {
-  const requirementTag = skill.tags.find((/** @type {string} */ tag) =>
-    tag.startsWith("require:"),
-  );
-
-  let /** @type {string | undefined} */ requirementType;
-  let /** @type {UniversEntry | undefined} */ requirementEntry;
-
-  if (requirementTag) {
-    const requirementParts = requirementTag.split(":");
-    requirementType = requirementParts[1];
-
-    switch (requirementType) {
-      case "voie-de-vie":
-        requirementEntry = vdvs.find((vdv) => vdv.key === requirementParts[2]);
-        break;
-      case "race":
-        requirementEntry = races.find(
-          (race) => race.key === requirementParts[2],
-        );
-        break;
-      default:
-        throw new Error("unknown requirement " + requirementParts);
-    }
-  }
-
   return {
-    requirementType: requirementType,
-    requirementEntry: requirementEntry,
     title:
       rank === 0
         ? skill.label
@@ -616,25 +627,22 @@ const skillSelect = document.querySelector(".skills");
 skills.forEach((skill) => {
   let lvl = 0;
 
-  const skillDesc = skillBuild(skill, lvl);
-
   const clone = skillTemplate.content.cloneNode(true);
 
   // Store skill data (including tags) on the element for filtering
   const skillElement = /** @type {HTMLElement} */ (
     clone.querySelector(".skill")
   );
-  if (skillElement && skillDesc.requirementEntry && skillDesc.requirementType) {
-    skillElement.dataset.requireType = skillDesc.requirementType;
-    skillElement.dataset.requireKey = skillDesc.requirementEntry.key;
+  if (skillElement && skill.requirementEntry && skill.requirementType) {
+    skillElement.dataset.requireType = skill.requirementType;
+    skillElement.dataset.requireKey = skill.requirementEntry.key;
   }
 
   const print = (/** @type {Element} */ el) => {
+    const skillDesc = skillBuild(skill, lvl);
+
     const titleElement = /** @type {HTMLElement} */ (
       el.querySelector(".skill__title")
-    );
-    const badgesElement = /** @type {HTMLElement} */ (
-      el.querySelector(".skill__badges")
     );
     const descriptionElement = /** @type {HTMLElement} */ (
       el.querySelector(".skill__content__main__description")
@@ -654,19 +662,6 @@ skills.forEach((skill) => {
     levelSpan1Element.textContent = skillDesc.rankDescription;
     levelSpan2Element.textContent = skillDesc.rankTitle;
     nextLevelElement.textContent = skillDesc.nextRankDescription;
-
-    if (skillDesc.requirementEntry && skillDesc.requirementType) {
-      const badgeElement = document.createElement("span");
-      badgeElement.classList.add("skill__badge");
-      badgeElement.textContent = skillDesc.requirementEntry.label;
-      badgeElement.setAttribute("data-require-type", skillDesc.requirementType);
-      badgeElement.setAttribute(
-        "data-require-key",
-        skillDesc.requirementEntry.key,
-      );
-
-      badgesElement.appendChild(badgeElement);
-    }
 
     if (lvl === skill.rankMax) {
       el.querySelector(".skill__content__level__up")?.classList.add(
@@ -688,6 +683,29 @@ skills.forEach((skill) => {
       );
     }
   };
+
+  const badgesElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".skill__badges")
+  );
+
+  if (skill.requirementEntry && skill.requirementType) {
+    const badgeElement = document.createElement("span");
+    badgeElement.classList.add("skill__badge");
+    badgeElement.textContent = skill.requirementEntry.label;
+    badgeElement.setAttribute("data-require-type", skill.requirementType);
+    badgeElement.setAttribute("data-require-key", skill.requirementEntry.key);
+
+    badgesElement.appendChild(badgeElement);
+  }
+
+  if (skill.availableToSorcerer) {
+    const badgeElement = document.createElement("span");
+    badgeElement.classList.add("skill__badge");
+    badgeElement.textContent = "Utilisable par les sorciers";
+    badgeElement.dataset.availableToSorcerer = "";
+
+    badgesElement.appendChild(badgeElement);
+  }
 
   skillSelect?.appendChild(clone);
   const node = /** @type {Element} */ (skillSelect?.lastElementChild);
@@ -934,7 +952,7 @@ function populateVdvOptions(filteredVdvs, mondeKey, mondeLabel) {
   // Attach listeners to the new VDV options
   const vdvList = vdvSelect?.querySelectorAll("li");
   if (vdvList) {
-    attachSelectListeners(vdvList, "voie-de-vie");
+    attachSelectListeners(vdvList, "vdv");
   }
 }
 
