@@ -296,6 +296,7 @@ const inventorySelect = document.querySelector(".inventory__select");
  * @property {string} key
  * @property {string[]} tags
  * @property {string} label
+ * @property {string?} img
  * @property {string} description
  */
 
@@ -954,10 +955,19 @@ allRaces.forEach((race) => {
 
   const titleElement = clone.querySelector(".race__select__option__title");
   const liElement = clone.querySelector("li");
+  const imgElement = clone.querySelector("img");
   const descriptionElement = clone.querySelector(
     ".race__select__option__description",
   );
   const mondeBadgeElement = clone.querySelector(".monde-badge");
+
+  if (race.img) {
+    imgElement.setAttribute("src", race.img);
+    imgElement.setAttribute("style", "margin-top:16px");
+    imgElement.setAttribute("width", "300px");
+    imgElement.setAttribute("height", "300px");
+    descriptionElement.setAttribute("style", "max-width: 400px");
+  }
 
   titleElement.textContent = race.label;
   descriptionElement.textContent = race.description;
