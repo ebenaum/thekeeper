@@ -306,7 +306,32 @@ const mondes = univers.filter((entry) => entry.tags.includes("monde"));
 const vdvs = univers.filter((entry) => entry.tags.includes("vdv"));
 const inventory = univers.filter((entry) => entry.tags.includes("inventory"));
 
-const formResult = { skills: {}, characteristics: {} };
+const formResult = { skills: {}, characteristics: {
+  corps: 0,
+  dexterite: 0,
+  influence: 0,
+  savoir: 0,
+} };
+
+/**
+ * Calculates the inventory budget based on the dexterity characteristic level.
+ * @param {number} dexterite - The dexterity level (from -2 to 4).
+ * @returns {number} The corresponding inventory budget.
+ * @throws {Error} If the dexterity level is outside the handled range.
+ */
+function dexteriteToInventoryBudget(dexterite) {
+  switch (dexterite) {
+    case -2: return 0;
+    case -1: return 0;
+    case 0: return 1;
+    case 1: return 2;
+    case 2: return 3;
+    case 3: return 4;
+    case 4: return 5;
+    default: throw new Error("dexeterite " + dexterite + "not handled");
+    
+  }
+}
 
 const characterNameInputElement = /** @type {HTMLElement} */ (
   document.querySelector(".character-name__input")
@@ -402,7 +427,7 @@ const characteristics = univers
 
 let characteristicBudget = CHARACTERISTIC_BUDGET;
 let skillBudget = SKILL_BUDGET;
-let inventoryBudget = INVENTORY_BUDGET;
+let inventoryBudget = dexteriteToInventoryBudget(formResult.characteristics.dexterite);
 
 const budgetElement = /** @type {HTMLElement} */ (
   document.querySelector(".skills__budget")
@@ -527,6 +552,11 @@ characteristics.forEach((characteristic) => {
     lvl = newLvl;
 
     formResult.characteristics[characteristic.key] = lvl;
+
+    if (characteristic.key === 'dexterite') {
+      inventoryBudget = dexteriteToInventoryBudget(formResult.characteristics.dexterite);
+      inventoryBudgetCounterElement.textContent = inventoryBudget + "";
+    }
 
     // Update budget display
     if (characteristicBudgetElement) {
