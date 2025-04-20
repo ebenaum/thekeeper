@@ -548,6 +548,11 @@ h2 {
   font-size: 1.5em;
 }
 
+details {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
 .group__title {
   font-size: 1.5em;
 }
@@ -561,6 +566,10 @@ h2 {
 }
 
 .inventory__title {
+  font-size: 1.5em;
+}
+
+.skills__title {
   font-size: 1.5em;
 }
 

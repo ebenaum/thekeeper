@@ -306,12 +306,15 @@ const mondes = univers.filter((entry) => entry.tags.includes("monde"));
 const vdvs = univers.filter((entry) => entry.tags.includes("vdv"));
 const inventory = univers.filter((entry) => entry.tags.includes("inventory"));
 
-const formResult = { skills: {}, characteristics: {
-  corps: 0,
-  dexterite: 0,
-  influence: 0,
-  savoir: 0,
-} };
+const formResult = {
+  skills: {},
+  characteristics: {
+    corps: 0,
+    dexterite: 0,
+    influence: 0,
+    savoir: 0,
+  },
+};
 
 /**
  * Calculates the inventory budget based on the dexterity characteristic level.
@@ -321,15 +324,22 @@ const formResult = { skills: {}, characteristics: {
  */
 function dexteriteToInventoryBudget(dexterite) {
   switch (dexterite) {
-    case -2: return 0;
-    case -1: return 0;
-    case 0: return 1;
-    case 1: return 2;
-    case 2: return 3;
-    case 3: return 4;
-    case 4: return 5;
-    default: throw new Error("dexeterite " + dexterite + "not handled");
-    
+    case -2:
+      return 0;
+    case -1:
+      return 0;
+    case 0:
+      return 1;
+    case 1:
+      return 2;
+    case 2:
+      return 3;
+    case 3:
+      return 4;
+    case 4:
+      return 5;
+    default:
+      throw new Error("dexeterite " + dexterite + "not handled");
   }
 }
 
@@ -427,7 +437,9 @@ const characteristics = univers
 
 let characteristicBudget = CHARACTERISTIC_BUDGET;
 let skillBudget = SKILL_BUDGET;
-let inventoryBudget = dexteriteToInventoryBudget(formResult.characteristics.dexterite);
+let inventoryBudget = dexteriteToInventoryBudget(
+  formResult.characteristics.dexterite,
+);
 
 const budgetElement = /** @type {HTMLElement} */ (
   document.querySelector(".skills__budget")
@@ -553,8 +565,10 @@ characteristics.forEach((characteristic) => {
 
     formResult.characteristics[characteristic.key] = lvl;
 
-    if (characteristic.key === 'dexterite') {
-      inventoryBudget = dexteriteToInventoryBudget(formResult.characteristics.dexterite);
+    if (characteristic.key === "dexterite") {
+      inventoryBudget = dexteriteToInventoryBudget(
+        formResult.characteristics.dexterite,
+      );
       inventoryBudgetCounterElement.textContent = inventoryBudget + "";
     }
 
