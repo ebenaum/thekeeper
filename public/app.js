@@ -589,101 +589,6 @@ characteristics.forEach((characteristic) => {
 });
 
 /**
- * Updates the UI elements related to the inventory budget.
- * - Sets the text content of the inventory budget counter.
- * - Adds/removes a CSS class to indicate a negative budget.
- * - Enables/disables the 'plus' buttons for inventory items based on the budget.
- * @param {number} budget - The current inventory budget value.
- * @returns {void}
- */
-function updateInventoryBudgetState(budget) {
-  inventoryBudgetCounterElement.textContent = budget + "";
-
-  if (budget < 0) {
-    document
-      .querySelector(".inventory__budget")
-      ?.classList.add("inventory__budget--negative");
-  } else {
-    document
-      .querySelector(".inventory__budget")
-      ?.classList.remove("inventory__budget--negative");
-  }
-
-  if (budget <= 0) {
-    document
-      .querySelectorAll(".inventory__select__option__picker__control__plus")
-      .forEach((el) => {
-        el.classList.add(
-          "inventory__select__option__picker__control__plus--disabled",
-        );
-      });
-  } else {
-    document
-      .querySelectorAll(".inventory__select__option__picker__control__plus")
-      .forEach((el) => {
-        el.classList.remove(
-          "inventory__select__option__picker__control__plus--disabled",
-        );
-      });
-  }
-}
-
-/**
- * Updates the state (enabled/disabled) of the 'minus' control button for an inventory item picker.
- * The button is disabled if the number of items is zero, and enabled otherwise.
- * @param {HTMLElement} el - The 'minus' control button element.
- * @param {number} numberOfItems - The current number of items selected for this inventory item.
- * @returns {void}
- */
-function updateItemPickerMinusControl(el, numberOfItems) {
-  if (numberOfItems > 0) {
-    el.classList.remove(
-      "inventory__select__option__picker__control__minus--disabled",
-    );
-  } else {
-    el.classList.add(
-      "inventory__select__option__picker__control__minus--disabled",
-    );
-  }
-}
-
-/**
- * Update the state of skill up/down buttons based on current budget
- */
-function updateSkillButtonStates() {
-  if (skillBudget <= 0) {
-    document.querySelectorAll(".skill__content__level__up").forEach((el) => {
-      el.classList.add("skill__content__level__up--nobudget");
-    });
-  } else {
-    document.querySelectorAll(".skill__content__level__up").forEach((el) => {
-      el.classList.remove("skill__content__level__up--nobudget");
-    });
-  }
-
-  // Update budget text color based on value
-  if (skillBudget < 0) {
-    budgetElement.classList.add("skills__budget--negative");
-  } else {
-    budgetElement.classList.remove("skills__budget--negative");
-  }
-}
-
-// Replace the budget check in onSkillPick with the new function
-function onSkillPick(skillKey, rank, cost) {
-  skillBudget += cost;
-
-  if (rank > 0) {
-    formResult.skills[skillKey] = rank;
-  } else {
-    delete formResult.skills[skillKey];
-  }
-  console.log(formResult);
-  budgetCounterElement.textContent = skillBudget + "";
-  updateSkillButtonStates();
-}
-
-/**
  * @typedef {Object} Skill
  * @property {string} key
  * @property {string} label
@@ -840,7 +745,41 @@ skills.forEach((skill) => {
   print(node);
 });
 
-updateSkillList();
+/**
+ * Update the state of skill up/down buttons based on current budget
+ */
+function updateSkillButtonStates() {
+  if (skillBudget <= 0) {
+    document.querySelectorAll(".skill__content__level__up").forEach((el) => {
+      el.classList.add("skill__content__level__up--nobudget");
+    });
+  } else {
+    document.querySelectorAll(".skill__content__level__up").forEach((el) => {
+      el.classList.remove("skill__content__level__up--nobudget");
+    });
+  }
+
+  // Update budget text color based on value
+  if (skillBudget < 0) {
+    budgetElement.classList.add("skills__budget--negative");
+  } else {
+    budgetElement.classList.remove("skills__budget--negative");
+  }
+}
+
+// Replace the budget check in onSkillPick with the new function
+function onSkillPick(skillKey, rank, cost) {
+  skillBudget += cost;
+
+  if (rank > 0) {
+    formResult.skills[skillKey] = rank;
+  } else {
+    delete formResult.skills[skillKey];
+  }
+  console.log(formResult);
+  budgetCounterElement.textContent = skillBudget + "";
+  updateSkillButtonStates();
+}
 
 // Function to update the visibility of skills based on the selected VDV
 function updateSkillList() {
@@ -860,11 +799,6 @@ function updateSkillList() {
     }
   });
 }
-
-// Store all races for filtering
-const allRaces = [...races];
-// Store all vdvs for filtering
-const allVdvs = [...vdvs];
 
 inventory.forEach((item) => {
   let numberOfItems = 0;
@@ -935,6 +869,65 @@ inventory.forEach((item) => {
   });
 });
 
+/**
+ * Updates the UI elements related to the inventory budget.
+ * - Sets the text content of the inventory budget counter.
+ * - Adds/removes a CSS class to indicate a negative budget.
+ * - Enables/disables the 'plus' buttons for inventory items based on the budget.
+ * @param {number} budget - The current inventory budget value.
+ * @returns {void}
+ */
+function updateInventoryBudgetState(budget) {
+  inventoryBudgetCounterElement.textContent = budget + "";
+
+  if (budget < 0) {
+    document
+      .querySelector(".inventory__budget")
+      ?.classList.add("inventory__budget--negative");
+  } else {
+    document
+      .querySelector(".inventory__budget")
+      ?.classList.remove("inventory__budget--negative");
+  }
+
+  if (budget <= 0) {
+    document
+      .querySelectorAll(".inventory__select__option__picker__control__plus")
+      .forEach((el) => {
+        el.classList.add(
+          "inventory__select__option__picker__control__plus--disabled",
+        );
+      });
+  } else {
+    document
+      .querySelectorAll(".inventory__select__option__picker__control__plus")
+      .forEach((el) => {
+        el.classList.remove(
+          "inventory__select__option__picker__control__plus--disabled",
+        );
+      });
+  }
+}
+
+/**
+ * Updates the state (enabled/disabled) of the 'minus' control button for an inventory item picker.
+ * The button is disabled if the number of items is zero, and enabled otherwise.
+ * @param {HTMLElement} el - The 'minus' control button element.
+ * @param {number} numberOfItems - The current number of items selected for this inventory item.
+ * @returns {void}
+ */
+function updateItemPickerMinusControl(el, numberOfItems) {
+  if (numberOfItems > 0) {
+    el.classList.remove(
+      "inventory__select__option__picker__control__minus--disabled",
+    );
+  } else {
+    el.classList.add(
+      "inventory__select__option__picker__control__minus--disabled",
+    );
+  }
+}
+
 mondes.forEach((monde) => {
   const clone = mondeTemplate.content.cloneNode(true);
 
@@ -951,65 +944,10 @@ mondes.forEach((monde) => {
   mondeSelect?.appendChild(clone);
 });
 
-/**
- * Attach click listeners to a list of selectable elements
- * @param {NodeListOf<Element> | Element[]} elements - List elements to attach listeners to
- * @param {string} formKey - Key to use in formResult object
- */
-function attachSelectListeners(elements, formKey) {
-  const sectionElement = document.querySelector("." + formKey);
-  const selectedSectionElement =
-    sectionElement?.querySelector(".selected-section");
-
-  elements.forEach((li, i) => {
-    li.addEventListener("click", function (e) {
-      const currentTarget = /** @type {Element} */ (e.currentTarget);
-      let classes = currentTarget.getAttribute("class")?.split(" ") || [];
-
-      const index = classes.indexOf("selected");
-      if (index !== -1) {
-        classes.splice(index, 1);
-        delete formResult[formKey];
-
-        updateSkillList();
-        console.log(formResult);
-
-        // If the section as a selected-section element, empty it.
-        if (selectedSectionElement) {
-          selectedSectionElement.textContent = "";
-        }
-      } else {
-        classes.push("selected");
-        formResult[formKey] = li.getAttribute("data-key");
-
-        updateSkillList();
-        console.log(formResult);
-
-        // If the section as a selected-section element, display the user choice there.
-        if (selectedSectionElement) {
-          const optionName = li.querySelector(
-            "." + formKey + "__select__option__title",
-          )?.textContent;
-          selectedSectionElement.textContent = optionName || "";
-
-          sectionElement?.removeAttribute("open");
-        }
-
-        // Deselect all other elements in this group
-        elements.forEach((li2, j) => {
-          if (i === j) return;
-          let classes = li2.getAttribute("class")?.split(" ") || [];
-          const index = classes.indexOf("selected");
-          if (index !== -1) classes.splice(index, 1);
-
-          li2.setAttribute("class", classes.join(" "));
-        });
-      }
-
-      currentTarget.setAttribute("class", classes.join(" "));
-    });
-  });
-}
+// Store all races for filtering
+const allRaces = [...races];
+// Store all vdvs for filtering
+const allVdvs = [...vdvs];
 
 allRaces.forEach((race) => {
   const clone = raceTemplate.content.cloneNode(true);
@@ -1091,7 +1029,67 @@ function filterRacesAndVdvsByMonde(mondeKey) {
   });
 }
 
-//filterRacesAndVdvsByMonde('erenthyrm');
+/**
+ * Attach click listeners to a list of selectable elements
+ * @param {NodeListOf<Element> | Element[]} elements - List elements to attach listeners to
+ * @param {string} formKey - Key to use in formResult object
+ */
+function attachSelectListeners(elements, formKey) {
+  const sectionElement = document.querySelector("." + formKey);
+  const selectedSectionElement =
+    sectionElement?.querySelector(".selected-section");
+
+  elements.forEach((li, i) => {
+    li.addEventListener("click", function (e) {
+      const currentTarget = /** @type {Element} */ (e.currentTarget);
+      let classes = currentTarget.getAttribute("class")?.split(" ") || [];
+
+      const index = classes.indexOf("selected");
+      if (index !== -1) {
+        classes.splice(index, 1);
+        delete formResult[formKey];
+
+        updateSkillList();
+        console.log(formResult);
+
+        // If the section as a selected-section element, empty it.
+        if (selectedSectionElement) {
+          selectedSectionElement.textContent = "";
+        }
+      } else {
+        classes.push("selected");
+        formResult[formKey] = li.getAttribute("data-key");
+
+        updateSkillList();
+        console.log(formResult);
+
+        // If the section as a selected-section element, display the user choice there.
+        if (selectedSectionElement) {
+          const optionName = li.querySelector(
+            "." + formKey + "__select__option__title",
+          )?.textContent;
+          selectedSectionElement.textContent = optionName || "";
+
+          sectionElement?.removeAttribute("open");
+        }
+
+        // Deselect all other elements in this group
+        elements.forEach((li2, j) => {
+          if (i === j) return;
+          let classes = li2.getAttribute("class")?.split(" ") || [];
+          const index = classes.indexOf("selected");
+          if (index !== -1) classes.splice(index, 1);
+
+          li2.setAttribute("class", classes.join(" "));
+        });
+      }
+
+      currentTarget.setAttribute("class", classes.join(" "));
+    });
+  });
+}
+
+updateSkillList();
 
 const matches = document.querySelectorAll(".q-select--unique");
 matches.forEach(function (match) {
