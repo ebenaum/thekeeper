@@ -563,9 +563,9 @@ characteristics.forEach((characteristic) => {
       const inventoryBudgetChange =
         dexteriteToInventoryBudget(newLvl) -
         dexteriteToInventoryBudget(previousLvl);
-      
-      inventoryBudget += inventoryBudgetChange
-      inventoryBudgetCounterElement.textContent = inventoryBudget + "";
+
+      inventoryBudget += inventoryBudgetChange;
+      updateInventoryBudgetState(inventoryBudget);
     }
 
     // Update previousLvl for next change
@@ -584,6 +584,65 @@ characteristics.forEach((characteristic) => {
 
   print(node);
 });
+
+/**
+ * Updates the UI elements related to the inventory budget.
+ * - Sets the text content of the inventory budget counter.
+ * - Adds/removes a CSS class to indicate a negative budget.
+ * - Enables/disables the 'plus' buttons for inventory items based on the budget.
+ * @param {number} budget - The current inventory budget value.
+ * @returns {void}
+ */
+function updateInventoryBudgetState(budget) {
+  inventoryBudgetCounterElement.textContent = budget + "";
+
+  if (budget < 0) {
+    document
+      .querySelector(".inventory__budget")
+      ?.classList.add("inventory__budget--negative");
+  } else {
+    document
+      .querySelector(".inventory__budget")
+      ?.classList.remove("inventory__budget--negative");
+  }
+
+  if (budget <= 0) {
+    document
+      .querySelectorAll(".inventory__select__option__picker__control__plus")
+      .forEach((el) => {
+        el.classList.add(
+          "inventory__select__option__picker__control__plus--disabled",
+        );
+      });
+  } else {
+    document
+      .querySelectorAll(".inventory__select__option__picker__control__plus")
+      .forEach((el) => {
+        el.classList.remove(
+          "inventory__select__option__picker__control__plus--disabled",
+        );
+      });
+  }
+}
+
+/**
+ * Updates the state (enabled/disabled) of the 'minus' control button for an inventory item picker.
+ * The button is disabled if the number of items is zero, and enabled otherwise.
+ * @param {HTMLElement} el - The 'minus' control button element.
+ * @param {number} numberOfItems - The current number of items selected for this inventory item.
+ * @returns {void}
+ */
+function updateItemPickerMinusControl(el, numberOfItems) {
+  if (numberOfItems > 0) {
+    el.classList.remove(
+      "inventory__select__option__picker__control__minus--disabled",
+    );
+  } else {
+    el.classList.add(
+      "inventory__select__option__picker__control__minus--disabled",
+    );
+  }
+}
 
 /**
  * Update the state of skill up/down buttons based on current budget
@@ -846,8 +905,10 @@ inventory.forEach((item) => {
     }
     numberOfItems++;
     numberElement.textContent = numberOfItems + "";
+
     inventoryBudget -= cost;
-    inventoryBudgetCounterElement.textContent = inventoryBudget + "";
+    updateInventoryBudgetState(inventoryBudget);
+    updateItemPickerMinusControl(minusElement, numberOfItems);
   });
 
   minusElement?.addEventListener("click", (e) => {
@@ -857,7 +918,8 @@ inventory.forEach((item) => {
     numberOfItems--;
     numberElement.textContent = numberOfItems + "";
     inventoryBudget += cost;
-    inventoryBudgetCounterElement.textContent = inventoryBudget + "";
+    updateInventoryBudgetState(inventoryBudget);
+    updateItemPickerMinusControl(minusElement, numberOfItems);
   });
 });
 

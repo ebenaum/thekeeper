@@ -604,6 +604,21 @@ details {
   cursor: pointer;
 }
 
+.inventory__select__option__picker__control__plus--disabled {
+  cursor: none;
+  opacity: 0.3;
+}
+
+.inventory__select__option__picker__control__minus--disabled {
+  cursor: none;
+  opacity: 0.3;
+}
+
+.inventory__budget--negative {
+  color: red;
+  font-weight: bold;
+}
+
 .inventory__select__option__picker__control__number {
   margin-right: 5px;
   margin-left: 5px;
