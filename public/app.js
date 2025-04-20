@@ -956,12 +956,19 @@ allRaces.forEach((race) => {
   const titleElement = clone.querySelector(".race__select__option__title");
   const liElement = clone.querySelector("li");
   const imgElement = clone.querySelector("img");
+  const contentElement = clone.querySelector(".race__select__option__content");
   const descriptionElement = clone.querySelector(
     ".race__select__option__description",
   );
   const mondeBadgeElement = clone.querySelector(".monde-badge");
 
   if (race.img) {
+    contentElement.setAttribute(
+      "style",
+      Math.random() > 0.5
+        ? "flex-direction: row-reverse"
+        : "flex-direction: row",
+    );
     imgElement.setAttribute("src", race.img);
     imgElement.setAttribute("style", "margin-top:16px");
     imgElement.setAttribute("width", "300px");
