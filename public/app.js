@@ -37,36 +37,6 @@ function buf2hex(buffer) {
     .join("");
 }
 
-/**
- *
- * @param {string} classes
- * @param {string} classe
- * @returns {string}
- */
-function addClass(classes, classe) {
-  const classesArray = classes.split(" ");
-  if (classesArray.indexOf(classe) === -1) {
-    classesArray.push(classe);
-  }
-
-  return classesArray.join(" ");
-}
-
-/**
- *
- * @param {string} classes
- * @param {string} classe
- * @returns {string}
- */
-function removeClass(classes, classe) {
-  const classesArray = classes.split(" ");
-  if (classesArray.indexOf(classe) !== -1) {
-    classesArray.splice(classesArray.indexOf(classe), 1);
-  }
-
-  return classesArray.join(" ");
-}
-
 const localStorage = window.localStorage;
 
 function newData() {

@@ -207,11 +207,6 @@ textarea {
   left: 0;
 }
 
-.history {
-  padding-top: 3rem;
-  padding-bottom: 3rem;
-}
-
 .form-element {
   opacity: 0.3;
   transition: opacity 1.5s ease-out;
@@ -315,11 +310,6 @@ input[type="checkbox"]:checked::before {
 textarea:focus,
 input:focus {
   outline: none;
-}
-
-.caracs {
-  background-color: black;
-  width: 60px;
 }
 
 .characteristic {
