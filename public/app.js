@@ -8,6 +8,7 @@ import { EventsSchema } from "./event_pb.js";
 
 const CHARACTERISTIC_BUDGET = 4;
 const SKILL_BUDGET = 4;
+const INVENTORY_BUDGET = 2;
 
 /**
  *
@@ -304,7 +305,21 @@ const vdvTemplate = document.querySelector("#template__vdv");
 if (!vdvTemplate) {
   throw new Error("cannot retrieve vdv template");
 }
+
+/** @type {HTMLTemplateElement | null} */
+const inventoryItemTemplate = document.querySelector(
+  "#template__inventory_item",
+);
+if (!inventoryItemTemplate) {
+  throw new Error("cannot retrieve inventory item template");
+}
 /* TEMPLATES               */
+
+const mondeSelect = document.querySelector(".group__select");
+const raceSelect = document.querySelector(".race__select");
+const vdvSelect = document.querySelector(".vdv__select");
+const skillSelect = document.querySelector(".skills");
+const inventorySelect = document.querySelector(".inventory__select");
 
 /**
  * @typedef {Object} UniversEntry
@@ -319,6 +334,7 @@ const /** @type {UniversEntry[]} */ univers = await universResponse.json();
 const races = univers.filter((entry) => entry.tags.includes("race"));
 const mondes = univers.filter((entry) => entry.tags.includes("monde"));
 const vdvs = univers.filter((entry) => entry.tags.includes("vdv"));
+const inventory = univers.filter((entry) => entry.tags.includes("inventory"));
 
 const formResult = { skills: {}, characteristics: {} };
 
@@ -416,6 +432,7 @@ const characteristics = univers
 
 let characteristicBudget = CHARACTERISTIC_BUDGET;
 let skillBudget = SKILL_BUDGET;
+let inventoryBudget = INVENTORY_BUDGET;
 
 const budgetElement = /** @type {HTMLElement} */ (
   document.querySelector(".skills__budget")
@@ -424,6 +441,14 @@ const budgetCounterElement = /** @type {HTMLElement} */ (
   document.querySelector(".skills__budget__counter")
 );
 budgetCounterElement.textContent = skillBudget + "";
+
+const inventoryBudgetElement = /** @type {HTMLElement} */ (
+  document.querySelector(".inventory__budget")
+);
+const inventoryBudgetCounterElement = /** @type {HTMLElement} */ (
+  document.querySelector(".inventory__budget__counter")
+);
+inventoryBudgetCounterElement.textContent = inventoryBudget + "";
 
 // Extract the default PC value from savoir characteristic level 0
 const savoirCharacteristic = characteristics.find(
@@ -623,7 +648,6 @@ function skillBuild(skill, rank) {
   };
 }
 
-const skillSelect = document.querySelector(".skills");
 skills.forEach((skill) => {
   let lvl = 0;
 
@@ -759,16 +783,33 @@ function updateSkillList() {
   });
 }
 
-const mondeSelect = document.querySelector(".group__select");
-// Initial race select setup - show placeholder message
-const raceSelect = document.querySelector(".race__select");
-// Initial race select setup - show placeholder message
-const vdvSelect = document.querySelector(".vdv__select");
-
 // Store all races for filtering
 const allRaces = [...races];
 // Store all vdvs for filtering
 const allVdvs = [...vdvs];
+
+inventory.forEach((item) => {
+  const clone = inventoryItemTemplate.content.cloneNode(true);
+
+  const titleElement = clone.querySelector(
+    ".inventory__select__option__content__title",
+  );
+  const descriptionElement = clone.querySelector(
+    ".inventory__select__option__content__description",
+  );
+
+  const costElement = clone.querySelector(
+    ".inventory__select__option__picker__cost",
+  );
+
+  titleElement.textContent = item.label;
+  descriptionElement.textContent = item.description;
+
+  const cost = item.tags.find((tag) => tag.startsWith("cost:"))?.split(":")[1];
+  costElement.textContent = cost + (cost === "1" ? " gemme" : " gemmes");
+
+  inventorySelect?.appendChild(clone);
+});
 
 mondes.forEach((monde) => {
   const clone = mondeTemplate.content.cloneNode(true);

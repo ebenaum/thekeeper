@@ -121,6 +121,27 @@
       </li>
     </template>
 
+    <template id="template__inventory_item">
+      <li class="inventory__select__option d-block">
+        <span class="inventory__select__option__content">
+          <span class="inventory__select__option__content__title"></span>
+          <span class="inventory__select__option__content__description"></span>
+        </span>
+        <span class="inventory__select__option__picker">
+          <span class="inventory__select__option__picker__cost"></span>
+          <span class="inventory__select__option__picker__control"
+            ><span class="inventory__select__option__picker__control__minus"
+              >-</span
+            ><span class="inventory__select__option__picker__control__number"
+              >0</span
+            ><span class="inventory__select__option__picker__control__plus"
+              >+</span
+            ></span
+          >
+        </span>
+      </li>
+    </template>
+
     <div class="container">
       <p>
         Pour le jeu de cet été les groupes seront en opposition directe et très
@@ -157,7 +178,7 @@
             />
           </div>
 
-          <details class="group" open>
+          <details class="group">
             <summary>
               <span class="group__title">Groupe de jeu</span
               ><span data-key="group" class="selected-section"></span>
@@ -168,7 +189,7 @@
             </div>
           </details>
 
-          <details class="race" open>
+          <details class="race">
             <summary>
               <span class="race__title">Race</span
               ><span class="selected-section"></span>
@@ -179,7 +200,7 @@
             </div>
           </details>
 
-          <details class="vdv" open>
+          <details class="vdv">
             <summary>
               <span class="vdv__title">Voie de Vie</span
               ><span class="selected-section"></span>
@@ -193,19 +214,29 @@
           <h2>Caractéristiques</h2>
           <div class="characteristics">
             <p>
-              Points disponibles: <span class="characteristics__budget">4</span>
+              Points disponibles: <span class="characteristics__budget"></span>
             </p>
           </div>
 
           <h2>Compétences</h2>
           <div class="skills">
             <p class="skills__budget">
-              Points restants: <span class="skills__budget__counter">0</span>
+              Points restants: <span class="skills__budget__counter"></span>
             </p>
           </div>
 
-          <h2>Inventaire</h2>
-          <div class="inventory"></div>
+          <details class="inventory" open>
+            <summary>
+              <span class="inventory__title">Inventaire</span>
+              <p class="inventory__budget">
+                Gemmes au début de jeu:
+                <span class="inventory__budget__counter"></span>
+              </p>
+            </summary>
+            <div class="q-select">
+              <ul class="inventory__select q-response-select d-block"></ul>
+            </div>
+          </details>
         </fieldset>
       </form>
     </div>
