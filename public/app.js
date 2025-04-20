@@ -308,6 +308,7 @@ const inventory = univers.filter((entry) => entry.tags.includes("inventory"));
 
 const formResult = {
   skills: {},
+  inventory: {},
   characteristics: {
     corps: 0,
     dexterite: 0,
@@ -470,6 +471,8 @@ const characteristicsSelect = document.querySelector(".characteristics");
 const characteristicBudgetElement = document.querySelector(
   ".characteristics__budget",
 );
+
+characteristicBudgetElement.textContent = `${characteristicBudget}`;
 
 characteristics.forEach((characteristic) => {
   const characteristicF = characteristic;
@@ -906,6 +909,8 @@ inventory.forEach((item) => {
     numberOfItems++;
     numberElement.textContent = numberOfItems + "";
 
+    formResult.inventory[item.key] = numberOfItems;
+
     inventoryBudget -= cost;
     updateInventoryBudgetState(inventoryBudget);
     updateItemPickerMinusControl(minusElement, numberOfItems);
@@ -915,8 +920,15 @@ inventory.forEach((item) => {
     if (numberOfItems === 0) {
       return;
     }
+
     numberOfItems--;
     numberElement.textContent = numberOfItems + "";
+
+    formResult.inventory[item.key] = numberOfItems;
+    if (numberOfItems === 0) {
+      delete formResult.inventory[item.key];
+    }
+
     inventoryBudget += cost;
     updateInventoryBudgetState(inventoryBudget);
     updateItemPickerMinusControl(minusElement, numberOfItems);

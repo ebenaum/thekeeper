@@ -544,6 +544,14 @@ input[type="number"]::-webkit-outer-spin-button {
   font-weight: bold;
 }
 
+.character-name {
+  font-size: 1.5rem;
+}
+
+.character-name input {
+  font-size: 1.5rem;
+}
+
 h2 {
   font-size: 1.5em;
 }
