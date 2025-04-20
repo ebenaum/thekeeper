@@ -701,7 +701,7 @@ skills.forEach((skill) => {
   if (skill.availableToSorcerer) {
     const badgeElement = document.createElement("span");
     badgeElement.classList.add("skill__badge");
-    badgeElement.textContent = "Utilisable par les sorciers";
+    badgeElement.textContent = "Utilisable avec “Sorts”";
     badgeElement.dataset.availableToSorcerer = "";
 
     badgesElement.appendChild(badgeElement);
