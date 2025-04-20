@@ -760,49 +760,15 @@ function updateSkillList() {
 }
 
 const mondeSelect = document.querySelector(".group__select");
+// Initial race select setup - show placeholder message
+const raceSelect = document.querySelector(".race__select");
+// Initial race select setup - show placeholder message
+const vdvSelect = document.querySelector(".vdv__select");
+
 // Store all races for filtering
 const allRaces = [...races];
 // Store all vdvs for filtering
 const allVdvs = [...vdvs];
-
-/**
- * Updates dependent sections when a monde is selected or deselected
- * @param {boolean} isSelected - Whether the monde is selected
- * @param {string|null} mondeKey - The key of the selected monde
- */
-function updateDependentSections(isSelected, mondeKey = null) {
-  const dependentSections = document.querySelectorAll(".dependency-monde");
-
-  // Clear any previous selections
-  dependentSections.forEach((el) => {
-    const selectedElement = el.querySelector(".selected-section");
-    if (selectedElement) {
-      selectedElement.textContent = "";
-    }
-  });
-
-  if (isSelected) {
-    // If deselecting a monde
-    displayPickAWorldPlaceholders();
-
-    dependentSections.forEach((el) => {
-      el.removeAttribute("open");
-      const labelElement = el.querySelector("label");
-      if (labelElement) {
-        delete formResult[labelElement.getAttribute("for")];
-      }
-    });
-  } else {
-    // If selecting a monde
-    dependentSections.forEach((el) => {
-      el.setAttribute("open", "");
-    });
-
-    if (mondeKey) {
-      filterRacesAndVdvsByMonde(mondeKey);
-    }
-  }
-}
 
 mondes.forEach((monde) => {
   const clone = mondeTemplate.content.cloneNode(true);
@@ -816,12 +782,6 @@ mondes.forEach((monde) => {
   titleElement.textContent = monde.label;
   descriptionElement.textContent = monde.description;
   liElement.setAttribute("data-key", monde.key);
-
-  // Add event listener to filter races on monde selection
-  liElement.addEventListener("click", function () {
-    const isSelected = this.classList.contains("selected");
-    updateDependentSections(isSelected, monde.key);
-  });
 
   mondeSelect?.appendChild(clone);
 });
@@ -886,129 +846,87 @@ function attachSelectListeners(elements, formKey) {
   });
 }
 
-/**
- * Populates race selection options based on filtered races
- * @param {UniversEntry[]} filteredRaces - Races filtered by monde
- * @param {string} mondeKey - Key of the selected monde
- * @param {string} mondeLabel - Display label of the selected monde
- */
-function populateRaceOptions(filteredRaces, mondeKey, mondeLabel) {
-  filteredRaces.forEach((race) => {
-    const clone = raceTemplate.content.cloneNode(true);
+allRaces.forEach((race) => {
+  const clone = raceTemplate.content.cloneNode(true);
 
-    const titleElement = clone.querySelector(".race__select__option__title");
-    const liElement = clone.querySelector("li");
-    const descriptionElement = clone.querySelector(
-      ".race__select__option__description",
-    );
-    const mondeBadgeElement = clone.querySelector(".monde-badge");
+  const titleElement = clone.querySelector(".race__select__option__title");
+  const liElement = clone.querySelector("li");
+  const descriptionElement = clone.querySelector(
+    ".race__select__option__description",
+  );
+  const mondeBadgeElement = clone.querySelector(".monde-badge");
 
-    titleElement.textContent = race.label;
-    descriptionElement.textContent = race.description;
-    liElement.setAttribute("data-key", race.key);
-    mondeBadgeElement.textContent = mondeLabel;
+  titleElement.textContent = race.label;
+  descriptionElement.textContent = race.description;
+  liElement.setAttribute("data-key", race.key);
+  mondeBadgeElement.textContent = mondes.find(
+    (monde) =>
+      monde.key ===
+      race.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
+  )?.label;
 
-    // Add a data attribute for the monde key (useful for styling)
-    liElement.setAttribute("data-monde", mondeKey);
+  // Add a data attribute for the monde key (useful for styling)
+  liElement.setAttribute(
+    "data-monde",
+    mondes.find(
+      (monde) =>
+        monde.key ===
+        race.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
+    )?.key,
+  );
 
-    raceSelect?.appendChild(clone);
-  });
+  raceSelect?.appendChild(clone);
+});
 
-  // Attach listeners to the new race options
-  const raceList = raceSelect?.querySelectorAll("li");
-  if (raceList) {
-    attachSelectListeners(raceList, "race");
-  }
-}
+allVdvs.forEach((vdv) => {
+  const clone = vdvTemplate.content.cloneNode(true);
 
-/**
- * Populates VDV selection options based on filtered VDVs
- * @param {UniversEntry[]} filteredVdvs - VDVs filtered by monde
- * @param {string} mondeKey - Key of the selected monde
- * @param {string} mondeLabel - Display label of the selected monde
- */
-function populateVdvOptions(filteredVdvs, mondeKey, mondeLabel) {
-  filteredVdvs.forEach((vdv) => {
-    const clone = vdvTemplate.content.cloneNode(true);
+  const titleElement = clone.querySelector(".vdv__select__option__title");
+  const liElement = clone.querySelector("li");
+  const descriptionElement = clone.querySelector(
+    ".vdv__select__option__description",
+  );
+  const mondeBadgeElement = clone.querySelector(".monde-badge");
 
-    const titleElement = clone.querySelector(".vdv__select__option__title");
-    const liElement = clone.querySelector("li");
-    const descriptionElement = clone.querySelector(
-      ".vdv__select__option__description",
-    );
-    const mondeBadgeElement = clone.querySelector(".monde-badge");
+  titleElement.textContent = vdv.label;
+  descriptionElement.textContent = vdv.description;
+  liElement.setAttribute("data-key", vdv.key);
+  mondeBadgeElement.textContent = mondes.find(
+    (monde) =>
+      monde.key ===
+      vdv.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
+  )?.label;
 
-    titleElement.textContent = vdv.label;
-    descriptionElement.textContent = vdv.description;
-    liElement.setAttribute("data-key", vdv.key);
-    mondeBadgeElement.textContent = mondeLabel;
+  // Add a data attribute for the monde key (useful for styling)
+  liElement.setAttribute(
+    "data-monde",
+    mondes.find(
+      (monde) =>
+        monde.key ===
+        vdv.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
+    )?.key,
+  );
 
-    // Add a data attribute for the monde key (useful for styling)
-    liElement.setAttribute("data-monde", mondeKey);
-
-    vdvSelect?.appendChild(clone);
-  });
-
-  // Attach listeners to the new VDV options
-  const vdvList = vdvSelect?.querySelectorAll("li");
-  if (vdvList) {
-    attachSelectListeners(vdvList, "vdv");
-  }
-}
+  vdvSelect?.appendChild(clone);
+});
 
 /**
  * Filter races based on the selected monde
- * @param {string} mondeKey - The key of the selected monde
+ * @param {string?} mondeKey - The key of the selected monde
  */
 function filterRacesAndVdvsByMonde(mondeKey) {
-  // Clear race selections
-  document.querySelectorAll(".dependency-monde").forEach((el) => {
-    const selected = el.querySelector(".selected");
-    if (selected) {
-      selected.classList.remove("selected");
-    }
+  const elements = document.querySelectorAll("li[data-monde]");
 
-    const ulElement = el.querySelector(".q-response-select");
-    if (ulElement) {
-      ulElement.innerHTML = "";
-    }
-  });
-
-  // Find the selected monde's label
-  const selectedMonde = mondes.find((monde) => monde.key === mondeKey);
-  const mondeLabel = selectedMonde ? selectedMonde.label : mondeKey;
-
-  // Filter races and vdvs that match the monde key in their tags
-  const filteredRaces = allRaces.filter((race) => race.tags.includes(mondeKey));
-  const filteredVdvs = allVdvs.filter((vdv) => vdv.tags.includes(mondeKey));
-
-  // Populate race and VDV options with the extracted functions
-  populateRaceOptions(filteredRaces, mondeKey, mondeLabel);
-  populateVdvOptions(filteredVdvs, mondeKey, mondeLabel);
-}
-
-// Initial race select setup - show placeholder message
-const raceSelect = document.querySelector(".race__select");
-// Initial race select setup - show placeholder message
-const vdvSelect = document.querySelector(".vdv__select");
-
-function displayPickAWorldPlaceholders() {
-  document.querySelectorAll(".dependency-monde").forEach((el) => {
-    const select = el.querySelector(".q-response-select");
-
-    if (select) {
-      select.innerHTML = "";
-      // Create and add placeholder message
-      const placeholderElement = document.createElement("div");
-      placeholderElement.textContent =
-        "Veuillez d'abord sélectionner un monde pour voir les choix disponibles";
-
-      select.appendChild(placeholderElement);
+  elements?.forEach((el) => {
+    if (el.dataset.monde === mondeKey) {
+      el.style.display = ""; // Show skill if VDV matches requirement
+    } else {
+      el.style.display = "none"; // Hide skill if VDV doesn't match or no VDV selected
     }
   });
 }
 
-displayPickAWorldPlaceholders();
+//filterRacesAndVdvsByMonde('erenthyrm');
 
 const matches = document.querySelectorAll(".q-select--unique");
 matches.forEach(function (match) {
