@@ -559,18 +559,20 @@ characteristics.forEach((characteristic) => {
       }
     }
 
+    if (characteristic.key === "dexterite") {
+      const inventoryBudgetChange =
+        dexteriteToInventoryBudget(newLvl) -
+        dexteriteToInventoryBudget(previousLvl);
+      
+      inventoryBudget += inventoryBudgetChange
+      inventoryBudgetCounterElement.textContent = inventoryBudget + "";
+    }
+
     // Update previousLvl for next change
     previousLvl = newLvl;
     lvl = newLvl;
 
     formResult.characteristics[characteristic.key] = lvl;
-
-    if (characteristic.key === "dexterite") {
-      inventoryBudget = dexteriteToInventoryBudget(
-        formResult.characteristics.dexterite,
-      );
-      inventoryBudgetCounterElement.textContent = inventoryBudget + "";
-    }
 
     // Update budget display
     if (characteristicBudgetElement) {
@@ -803,6 +805,8 @@ const allRaces = [...races];
 const allVdvs = [...vdvs];
 
 inventory.forEach((item) => {
+  let numberOfItems = 0;
+
   const clone = inventoryItemTemplate.content.cloneNode(true);
 
   const titleElement = clone.querySelector(
@@ -811,18 +815,50 @@ inventory.forEach((item) => {
   const descriptionElement = clone.querySelector(
     ".inventory__select__option__content__description",
   );
-
   const costElement = clone.querySelector(
     ".inventory__select__option__picker__cost",
+  );
+
+  const numberElement = clone.querySelector(
+    ".inventory__select__option__picker__control__number",
   );
 
   titleElement.textContent = item.label;
   descriptionElement.textContent = item.description;
 
-  const cost = item.tags.find((tag) => tag.startsWith("cost:"))?.split(":")[1];
+  const cost = parseInt(
+    item.tags.find((tag) => tag.startsWith("cost:"))?.split(":")[1],
+  );
   costElement.textContent = cost + (cost === "1" ? " gemme" : " gemmes");
 
   inventorySelect?.appendChild(clone);
+  const node = /** @type {Element} */ (inventorySelect?.lastElementChild);
+  const plusElement = /** @type {HTMLElement} */ node.querySelector(
+    ".inventory__select__option__picker__control__plus",
+  );
+  const minusElement = /** @type {HTMLElement} */ node.querySelector(
+    ".inventory__select__option__picker__control__minus",
+  );
+
+  plusElement?.addEventListener("click", (e) => {
+    if (inventoryBudget <= 0) {
+      return;
+    }
+    numberOfItems++;
+    numberElement.textContent = numberOfItems + "";
+    inventoryBudget -= cost;
+    inventoryBudgetCounterElement.textContent = inventoryBudget + "";
+  });
+
+  minusElement?.addEventListener("click", (e) => {
+    if (numberOfItems === 0) {
+      return;
+    }
+    numberOfItems--;
+    numberElement.textContent = numberOfItems + "";
+    inventoryBudget += cost;
+    inventoryBudgetCounterElement.textContent = inventoryBudget + "";
+  });
 });
 
 mondes.forEach((monde) => {
