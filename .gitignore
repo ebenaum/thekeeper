@@ -4,3 +4,4 @@ foo.db-shm
 foo.db-wal
 node_modules
 public/univers.json
+public/prompt
