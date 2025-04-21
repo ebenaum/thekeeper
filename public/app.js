@@ -382,14 +382,12 @@ const /** @type {Skill[]} */ skills = univers
 
         switch (requirementType) {
           case "vdv":
-            requirementEntry = vdvs.find(
-              (vdv) => vdv.key === requirementParts[2],
-            );
+            requirementEntry =
+              vdvs.find((vdv) => vdv.key === requirementParts[2]) || null;
             break;
           case "race":
-            requirementEntry = races.find(
-              (race) => race.key === requirementParts[2],
-            );
+            requirementEntry =
+              races.find((race) => race.key === requirementParts[2]) || null;
             break;
           default:
             throw new Error("unknown requirement " + requirementParts);
@@ -476,8 +474,8 @@ const defaultSavoirLevel = savoirCharacteristic?.levels.find(
 const defaultSavoirPcValue = defaultSavoirLevel?.pcValue || 0; // Fallback to 1 if not found
 
 const characteristicsSelect = document.querySelector(".characteristics");
-const characteristicBudgetElement = document.querySelector(
-  ".characteristics__budget",
+const characteristicBudgetElement = /** @type {HTMLElement} */ (
+  document.querySelector(".characteristics__budget")
 );
 
 characteristicBudgetElement.textContent = `${characteristicBudget}`;
@@ -644,7 +642,9 @@ const skillResets = {};
 skills.forEach((skill) => {
   let lvl = 0;
 
-  const clone = skillTemplate.content.cloneNode(true);
+  const clone = /** @type {HTMLElement} */ (
+    skillTemplate.content.cloneNode(true)
+  );
 
   // Store skill data (including tags) on the element for filtering
   const skillElement = /** @type {HTMLElement} */ (
@@ -815,7 +815,9 @@ function updateSkillList() {
     }
   });
 
-  const skillElements = skillSelect?.querySelectorAll(".skill");
+  const skillElements = /** @type {NodeListOf<HTMLElement>} */ (
+    skillSelect?.querySelectorAll(".skill")
+  );
   skillElements?.forEach((el) => {
     if (!el.dataset.requireType || !el.dataset.requireKey) {
       return;
@@ -835,37 +837,39 @@ function updateSkillList() {
 inventory.forEach((item) => {
   let numberOfItems = 0;
 
-  const clone = inventoryItemTemplate.content.cloneNode(true);
-
-  const titleElement = clone.querySelector(
-    ".inventory__select__option__content__title",
-  );
-  const descriptionElement = clone.querySelector(
-    ".inventory__select__option__content__description",
-  );
-  const costElement = clone.querySelector(
-    ".inventory__select__option__picker__cost",
+  const clone = /** @type {HTMLElement} */ (
+    inventoryItemTemplate.content.cloneNode(true)
   );
 
-  const numberElement = clone.querySelector(
-    ".inventory__select__option__picker__control__number",
+  const titleElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".inventory__select__option__content__title")
+  );
+  const descriptionElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".inventory__select__option__content__description")
+  );
+  const costElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".inventory__select__option__picker__cost")
+  );
+
+  const numberElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".inventory__select__option__picker__control__number")
   );
 
   titleElement.textContent = item.label;
   descriptionElement.textContent = item.description;
 
   const cost = parseInt(
-    item.tags.find((tag) => tag.startsWith("cost:"))?.split(":")[1],
+    item.tags.find((tag) => tag.startsWith("cost:"))?.split(":")[1] || "0",
   );
-  costElement.textContent = cost + (cost === "1" ? " gemme" : " gemmes");
+  costElement.textContent = cost + (cost === 1 ? " gemme" : " gemmes");
 
   inventorySelect?.appendChild(clone);
   const node = /** @type {Element} */ (inventorySelect?.lastElementChild);
-  const plusElement = /** @type {HTMLElement} */ node.querySelector(
-    ".inventory__select__option__picker__control__plus",
+  const plusElement = /** @type {HTMLElement} */ (
+    node.querySelector(".inventory__select__option__picker__control__plus")
   );
-  const minusElement = /** @type {HTMLElement} */ node.querySelector(
-    ".inventory__select__option__picker__control__minus",
+  const minusElement = /** @type {HTMLElement} */ (
+    node.querySelector(".inventory__select__option__picker__control__minus")
   );
 
   plusElement?.addEventListener("click", (e) => {
@@ -961,12 +965,16 @@ function updateItemPickerMinusControl(el, numberOfItems) {
 }
 
 mondes.forEach((monde) => {
-  const clone = mondeTemplate.content.cloneNode(true);
+  const clone = /** @type {HTMLElement} */ (
+    mondeTemplate.content.cloneNode(true)
+  );
 
-  const titleElement = clone.querySelector(".group__select__option__title");
-  const liElement = clone.querySelector("li");
-  const descriptionElement = clone.querySelector(
-    ".group__select__option__description",
+  const titleElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".group__select__option__title")
+  );
+  const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
+  const descriptionElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".group__select__option__description")
   );
 
   titleElement.textContent = monde.label;
@@ -982,16 +990,24 @@ const allRaces = [...races];
 const allVdvs = [...vdvs];
 
 allRaces.forEach((race) => {
-  const clone = raceTemplate.content.cloneNode(true);
-
-  const titleElement = clone.querySelector(".race__select__option__title");
-  const liElement = clone.querySelector("li");
-  const imgElement = clone.querySelector("img");
-  const contentElement = clone.querySelector(".race__select__option__content");
-  const descriptionElement = clone.querySelector(
-    ".race__select__option__description",
+  const clone = /** @type {HTMLElement} */ (
+    raceTemplate.content.cloneNode(true)
   );
-  const mondeBadgeElement = clone.querySelector(".monde-badge");
+
+  const titleElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".race__select__option__title")
+  );
+  const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
+  const imgElement = /** @type {HTMLElement} */ (clone.querySelector("img"));
+  const contentElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".race__select__option__content")
+  );
+  const descriptionElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".race__select__option__description")
+  );
+  const mondeBadgeElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".monde-badge")
+  );
 
   if (race.img) {
     contentElement.setAttribute(
@@ -1010,11 +1026,12 @@ allRaces.forEach((race) => {
   titleElement.textContent = race.label;
   descriptionElement.textContent = race.description;
   liElement.setAttribute("data-key", race.key);
-  mondeBadgeElement.textContent = mondes.find(
-    (monde) =>
-      monde.key ===
-      race.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
-  )?.label;
+  mondeBadgeElement.textContent =
+    mondes.find(
+      (monde) =>
+        monde.key ===
+        race.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
+    )?.label || "";
 
   // Add a data attribute for the monde key (useful for styling)
   liElement.setAttribute(
@@ -1023,30 +1040,37 @@ allRaces.forEach((race) => {
       (monde) =>
         monde.key ===
         race.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
-    )?.key,
+    )?.key || "",
   );
 
   raceSelect?.appendChild(clone);
 });
 
 allVdvs.forEach((vdv) => {
-  const clone = vdvTemplate.content.cloneNode(true);
-
-  const titleElement = clone.querySelector(".vdv__select__option__title");
-  const liElement = clone.querySelector("li");
-  const descriptionElement = clone.querySelector(
-    ".vdv__select__option__description",
+  const clone = /** @type {HTMLElement} */ (
+    vdvTemplate.content.cloneNode(true)
   );
-  const mondeBadgeElement = clone.querySelector(".monde-badge");
+
+  const titleElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".vdv__select__option__title")
+  );
+  const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
+  const descriptionElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".vdv__select__option__description")
+  );
+  const mondeBadgeElement = /** @type {HTMLElement} */ (
+    clone.querySelector(".monde-badge")
+  );
 
   titleElement.textContent = vdv.label;
   descriptionElement.textContent = vdv.description;
   liElement.setAttribute("data-key", vdv.key);
-  mondeBadgeElement.textContent = mondes.find(
-    (monde) =>
-      monde.key ===
-      vdv.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
-  )?.label;
+  mondeBadgeElement.textContent =
+    mondes.find(
+      (monde) =>
+        monde.key ===
+        vdv.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
+    )?.label || "";
 
   // Add a data attribute for the monde key (useful for styling)
   liElement.setAttribute(
@@ -1055,7 +1079,7 @@ allVdvs.forEach((vdv) => {
       (monde) =>
         monde.key ===
         vdv.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
-    )?.key,
+    )?.key || "",
   );
 
   vdvSelect?.appendChild(clone);
@@ -1066,7 +1090,9 @@ allVdvs.forEach((vdv) => {
  * @param {string?} mondeKey - The key of the selected monde
  */
 function filterRacesAndVdvsByMonde(mondeKey) {
-  const elements = document.querySelectorAll("li[data-monde]");
+  const elements = /** @type {NodeListOf<HTMLElement>} */ (
+    document.querySelectorAll("li[data-monde]")
+  );
 
   elements?.forEach((el) => {
     if (el.dataset.monde === mondeKey) {
