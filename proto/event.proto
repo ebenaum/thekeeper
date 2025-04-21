@@ -5,6 +5,7 @@ import "permission.proto";
 import "seed_player.proto";
 import "seed_actor.proto";
 import "player_person.proto";
+import "player_character.proto";
 
 option go_package = "github.com/ebenaum/thekeeper/proto;proto";
 
@@ -13,6 +14,7 @@ enum EventType {
   EventTypeSeedPlayer = 1;
   EventTypeSeedActor = 2;
   EventTypePlayerPerson = 3;
+  EventTypePlayerCharacter = 4;
 }
 
 message Event {
@@ -22,6 +24,7 @@ message Event {
     EventSeedPlayer SeedPlayer = 3;
     EventSeedActor SeedActor = 4;
     EventPlayerPerson PlayerPerson = 5;
+    EventPlayerCharacter PlayerCharacter = 6;
   }
 }
 

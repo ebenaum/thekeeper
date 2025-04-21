@@ -7,16 +7,13 @@ import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv1";
 /**
  * Describes the file player_person.proto.
  */
-export const file_player_person =
-  /*@__PURE__*/
-  fileDesc(
-    "ChNwbGF5ZXJfcGVyc29uLnByb3RvEgl0aGVrZWVwZXIi0QEKEUV2ZW50UGxheWVyUGVyc29uEhAKCHBsYXllcklkGAEgASgJEg8KB3N1cm5hbWUYAiABKAkSCwoDYWdlGAMgASgJEhQKDGNpdHlPZk9yaWdpbhgEIAEoCRITCgtwaG9uZU51bWJlchgFIAEoCRIZChFoZWFsdGhEZWNsYXJhdGlvbhgGIAEoCRIdChVhZGRpdGlvbmFsSW5mb3JtYXRpb24YByABKAkSGAoQcGVvcGxlVG9QbGF5V2l0aBgIIAEoCRINCgVza2lsbBgJIAEoCUIqWihnaXRodWIuY29tL2ViZW5hdW0vdGhla2VlcGVyL3Byb3RvO3Byb3RvYgZwcm90bzM",
-  );
+export const file_player_person = /*@__PURE__*/
+  fileDesc("ChNwbGF5ZXJfcGVyc29uLnByb3RvEgl0aGVrZWVwZXIi0QEKEUV2ZW50UGxheWVyUGVyc29uEhAKCHBsYXllcklkGAEgASgJEg8KB3N1cm5hbWUYAiABKAkSCwoDYWdlGAMgASgJEhQKDGNpdHlPZk9yaWdpbhgEIAEoCRITCgtwaG9uZU51bWJlchgFIAEoCRIZChFoZWFsdGhEZWNsYXJhdGlvbhgGIAEoCRIdChVhZGRpdGlvbmFsSW5mb3JtYXRpb24YByABKAkSGAoQcGVvcGxlVG9QbGF5V2l0aBgIIAEoCRINCgVza2lsbBgJIAEoCUIqWihnaXRodWIuY29tL2ViZW5hdW0vdGhla2VlcGVyL3Byb3RvO3Byb3RvYgZwcm90bzM");
 
 /**
  * Describes the message thekeeper.EventPlayerPerson.
  * Use `create(EventPlayerPersonSchema)` to create a new message.
  */
-export const EventPlayerPersonSchema =
-  /*@__PURE__*/
+export const EventPlayerPersonSchema = /*@__PURE__*/
   messageDesc(file_player_person, 0);
+

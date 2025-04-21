@@ -1,0 +1,19 @@
+syntax = "proto3";
+package thekeeper;
+
+option go_package = "github.com/ebenaum/thekeeper/proto;proto";
+
+message Characteristics {
+  int32 corps     = 1;
+  int32 dexterite = 2;
+  int32 influence = 3;
+  int32 savoir    = 4;
+}
+
+message EventPlayerCharacter {
+   string vdv                      = 1;
+   string race                     = 2;
+   map<string, int32> skills       = 3;
+   Characteristics characteristics = 4;
+   map<string, int32> inventory    = 5;
+}
