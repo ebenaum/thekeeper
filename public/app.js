@@ -632,6 +632,8 @@ function skillBuild(skill, rank) {
   };
 }
 
+const skillResets = {};
+
 skills.forEach((skill) => {
   let lvl = 0;
 
@@ -743,6 +745,17 @@ skills.forEach((skill) => {
     }
   });
 
+  skillResets[skill.key] = () => {
+    let cost = 0;
+    for (let i = lvl; i > 0; i--) {
+      cost += skill.levels[i - 1].cost;
+    }
+
+    onSkillPick(skill.key, 0, cost);
+    lvl = 0;
+    print(node);
+  };
+
   print(node);
 });
 
@@ -784,6 +797,17 @@ function onSkillPick(skillKey, rank, cost) {
 
 // Function to update the visibility of skills based on the selected VDV
 function updateSkillList() {
+  // Check again the picked skills matches with the race and vdv.
+  Object.keys(formResult.skills).forEach((key) => {
+    const skill = skills.find((skill) => skill.key === key);
+    if (
+      skill?.requirementType &&
+      formResult[skill.requirementType] !== skill.requirementEntry?.key
+    ) {
+      skillResets[key]();
+    }
+  });
+
   const skillElements = skillSelect?.querySelectorAll(".skill");
   skillElements?.forEach((el) => {
     if (!el.dataset.requireType || !el.dataset.requireKey) {
