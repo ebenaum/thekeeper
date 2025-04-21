@@ -6,10 +6,6 @@ import * as jose from "jose";
 import { create, toJson, toBinary, fromBinary } from "@bufbuild/protobuf";
 import { EventsSchema } from "./event_pb.js";
 
-const CHARACTERISTIC_BUDGET = 4;
-const SKILL_BUDGET = 4;
-const INVENTORY_BUDGET = 2;
-
 /**
  *
  * @param {number} length
@@ -437,8 +433,19 @@ const characteristics = univers
     return { levels, ...characteristic };
   });
 
-let characteristicBudget = CHARACTERISTIC_BUDGET;
-let skillBudget = SKILL_BUDGET;
+let characteristicBudget = parseInt(
+  univers
+    .find((entry) => entry.key === "characteristics-default-points")
+    ?.tags.find((tag) => tag.startsWith("n:"))
+    ?.split(":")[1] || "0",
+);
+
+let skillBudget = parseInt(
+  univers
+    .find((entry) => entry.key === "skills-default-points")
+    ?.tags.find((tag) => tag.startsWith("n:"))
+    ?.split(":")[1] || "0",
+);
 let inventoryBudget = dexteriteToInventoryBudget(
   formResult.characteristics.dexterite,
 );
