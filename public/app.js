@@ -239,956 +239,969 @@ const response = await fetch("http://localhost:8081/state", {
 
 await sync(state, false);
 
-/* TEMPLATES */
-/** @type {HTMLTemplateElement | null} */
-const mondeTemplate = document.querySelector("#template__group-option");
-if (!mondeTemplate) {
-  throw new Error("cannot retrieve monde template");
-}
-
-const /** @type {HTMLTemplateElement | null} */ raceTemplate =
-    document.querySelector("#template__race-option");
-if (!raceTemplate) {
-  throw new Error("cannot retrieve race-option template");
-}
-
-/** @type {HTMLTemplateElement | null} */
-const skillTemplate = document.querySelector("#template__skill");
-if (!skillTemplate) {
-  throw new Error("cannot retrieve skill template");
-}
-
-/** @type {HTMLTemplateElement | null} */
-const characteristicTemplate = document.querySelector(
-  "#template__characteristic",
-);
-if (!characteristicTemplate) {
-  throw new Error("cannot retrieve characteristic template");
-}
-
-/** @type {HTMLTemplateElement | null} */
-const vdvTemplate = document.querySelector("#template__vdv");
-if (!vdvTemplate) {
-  throw new Error("cannot retrieve vdv template");
-}
-
-/** @type {HTMLTemplateElement | null} */
-const inventoryItemTemplate = document.querySelector(
-  "#template__inventory_item",
-);
-if (!inventoryItemTemplate) {
-  throw new Error("cannot retrieve inventory item template");
-}
-/* TEMPLATES               */
-
-const mondeSelect = document.querySelector(".group__select");
-const raceSelect = document.querySelector(".race__select");
-const vdvSelect = document.querySelector(".vdv__select");
-const skillSelect = document.querySelector(".skills");
-const inventorySelect = document.querySelector(".inventory__select");
-
-/**
- * @typedef {Object} UniversEntry
- * @property {string} key
- * @property {string[]} tags
- * @property {string} label
- * @property {string?} img
- * @property {string} description
- */
-
-const universResponse = await fetch("http://localhost:8080/univers.json");
-const /** @type {UniversEntry[]} */ univers = await universResponse.json();
-const races = univers.filter((entry) => entry.tags.includes("race"));
-const mondes = univers.filter((entry) => entry.tags.includes("monde"));
-const vdvs = univers.filter((entry) => entry.tags.includes("vdv"));
-const inventory = univers.filter((entry) => entry.tags.includes("inventory"));
-
-const formResult = {
-  skills: {},
-  inventory: {},
-  characteristics: {
-    corps: 0,
-    dexterite: 0,
-    influence: 0,
-    savoir: 0,
-  },
-};
-
-/**
- * Calculates the inventory budget based on the dexterity characteristic level.
- * @param {number} dexterite - The dexterity level (from -2 to 4).
- * @returns {number} The corresponding inventory budget.
- * @throws {Error} If the dexterity level is outside the handled range.
- */
-function dexteriteToInventoryBudget(dexterite) {
-  switch (dexterite) {
-    case -2:
-      return 0;
-    case -1:
-      return 0;
-    case 0:
-      return 1;
-    case 1:
-      return 2;
-    case 2:
-      return 3;
-    case 3:
-      return 4;
-    case 4:
-      return 5;
-    default:
-      throw new Error("dexeterite " + dexterite + "not handled");
+async function personnage() {
+  /* TEMPLATES */
+  /** @type {HTMLTemplateElement | null} */
+  const mondeTemplate = document.querySelector("#template__group-option");
+  if (!mondeTemplate) {
+    throw new Error("cannot retrieve monde template");
   }
-}
 
-const characterNameInputElement = /** @type {HTMLElement} */ (
-  document.querySelector(".character-name__input")
-);
+  const /** @type {HTMLTemplateElement | null} */ raceTemplate =
+      document.querySelector("#template__race-option");
+  if (!raceTemplate) {
+    throw new Error("cannot retrieve race-option template");
+  }
 
-characterNameInputElement.addEventListener("input", (e) => {
-  formResult.name = e.target.value;
-});
+  /** @type {HTMLTemplateElement | null} */
+  const skillTemplate = document.querySelector("#template__skill");
+  if (!skillTemplate) {
+    throw new Error("cannot retrieve skill template");
+  }
 
-const /** @type {Skill[]} */ skills = univers
-    .filter((entry) => entry.tags.includes("skill"))
-    .map((skill) => {
+  /** @type {HTMLTemplateElement | null} */
+  const characteristicTemplate = document.querySelector(
+    "#template__characteristic",
+  );
+  if (!characteristicTemplate) {
+    throw new Error("cannot retrieve characteristic template");
+  }
+
+  /** @type {HTMLTemplateElement | null} */
+  const vdvTemplate = document.querySelector("#template__vdv");
+  if (!vdvTemplate) {
+    throw new Error("cannot retrieve vdv template");
+  }
+
+  /** @type {HTMLTemplateElement | null} */
+  const inventoryItemTemplate = document.querySelector(
+    "#template__inventory_item",
+  );
+  if (!inventoryItemTemplate) {
+    throw new Error("cannot retrieve inventory item template");
+  }
+  /* TEMPLATES               */
+
+  const mondeSelect = document.querySelector(".group__select");
+  const raceSelect = document.querySelector(".race__select");
+  const vdvSelect = document.querySelector(".vdv__select");
+  const skillSelect = document.querySelector(".skills");
+  const inventorySelect = document.querySelector(".inventory__select");
+
+  /**
+   * @typedef {Object} UniversEntry
+   * @property {string} key
+   * @property {string[]} tags
+   * @property {string} label
+   * @property {string?} img
+   * @property {string} description
+   */
+
+  const universResponse = await fetch("http://localhost:8080/univers.json");
+  const /** @type {UniversEntry[]} */ univers = await universResponse.json();
+  const races = univers.filter((entry) => entry.tags.includes("race"));
+  const mondes = univers.filter((entry) => entry.tags.includes("monde"));
+  const vdvs = univers.filter((entry) => entry.tags.includes("vdv"));
+  const inventory = univers.filter((entry) => entry.tags.includes("inventory"));
+
+  const formResult = {
+    skills: {},
+    inventory: {},
+    characteristics: {
+      corps: 0,
+      dexterite: 0,
+      influence: 0,
+      savoir: 0,
+    },
+  };
+
+  /**
+   * Calculates the inventory budget based on the dexterity characteristic level.
+   * @param {number} dexterite - The dexterity level (from -2 to 4).
+   * @returns {number} The corresponding inventory budget.
+   * @throws {Error} If the dexterity level is outside the handled range.
+   */
+  function dexteriteToInventoryBudget(dexterite) {
+    switch (dexterite) {
+      case -2:
+        return 0;
+      case -1:
+        return 0;
+      case 0:
+        return 1;
+      case 1:
+        return 2;
+      case 2:
+        return 3;
+      case 3:
+        return 4;
+      case 4:
+        return 5;
+      default:
+        throw new Error("dexeterite " + dexterite + "not handled");
+    }
+  }
+
+  const characterNameInputElement = /** @type {HTMLElement} */ (
+    document.querySelector(".character-name__input")
+  );
+
+  characterNameInputElement.addEventListener("input", (e) => {
+    formResult.name = e.target.value;
+  });
+
+  const /** @type {Skill[]} */ skills = univers
+      .filter((entry) => entry.tags.includes("skill"))
+      .map((skill) => {
+        const levels = univers
+          .filter((entry) => entry.tags.includes("skill:" + skill.key))
+          .map((level) => {
+            const cost = level.tags
+              .find((tag) => tag.startsWith("cost:"))
+              ?.split(":")[1];
+            const rank = level.tags
+              .find((tag) => tag.startsWith("level:"))
+              ?.split(":")[1];
+
+            if (!cost || !rank) {
+              throw new Error("missing cost or rank on " + level.toString());
+            }
+
+            return { cost: parseInt(cost), rank: parseInt(rank), ...level };
+          });
+
+        const requirementTag = skill.tags.find((/** @type {string} */ tag) =>
+          tag.startsWith("require:"),
+        );
+
+        let /** @type {string | null} */ requirementType;
+        let /** @type {UniversEntry | null} */ requirementEntry;
+
+        if (requirementTag) {
+          const requirementParts = requirementTag.split(":");
+          requirementType = requirementParts[1];
+
+          switch (requirementType) {
+            case "vdv":
+              requirementEntry =
+                vdvs.find((vdv) => vdv.key === requirementParts[2]) || null;
+              break;
+            case "race":
+              requirementEntry =
+                races.find((race) => race.key === requirementParts[2]) || null;
+              break;
+            default:
+              throw new Error("unknown requirement " + requirementParts);
+          }
+        }
+
+        return {
+          levels,
+          rankMax: levels.length,
+          requirementType: requirementType,
+          requirementEntry: requirementEntry,
+          availableToSorcerer:
+            skill.tags.findIndex((tag) => tag === "available-to-sorcerer") !==
+            -1,
+          ...skill,
+        };
+      });
+
+  const characteristics = univers
+    .filter((entry) => entry.tags.includes("characteristic"))
+    .map((characteristic) => {
       const levels = univers
-        .filter((entry) => entry.tags.includes("skill:" + skill.key))
+        .filter((entry) =>
+          entry.tags.includes("characteristic:" + characteristic.key),
+        )
         .map((level) => {
-          const cost = level.tags
-            .find((tag) => tag.startsWith("cost:"))
-            ?.split(":")[1];
           const rank = level.tags
             .find((tag) => tag.startsWith("level:"))
             ?.split(":")[1];
 
-          if (!cost || !rank) {
-            throw new Error("missing cost or rank on " + level.toString());
+          if (!rank) {
+            throw new Error("missing rank on " + level.toString());
           }
 
-          return { cost: parseInt(cost), rank: parseInt(rank), ...level };
+          // Extract pc tag if it exists
+          const pcTag = level.tags.find((tag) => tag.startsWith("pc:"));
+          const pcValue = pcTag ? parseInt(pcTag.split(":")[1]) : null;
+
+          return { rank: parseInt(rank), pcValue, ...level };
         });
 
-      const requirementTag = skill.tags.find((/** @type {string} */ tag) =>
-        tag.startsWith("require:"),
-      );
-
-      let /** @type {string | null} */ requirementType;
-      let /** @type {UniversEntry | null} */ requirementEntry;
-
-      if (requirementTag) {
-        const requirementParts = requirementTag.split(":");
-        requirementType = requirementParts[1];
-
-        switch (requirementType) {
-          case "vdv":
-            requirementEntry =
-              vdvs.find((vdv) => vdv.key === requirementParts[2]) || null;
-            break;
-          case "race":
-            requirementEntry =
-              races.find((race) => race.key === requirementParts[2]) || null;
-            break;
-          default:
-            throw new Error("unknown requirement " + requirementParts);
-        }
-      }
-
-      return {
-        levels,
-        rankMax: levels.length,
-        requirementType: requirementType,
-        requirementEntry: requirementEntry,
-        availableToSorcerer:
-          skill.tags.findIndex((tag) => tag === "available-to-sorcerer") !== -1,
-        ...skill,
-      };
+      return { levels, ...characteristic };
     });
 
-const characteristics = univers
-  .filter((entry) => entry.tags.includes("characteristic"))
-  .map((characteristic) => {
-    const levels = univers
-      .filter((entry) =>
-        entry.tags.includes("characteristic:" + characteristic.key),
-      )
-      .map((level) => {
-        const rank = level.tags
-          .find((tag) => tag.startsWith("level:"))
-          ?.split(":")[1];
-
-        if (!rank) {
-          throw new Error("missing rank on " + level.toString());
-        }
-
-        // Extract pc tag if it exists
-        const pcTag = level.tags.find((tag) => tag.startsWith("pc:"));
-        const pcValue = pcTag ? parseInt(pcTag.split(":")[1]) : null;
-
-        return { rank: parseInt(rank), pcValue, ...level };
-      });
-
-    return { levels, ...characteristic };
-  });
-
-let characteristicBudget = parseInt(
-  univers
-    .find((entry) => entry.key === "characteristics-default-points")
-    ?.tags.find((tag) => tag.startsWith("n:"))
-    ?.split(":")[1] || "0",
-);
-
-let skillBudget = parseInt(
-  univers
-    .find((entry) => entry.key === "skills-default-points")
-    ?.tags.find((tag) => tag.startsWith("n:"))
-    ?.split(":")[1] || "0",
-);
-let inventoryBudget = dexteriteToInventoryBudget(
-  formResult.characteristics.dexterite,
-);
-
-const budgetElement = /** @type {HTMLElement} */ (
-  document.querySelector(".skills__budget")
-);
-const budgetCounterElement = /** @type {HTMLElement} */ (
-  document.querySelector(".skills__budget__counter")
-);
-budgetCounterElement.textContent = skillBudget + "";
-
-const inventoryBudgetElement = /** @type {HTMLElement} */ (
-  document.querySelector(".inventory__budget")
-);
-const inventoryBudgetCounterElement = /** @type {HTMLElement} */ (
-  document.querySelector(".inventory__budget__counter")
-);
-inventoryBudgetCounterElement.textContent = inventoryBudget + "";
-
-// Extract the default PC value from savoir characteristic level 0
-const savoirCharacteristic = characteristics.find(
-  (char) => char.key === "savoir",
-);
-const defaultSavoirLevel = savoirCharacteristic?.levels.find(
-  (level) => level.rank === 0,
-);
-const defaultSavoirPcValue = defaultSavoirLevel?.pcValue || 0; // Fallback to 1 if not found
-
-const characteristicsSelect = document.querySelector(".characteristics");
-const characteristicBudgetElement = /** @type {HTMLElement} */ (
-  document.querySelector(".characteristics__budget")
-);
-
-characteristicBudgetElement.textContent = `${characteristicBudget}`;
-
-characteristics.forEach((characteristic) => {
-  const characteristicF = characteristic;
-  let lvl = 0;
-  let previousLvl = 0;
-  let previousPcValue =
-    characteristic.key === "savoir" ? defaultSavoirPcValue : null; // Initialize with default PC value for savoir
-
-  const clone = characteristicTemplate.content.cloneNode(true);
-
-  const print = (/** @type {Element} */ el) => {
-    const characteristicDesc = characteristicF.levels[lvl + 2];
-    const labelElement = /** @type {HTMLElement} */ (
-      el.querySelector(".characteristic__label")
-    );
-    const descriptionElement = /** @type {HTMLElement} */ (
-      el.querySelector(".characteristic__description")
-    );
-
-    const inputElement = /** @type {HTMLElement} */ (
-      el.querySelector(".characteristic__input")
-    );
-
-    labelElement.textContent = characteristicF.label;
-    labelElement.setAttribute("for", characteristicF.key);
-    inputElement.setAttribute("name", characteristicF.key);
-    descriptionElement.textContent = characteristicDesc.description;
-  };
-
-  characteristicsSelect?.appendChild(clone);
-  const node = /** @type {Element} */ (characteristicsSelect?.lastElementChild);
-
-  const nodeInput = /** @type {HTMLInputElement} */ (
-    node.querySelector(".characteristic__input")
+  let characteristicBudget = parseInt(
+    univers
+      .find((entry) => entry.key === "characteristics-default-points")
+      ?.tags.find((tag) => tag.startsWith("n:"))
+      ?.split(":")[1] || "0",
   );
 
-  nodeInput.addEventListener("input", (e) => {
-    const targetValue = parseInt(e.target?.value);
-    if (isNaN(targetValue)) return;
+  let skillBudget = parseInt(
+    univers
+      .find((entry) => entry.key === "skills-default-points")
+      ?.tags.find((tag) => tag.startsWith("n:"))
+      ?.split(":")[1] || "0",
+  );
+  let inventoryBudget = dexteriteToInventoryBudget(
+    formResult.characteristics.dexterite,
+  );
 
-    // Calculate cost of this change (positive values cost points)
-    const pointChange = targetValue - previousLvl;
+  const budgetElement = /** @type {HTMLElement} */ (
+    document.querySelector(".skills__budget")
+  );
+  const budgetCounterElement = /** @type {HTMLElement} */ (
+    document.querySelector(".skills__budget__counter")
+  );
+  budgetCounterElement.textContent = skillBudget + "";
 
-    // Check if we have enough budget for this change
-    if (characteristicBudget - pointChange < 0) {
-      // Revert to previous value if not enough budget
-      e.target.value = previousLvl.toString();
-      return;
-    }
+  const inventoryBudgetElement = /** @type {HTMLElement} */ (
+    document.querySelector(".inventory__budget")
+  );
+  const inventoryBudgetCounterElement = /** @type {HTMLElement} */ (
+    document.querySelector(".inventory__budget__counter")
+  );
+  inventoryBudgetCounterElement.textContent = inventoryBudget + "";
 
-    // Apply constraints
-    let newLvl = targetValue;
-    if (newLvl > 4) {
-      newLvl = 4;
-      e.target.value = "4";
-    }
-    if (newLvl < -2) {
-      newLvl = -2;
-      e.target.value = "-2";
-    }
+  // Extract the default PC value from savoir characteristic level 0
+  const savoirCharacteristic = characteristics.find(
+    (char) => char.key === "savoir",
+  );
+  const defaultSavoirLevel = savoirCharacteristic?.levels.find(
+    (level) => level.rank === 0,
+  );
+  const defaultSavoirPcValue = defaultSavoirLevel?.pcValue || 0; // Fallback to 1 if not found
 
-    // Calculate actual point change after constraints
-    const actualPointChange = newLvl - previousLvl;
+  const characteristicsSelect = document.querySelector(".characteristics");
+  const characteristicBudgetElement = /** @type {HTMLElement} */ (
+    document.querySelector(".characteristics__budget")
+  );
 
-    // Update spent points
-    characteristicBudget -= actualPointChange;
+  characteristicBudgetElement.textContent = `${characteristicBudget}`;
 
-    // Update skillBudget if this is the savoir characteristic
-    if (characteristic.key === "savoir") {
-      // Find the new PC value
-      const levelIndex = newLvl + 2; // Adjust for -2 base index
-      const newPcValue = characteristicF.levels[levelIndex].pcValue;
+  characteristics.forEach((characteristic) => {
+    const characteristicF = characteristic;
+    let lvl = 0;
+    let previousLvl = 0;
+    let previousPcValue =
+      characteristic.key === "savoir" ? defaultSavoirPcValue : null; // Initialize with default PC value for savoir
 
-      if (newPcValue !== null && previousPcValue !== null) {
-        // Calculate the difference in PC points
-        const pcDifference = newPcValue - previousPcValue;
+    const clone = characteristicTemplate.content.cloneNode(true);
 
-        // Update the skill budget
-        skillBudget += pcDifference;
-        budgetCounterElement.textContent = skillBudget + "";
+    const print = (/** @type {Element} */ el) => {
+      const characteristicDesc = characteristicF.levels[lvl + 2];
+      const labelElement = /** @type {HTMLElement} */ (
+        el.querySelector(".characteristic__label")
+      );
+      const descriptionElement = /** @type {HTMLElement} */ (
+        el.querySelector(".characteristic__description")
+      );
 
-        // Update button states based on new budget
-        updateSkillButtonStates();
+      const inputElement = /** @type {HTMLElement} */ (
+        el.querySelector(".characteristic__input")
+      );
 
-        // Store the new PC value for next change
-        previousPcValue = newPcValue;
+      labelElement.textContent = characteristicF.label;
+      labelElement.setAttribute("for", characteristicF.key);
+      inputElement.setAttribute("name", characteristicF.key);
+      descriptionElement.textContent = characteristicDesc.description;
+    };
+
+    characteristicsSelect?.appendChild(clone);
+    const node = /** @type {Element} */ (
+      characteristicsSelect?.lastElementChild
+    );
+
+    const nodeInput = /** @type {HTMLInputElement} */ (
+      node.querySelector(".characteristic__input")
+    );
+
+    nodeInput.addEventListener("input", (e) => {
+      const targetValue = parseInt(e.target?.value);
+      if (isNaN(targetValue)) return;
+
+      // Calculate cost of this change (positive values cost points)
+      const pointChange = targetValue - previousLvl;
+
+      // Check if we have enough budget for this change
+      if (characteristicBudget - pointChange < 0) {
+        // Revert to previous value if not enough budget
+        e.target.value = previousLvl.toString();
+        return;
       }
-    }
 
-    if (characteristic.key === "dexterite") {
-      const inventoryBudgetChange =
-        dexteriteToInventoryBudget(newLvl) -
-        dexteriteToInventoryBudget(previousLvl);
+      // Apply constraints
+      let newLvl = targetValue;
+      if (newLvl > 4) {
+        newLvl = 4;
+        e.target.value = "4";
+      }
+      if (newLvl < -2) {
+        newLvl = -2;
+        e.target.value = "-2";
+      }
 
-      inventoryBudget += inventoryBudgetChange;
-      updateInventoryBudgetState(inventoryBudget);
-    }
+      // Calculate actual point change after constraints
+      const actualPointChange = newLvl - previousLvl;
 
-    // Update previousLvl for next change
-    previousLvl = newLvl;
-    lvl = newLvl;
+      // Update spent points
+      characteristicBudget -= actualPointChange;
 
-    formResult.characteristics[characteristic.key] = lvl;
+      // Update skillBudget if this is the savoir characteristic
+      if (characteristic.key === "savoir") {
+        // Find the new PC value
+        const levelIndex = newLvl + 2; // Adjust for -2 base index
+        const newPcValue = characteristicF.levels[levelIndex].pcValue;
 
-    // Update budget display
-    if (characteristicBudgetElement) {
-      characteristicBudgetElement.textContent = `${characteristicBudget}`;
-    }
+        if (newPcValue !== null && previousPcValue !== null) {
+          // Calculate the difference in PC points
+          const pcDifference = newPcValue - previousPcValue;
+
+          // Update the skill budget
+          skillBudget += pcDifference;
+          budgetCounterElement.textContent = skillBudget + "";
+
+          // Update button states based on new budget
+          updateSkillButtonStates();
+
+          // Store the new PC value for next change
+          previousPcValue = newPcValue;
+        }
+      }
+
+      if (characteristic.key === "dexterite") {
+        const inventoryBudgetChange =
+          dexteriteToInventoryBudget(newLvl) -
+          dexteriteToInventoryBudget(previousLvl);
+
+        inventoryBudget += inventoryBudgetChange;
+        updateInventoryBudgetState(inventoryBudget);
+      }
+
+      // Update previousLvl for next change
+      previousLvl = newLvl;
+      lvl = newLvl;
+
+      formResult.characteristics[characteristic.key] = lvl;
+
+      // Update budget display
+      if (characteristicBudgetElement) {
+        characteristicBudgetElement.textContent = `${characteristicBudget}`;
+      }
+
+      print(node);
+    });
 
     print(node);
   });
 
-  print(node);
-});
+  /**
+   * @typedef {Object} Skill
+   * @property {string} key
+   * @property {string} label
+   * @property {string} description
+   * @property {number} rankMax
+   * @property {string[]} tags
+   * @property {boolean} availableToSorcerer
+   * @property {string?} requirementType
+   * @property {UniversEntry?} requirementEntry
+   * @property {{cost: number, rank: number, label: string, description: string}[]} levels
+   */
 
-/**
- * @typedef {Object} Skill
- * @property {string} key
- * @property {string} label
- * @property {string} description
- * @property {number} rankMax
- * @property {string[]} tags
- * @property {boolean} availableToSorcerer
- * @property {string?} requirementType
- * @property {UniversEntry?} requirementEntry
- * @property {{cost: number, rank: number, label: string, description: string}[]} levels
- */
-
-/**
- *
- * @param {Skill} skill
- * @param {number} rank
- * @return {{description: string, title: string, rankTitle: string, rankDescription: string, nextRankDescription: string | null}}}
- */
-function skillBuild(skill, rank) {
-  return {
-    title:
-      rank === 0
-        ? skill.label
-        : skill.levels[rank - 1].label +
-          " - Coût : " +
-          skill.levels
-            .slice(0, rank)
-            .reduce((cost, level) => cost + (level.cost | 0), 0),
-    description:
-      rank === 0 ? skill.description : skill.levels[rank - 1].description,
-    rankDescription: "Rang " + rank + "/" + skill.rankMax,
-    nextRankDescription:
-      rank === skill.rankMax
-        ? null
-        : "Rang suivant - Coût " +
-          skill.levels[rank].cost +
-          " : " +
-          skill.levels[rank].description,
-    rankTitle: ["", "Novice", "Expert", "Maître"][rank],
-  };
-}
-
-const skillResets = {};
-
-skills.forEach((skill) => {
-  let lvl = 0;
-
-  const clone = /** @type {HTMLElement} */ (
-    skillTemplate.content.cloneNode(true)
-  );
-
-  // Store skill data (including tags) on the element for filtering
-  const skillElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".skill")
-  );
-  if (skillElement && skill.requirementEntry && skill.requirementType) {
-    skillElement.dataset.requireType = skill.requirementType;
-    skillElement.dataset.requireKey = skill.requirementEntry.key;
+  /**
+   *
+   * @param {Skill} skill
+   * @param {number} rank
+   * @return {{description: string, title: string, rankTitle: string, rankDescription: string, nextRankDescription: string | null}}}
+   */
+  function skillBuild(skill, rank) {
+    return {
+      title:
+        rank === 0
+          ? skill.label
+          : skill.levels[rank - 1].label +
+            " - Coût : " +
+            skill.levels
+              .slice(0, rank)
+              .reduce((cost, level) => cost + (level.cost | 0), 0),
+      description:
+        rank === 0 ? skill.description : skill.levels[rank - 1].description,
+      rankDescription: "Rang " + rank + "/" + skill.rankMax,
+      nextRankDescription:
+        rank === skill.rankMax
+          ? null
+          : "Rang suivant - Coût " +
+            skill.levels[rank].cost +
+            " : " +
+            skill.levels[rank].description,
+      rankTitle: ["", "Novice", "Expert", "Maître"][rank],
+    };
   }
 
-  const print = (/** @type {Element} */ el) => {
-    const skillDesc = skillBuild(skill, lvl);
+  const skillResets = {};
+
+  skills.forEach((skill) => {
+    let lvl = 0;
+
+    const clone = /** @type {HTMLElement} */ (
+      skillTemplate.content.cloneNode(true)
+    );
+
+    // Store skill data (including tags) on the element for filtering
+    const skillElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".skill")
+    );
+    if (skillElement && skill.requirementEntry && skill.requirementType) {
+      skillElement.dataset.requireType = skill.requirementType;
+      skillElement.dataset.requireKey = skill.requirementEntry.key;
+    }
+
+    const print = (/** @type {Element} */ el) => {
+      const skillDesc = skillBuild(skill, lvl);
+
+      const titleElement = /** @type {HTMLElement} */ (
+        el.querySelector(".skill__title")
+      );
+      const descriptionElement = /** @type {HTMLElement} */ (
+        el.querySelector(".skill__content__main__description")
+      );
+      const levelSpan1Element = /** @type {HTMLElement} */ (
+        el.querySelector(".skill__content__level__span1")
+      );
+      const levelSpan2Element = /** @type {HTMLElement} */ (
+        el.querySelector(".skill__content__level__span2")
+      );
+      const nextLevelElement = /** @type {HTMLElement} */ (
+        el.querySelector(".skill__content__main__next-level")
+      );
+
+      titleElement.textContent = skillDesc.title;
+      descriptionElement.textContent = skillDesc.description;
+      levelSpan1Element.textContent = skillDesc.rankDescription;
+      levelSpan2Element.textContent = skillDesc.rankTitle;
+      nextLevelElement.textContent = skillDesc.nextRankDescription;
+
+      if (lvl === skill.rankMax) {
+        el.querySelector(".skill__content__level__up")?.classList.add(
+          "skill__content__level__up--max",
+        );
+      } else {
+        el.querySelector(".skill__content__level__up")?.classList.remove(
+          "skill__content__level__up--max",
+        );
+      }
+
+      if (lvl === 0) {
+        el.querySelector(".skill__content__level__down")?.classList.add(
+          "skill__content__level__down--min",
+        );
+      } else {
+        el.querySelector(".skill__content__level__down")?.classList.remove(
+          "skill__content__level__down--min",
+        );
+      }
+    };
+
+    const badgesElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".skill__badges")
+    );
+
+    if (skill.requirementEntry && skill.requirementType) {
+      const badgeElement = document.createElement("span");
+      badgeElement.classList.add("skill__badge");
+      badgeElement.textContent = skill.requirementEntry.label;
+      badgeElement.setAttribute("data-require-type", skill.requirementType);
+      badgeElement.setAttribute("data-require-key", skill.requirementEntry.key);
+
+      badgesElement.appendChild(badgeElement);
+    }
+
+    if (skill.availableToSorcerer) {
+      const badgeElement = document.createElement("span");
+      badgeElement.classList.add("skill__badge");
+      badgeElement.textContent = "Utilisable avec “Sorts”";
+      badgeElement.dataset.availableToSorcerer = "";
+
+      badgesElement.appendChild(badgeElement);
+    }
+
+    skillSelect?.appendChild(clone);
+    const node = /** @type {Element} */ (skillSelect?.lastElementChild);
+    const nodeRankUpElement = /** @type {HTMLElement} */ (
+      node.querySelector(".skill__content__level__up")
+    );
+    const nodeRankDownElement = /** @type {HTMLElement} */ (
+      node.querySelector(".skill__content__level__down")
+    );
+
+    nodeRankUpElement.addEventListener("click", (e) => {
+      if (skillBudget <= 0) {
+        return;
+      }
+      if (lvl < skill.rankMax) {
+        lvl++;
+        onSkillPick(skill.key, lvl, -skill.levels[lvl - 1].cost);
+        print(node);
+      }
+    });
+
+    nodeRankDownElement.addEventListener("click", (e) => {
+      if (lvl > 0) {
+        onSkillPick(skill.key, lvl - 1, skill.levels[lvl - 1].cost);
+        lvl--;
+        print(node);
+      }
+    });
+
+    skillResets[skill.key] = () => {
+      let cost = 0;
+      for (let i = lvl; i > 0; i--) {
+        cost += skill.levels[i - 1].cost;
+      }
+
+      onSkillPick(skill.key, 0, cost);
+      lvl = 0;
+      print(node);
+    };
+
+    print(node);
+  });
+
+  /**
+   * Update the state of skill up/down buttons based on current budget
+   */
+  function updateSkillButtonStates() {
+    if (skillBudget <= 0) {
+      document.querySelectorAll(".skill__content__level__up").forEach((el) => {
+        el.classList.add("skill__content__level__up--nobudget");
+      });
+    } else {
+      document.querySelectorAll(".skill__content__level__up").forEach((el) => {
+        el.classList.remove("skill__content__level__up--nobudget");
+      });
+    }
+
+    // Update budget text color based on value
+    if (skillBudget < 0) {
+      budgetElement.classList.add("skills__budget--negative");
+    } else {
+      budgetElement.classList.remove("skills__budget--negative");
+    }
+  }
+
+  // Replace the budget check in onSkillPick with the new function
+  function onSkillPick(skillKey, rank, cost) {
+    skillBudget += cost;
+
+    if (rank > 0) {
+      formResult.skills[skillKey] = rank;
+    } else {
+      delete formResult.skills[skillKey];
+    }
+    console.log(formResult);
+    budgetCounterElement.textContent = skillBudget + "";
+    updateSkillButtonStates();
+  }
+
+  // Function to update the visibility of skills based on the selected VDV
+  function updateSkillList() {
+    // Check again the picked skills matches with the race and vdv.
+    Object.keys(formResult.skills).forEach((key) => {
+      const skill = skills.find((skill) => skill.key === key);
+      if (
+        skill?.requirementType &&
+        formResult[skill.requirementType] !== skill.requirementEntry?.key
+      ) {
+        skillResets[key]();
+      }
+    });
+
+    const skillElements = /** @type {NodeListOf<HTMLElement>} */ (
+      skillSelect?.querySelectorAll(".skill")
+    );
+    skillElements?.forEach((el) => {
+      if (!el.dataset.requireType || !el.dataset.requireKey) {
+        return;
+      }
+
+      if (
+        formResult[el.dataset.requireType] &&
+        formResult[el.dataset.requireType] === el.dataset.requireKey
+      ) {
+        el.style.display = ""; // Show skill if VDV matches requirement
+      } else {
+        el.style.display = "none"; // Hide skill if VDV doesn't match or no VDV selected
+      }
+    });
+  }
+
+  inventory.forEach((item) => {
+    let numberOfItems = 0;
+
+    const clone = /** @type {HTMLElement} */ (
+      inventoryItemTemplate.content.cloneNode(true)
+    );
 
     const titleElement = /** @type {HTMLElement} */ (
-      el.querySelector(".skill__title")
+      clone.querySelector(".inventory__select__option__content__title")
     );
     const descriptionElement = /** @type {HTMLElement} */ (
-      el.querySelector(".skill__content__main__description")
+      clone.querySelector(".inventory__select__option__content__description")
     );
-    const levelSpan1Element = /** @type {HTMLElement} */ (
-      el.querySelector(".skill__content__level__span1")
-    );
-    const levelSpan2Element = /** @type {HTMLElement} */ (
-      el.querySelector(".skill__content__level__span2")
-    );
-    const nextLevelElement = /** @type {HTMLElement} */ (
-      el.querySelector(".skill__content__main__next-level")
+    const costElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".inventory__select__option__picker__cost")
     );
 
-    titleElement.textContent = skillDesc.title;
-    descriptionElement.textContent = skillDesc.description;
-    levelSpan1Element.textContent = skillDesc.rankDescription;
-    levelSpan2Element.textContent = skillDesc.rankTitle;
-    nextLevelElement.textContent = skillDesc.nextRankDescription;
+    const numberElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".inventory__select__option__picker__control__number")
+    );
 
-    if (lvl === skill.rankMax) {
-      el.querySelector(".skill__content__level__up")?.classList.add(
-        "skill__content__level__up--max",
-      );
-    } else {
-      el.querySelector(".skill__content__level__up")?.classList.remove(
-        "skill__content__level__up--max",
-      );
-    }
+    titleElement.textContent = item.label;
+    descriptionElement.textContent = item.description;
 
-    if (lvl === 0) {
-      el.querySelector(".skill__content__level__down")?.classList.add(
-        "skill__content__level__down--min",
-      );
-    } else {
-      el.querySelector(".skill__content__level__down")?.classList.remove(
-        "skill__content__level__down--min",
-      );
-    }
-  };
+    const cost = parseInt(
+      item.tags.find((tag) => tag.startsWith("cost:"))?.split(":")[1] || "0",
+    );
+    costElement.textContent = cost + (cost === 1 ? " gemme" : " gemmes");
 
-  const badgesElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".skill__badges")
-  );
+    inventorySelect?.appendChild(clone);
+    const node = /** @type {Element} */ (inventorySelect?.lastElementChild);
+    const plusElement = /** @type {HTMLElement} */ (
+      node.querySelector(".inventory__select__option__picker__control__plus")
+    );
+    const minusElement = /** @type {HTMLElement} */ (
+      node.querySelector(".inventory__select__option__picker__control__minus")
+    );
 
-  if (skill.requirementEntry && skill.requirementType) {
-    const badgeElement = document.createElement("span");
-    badgeElement.classList.add("skill__badge");
-    badgeElement.textContent = skill.requirementEntry.label;
-    badgeElement.setAttribute("data-require-type", skill.requirementType);
-    badgeElement.setAttribute("data-require-key", skill.requirementEntry.key);
+    plusElement?.addEventListener("click", (e) => {
+      if (inventoryBudget <= 0) {
+        return;
+      }
+      numberOfItems++;
+      numberElement.textContent = numberOfItems + "";
 
-    badgesElement.appendChild(badgeElement);
-  }
+      formResult.inventory[item.key] = numberOfItems;
 
-  if (skill.availableToSorcerer) {
-    const badgeElement = document.createElement("span");
-    badgeElement.classList.add("skill__badge");
-    badgeElement.textContent = "Utilisable avec “Sorts”";
-    badgeElement.dataset.availableToSorcerer = "";
-
-    badgesElement.appendChild(badgeElement);
-  }
-
-  skillSelect?.appendChild(clone);
-  const node = /** @type {Element} */ (skillSelect?.lastElementChild);
-  const nodeRankUpElement = /** @type {HTMLElement} */ (
-    node.querySelector(".skill__content__level__up")
-  );
-  const nodeRankDownElement = /** @type {HTMLElement} */ (
-    node.querySelector(".skill__content__level__down")
-  );
-
-  nodeRankUpElement.addEventListener("click", (e) => {
-    if (skillBudget <= 0) {
-      return;
-    }
-    if (lvl < skill.rankMax) {
-      lvl++;
-      onSkillPick(skill.key, lvl, -skill.levels[lvl - 1].cost);
-      print(node);
-    }
-  });
-
-  nodeRankDownElement.addEventListener("click", (e) => {
-    if (lvl > 0) {
-      onSkillPick(skill.key, lvl - 1, skill.levels[lvl - 1].cost);
-      lvl--;
-      print(node);
-    }
-  });
-
-  skillResets[skill.key] = () => {
-    let cost = 0;
-    for (let i = lvl; i > 0; i--) {
-      cost += skill.levels[i - 1].cost;
-    }
-
-    onSkillPick(skill.key, 0, cost);
-    lvl = 0;
-    print(node);
-  };
-
-  print(node);
-});
-
-/**
- * Update the state of skill up/down buttons based on current budget
- */
-function updateSkillButtonStates() {
-  if (skillBudget <= 0) {
-    document.querySelectorAll(".skill__content__level__up").forEach((el) => {
-      el.classList.add("skill__content__level__up--nobudget");
+      inventoryBudget -= cost;
+      updateInventoryBudgetState(inventoryBudget);
+      updateItemPickerMinusControl(minusElement, numberOfItems);
     });
-  } else {
-    document.querySelectorAll(".skill__content__level__up").forEach((el) => {
-      el.classList.remove("skill__content__level__up--nobudget");
-    });
-  }
 
-  // Update budget text color based on value
-  if (skillBudget < 0) {
-    budgetElement.classList.add("skills__budget--negative");
-  } else {
-    budgetElement.classList.remove("skills__budget--negative");
-  }
-}
-
-// Replace the budget check in onSkillPick with the new function
-function onSkillPick(skillKey, rank, cost) {
-  skillBudget += cost;
-
-  if (rank > 0) {
-    formResult.skills[skillKey] = rank;
-  } else {
-    delete formResult.skills[skillKey];
-  }
-  console.log(formResult);
-  budgetCounterElement.textContent = skillBudget + "";
-  updateSkillButtonStates();
-}
-
-// Function to update the visibility of skills based on the selected VDV
-function updateSkillList() {
-  // Check again the picked skills matches with the race and vdv.
-  Object.keys(formResult.skills).forEach((key) => {
-    const skill = skills.find((skill) => skill.key === key);
-    if (
-      skill?.requirementType &&
-      formResult[skill.requirementType] !== skill.requirementEntry?.key
-    ) {
-      skillResets[key]();
-    }
-  });
-
-  const skillElements = /** @type {NodeListOf<HTMLElement>} */ (
-    skillSelect?.querySelectorAll(".skill")
-  );
-  skillElements?.forEach((el) => {
-    if (!el.dataset.requireType || !el.dataset.requireKey) {
-      return;
-    }
-
-    if (
-      formResult[el.dataset.requireType] &&
-      formResult[el.dataset.requireType] === el.dataset.requireKey
-    ) {
-      el.style.display = ""; // Show skill if VDV matches requirement
-    } else {
-      el.style.display = "none"; // Hide skill if VDV doesn't match or no VDV selected
-    }
-  });
-}
-
-inventory.forEach((item) => {
-  let numberOfItems = 0;
-
-  const clone = /** @type {HTMLElement} */ (
-    inventoryItemTemplate.content.cloneNode(true)
-  );
-
-  const titleElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".inventory__select__option__content__title")
-  );
-  const descriptionElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".inventory__select__option__content__description")
-  );
-  const costElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".inventory__select__option__picker__cost")
-  );
-
-  const numberElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".inventory__select__option__picker__control__number")
-  );
-
-  titleElement.textContent = item.label;
-  descriptionElement.textContent = item.description;
-
-  const cost = parseInt(
-    item.tags.find((tag) => tag.startsWith("cost:"))?.split(":")[1] || "0",
-  );
-  costElement.textContent = cost + (cost === 1 ? " gemme" : " gemmes");
-
-  inventorySelect?.appendChild(clone);
-  const node = /** @type {Element} */ (inventorySelect?.lastElementChild);
-  const plusElement = /** @type {HTMLElement} */ (
-    node.querySelector(".inventory__select__option__picker__control__plus")
-  );
-  const minusElement = /** @type {HTMLElement} */ (
-    node.querySelector(".inventory__select__option__picker__control__minus")
-  );
-
-  plusElement?.addEventListener("click", (e) => {
-    if (inventoryBudget <= 0) {
-      return;
-    }
-    numberOfItems++;
-    numberElement.textContent = numberOfItems + "";
-
-    formResult.inventory[item.key] = numberOfItems;
-
-    inventoryBudget -= cost;
-    updateInventoryBudgetState(inventoryBudget);
-    updateItemPickerMinusControl(minusElement, numberOfItems);
-  });
-
-  minusElement?.addEventListener("click", (e) => {
-    if (numberOfItems === 0) {
-      return;
-    }
-
-    numberOfItems--;
-    numberElement.textContent = numberOfItems + "";
-
-    formResult.inventory[item.key] = numberOfItems;
-    if (numberOfItems === 0) {
-      delete formResult.inventory[item.key];
-    }
-
-    inventoryBudget += cost;
-    updateInventoryBudgetState(inventoryBudget);
-    updateItemPickerMinusControl(minusElement, numberOfItems);
-  });
-});
-
-/**
- * Updates the UI elements related to the inventory budget.
- * - Sets the text content of the inventory budget counter.
- * - Adds/removes a CSS class to indicate a negative budget.
- * - Enables/disables the 'plus' buttons for inventory items based on the budget.
- * @param {number} budget - The current inventory budget value.
- * @returns {void}
- */
-function updateInventoryBudgetState(budget) {
-  inventoryBudgetCounterElement.textContent = budget + "";
-
-  if (budget < 0) {
-    document
-      .querySelector(".inventory__budget")
-      ?.classList.add("inventory__budget--negative");
-  } else {
-    document
-      .querySelector(".inventory__budget")
-      ?.classList.remove("inventory__budget--negative");
-  }
-
-  if (budget <= 0) {
-    document
-      .querySelectorAll(".inventory__select__option__picker__control__plus")
-      .forEach((el) => {
-        el.classList.add(
-          "inventory__select__option__picker__control__plus--disabled",
-        );
-      });
-  } else {
-    document
-      .querySelectorAll(".inventory__select__option__picker__control__plus")
-      .forEach((el) => {
-        el.classList.remove(
-          "inventory__select__option__picker__control__plus--disabled",
-        );
-      });
-  }
-}
-
-/**
- * Updates the state (enabled/disabled) of the 'minus' control button for an inventory item picker.
- * The button is disabled if the number of items is zero, and enabled otherwise.
- * @param {HTMLElement} el - The 'minus' control button element.
- * @param {number} numberOfItems - The current number of items selected for this inventory item.
- * @returns {void}
- */
-function updateItemPickerMinusControl(el, numberOfItems) {
-  if (numberOfItems > 0) {
-    el.classList.remove(
-      "inventory__select__option__picker__control__minus--disabled",
-    );
-  } else {
-    el.classList.add(
-      "inventory__select__option__picker__control__minus--disabled",
-    );
-  }
-}
-
-mondes.forEach((monde) => {
-  const clone = /** @type {HTMLElement} */ (
-    mondeTemplate.content.cloneNode(true)
-  );
-
-  const titleElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".group__select__option__title")
-  );
-  const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
-  const descriptionElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".group__select__option__description")
-  );
-
-  titleElement.textContent = monde.label;
-  descriptionElement.textContent = monde.description;
-  liElement.setAttribute("data-key", monde.key);
-
-  mondeSelect?.appendChild(clone);
-});
-
-// Store all races for filtering
-const allRaces = [...races];
-// Store all vdvs for filtering
-const allVdvs = [...vdvs];
-
-allRaces.forEach((race) => {
-  const clone = /** @type {HTMLElement} */ (
-    raceTemplate.content.cloneNode(true)
-  );
-
-  const titleElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".race__select__option__title")
-  );
-  const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
-  const imgElement = /** @type {HTMLElement} */ (clone.querySelector("img"));
-  const contentElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".race__select__option__content")
-  );
-  const descriptionElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".race__select__option__description")
-  );
-  const mondeBadgeElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".monde-badge")
-  );
-
-  if (race.img) {
-    contentElement.setAttribute(
-      "style",
-      Math.random() > 0.5
-        ? "flex-direction: row-reverse"
-        : "flex-direction: row",
-    );
-    imgElement.setAttribute("src", race.img);
-    imgElement.setAttribute("style", "margin-top:16px; margin-bottom:16px");
-    imgElement.setAttribute("width", "300px");
-    imgElement.setAttribute("height", "300px");
-    descriptionElement.setAttribute("style", "max-width: 400px");
-  }
-
-  titleElement.textContent = race.label;
-  descriptionElement.textContent = race.description;
-  liElement.setAttribute("data-key", race.key);
-  mondeBadgeElement.textContent =
-    mondes.find(
-      (monde) =>
-        monde.key ===
-        race.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
-    )?.label || "";
-
-  // Add a data attribute for the monde key (useful for styling)
-  liElement.setAttribute(
-    "data-monde",
-    mondes.find(
-      (monde) =>
-        monde.key ===
-        race.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
-    )?.key || "",
-  );
-
-  raceSelect?.appendChild(clone);
-});
-
-allVdvs.forEach((vdv) => {
-  const clone = /** @type {HTMLElement} */ (
-    vdvTemplate.content.cloneNode(true)
-  );
-
-  const titleElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".vdv__select__option__title")
-  );
-  const imgElement = /** @type {HTMLElement} */ (clone.querySelector("img"));
-  const contentElement =  /** @type {HTMLElement} */(clone.querySelector(".vdv__select__option__content"));
-
-  const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
-  const descriptionElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".vdv__select__option__description")
-  );
-  const mondeBadgeElement = /** @type {HTMLElement} */ (
-    clone.querySelector(".monde-badge")
-  );
-
-  if (vdv.img) {
-    contentElement.setAttribute(
-      "style",
-      Math.random() > 0.5
-        ? "flex-direction: row-reverse"
-        : "flex-direction: row",
-    );
-    imgElement.setAttribute("src", vdv.img);
-    imgElement.setAttribute("style", "margin-top:16px; margin-bottom:16px");
-    imgElement.setAttribute("width", "300px");
-    imgElement.setAttribute("height", "300px");
-    descriptionElement.setAttribute("style", "max-width: 400px");
-  }
-
-  titleElement.textContent = vdv.label;
-  descriptionElement.textContent = vdv.description;
-  liElement.setAttribute("data-key", vdv.key);
-  mondeBadgeElement.textContent =
-    mondes.find(
-      (monde) =>
-        monde.key ===
-        vdv.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
-    )?.label || "";
-
-  // Add a data attribute for the monde key (useful for styling)
-  liElement.setAttribute(
-    "data-monde",
-    mondes.find(
-      (monde) =>
-        monde.key ===
-        vdv.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
-    )?.key || "",
-  );
-
-  vdvSelect?.appendChild(clone);
-});
-
-/**
- * Filter races based on the selected monde
- * @param {string?} mondeKey - The key of the selected monde
- */
-function filterRacesAndVdvsByMonde(mondeKey) {
-  const elements = /** @type {NodeListOf<HTMLElement>} */ (
-    document.querySelectorAll("li[data-monde]")
-  );
-
-  elements?.forEach((el) => {
-    if (el.dataset.monde === mondeKey) {
-      el.style.display = ""; // Show skill if VDV matches requirement
-    } else {
-      el.style.display = "none"; // Hide skill if VDV doesn't match or no VDV selected
-    }
-  });
-}
-
-/**
- * Attach click listeners to a list of selectable elements
- * @param {NodeListOf<Element> | Element[]} elements - List elements to attach listeners to
- * @param {string} formKey - Key to use in formResult object
- */
-function attachSelectListeners(elements, formKey) {
-  const sectionElement = document.querySelector("." + formKey);
-  const selectedSectionElement =
-    sectionElement?.querySelector(".selected-section");
-
-  elements.forEach((li, i) => {
-    li.addEventListener("click", function (e) {
-      const currentTarget = /** @type {Element} */ (e.currentTarget);
-      let classes = currentTarget.getAttribute("class")?.split(" ") || [];
-
-      const index = classes.indexOf("selected");
-      if (index !== -1) {
-        classes.splice(index, 1);
-        delete formResult[formKey];
-
-        updateSkillList();
-        console.log(formResult);
-
-        // If the section as a selected-section element, empty it.
-        if (selectedSectionElement) {
-          selectedSectionElement.textContent = "";
-        }
-      } else {
-        classes.push("selected");
-        formResult[formKey] = li.getAttribute("data-key");
-
-        updateSkillList();
-        console.log(formResult);
-
-        // If the section as a selected-section element, display the user choice there.
-        if (selectedSectionElement) {
-          const optionName = li.querySelector(
-            "." + formKey + "__select__option__title",
-          )?.textContent;
-          selectedSectionElement.textContent = optionName || "";
-
-          sectionElement?.removeAttribute("open");
-        }
-
-        // Deselect all other elements in this group
-        elements.forEach((li2, j) => {
-          if (i === j) return;
-          let classes = li2.getAttribute("class")?.split(" ") || [];
-          const index = classes.indexOf("selected");
-          if (index !== -1) classes.splice(index, 1);
-
-          li2.setAttribute("class", classes.join(" "));
-        });
+    minusElement?.addEventListener("click", (e) => {
+      if (numberOfItems === 0) {
+        return;
       }
 
-      currentTarget.setAttribute("class", classes.join(" "));
+      numberOfItems--;
+      numberElement.textContent = numberOfItems + "";
+
+      formResult.inventory[item.key] = numberOfItems;
+      if (numberOfItems === 0) {
+        delete formResult.inventory[item.key];
+      }
+
+      inventoryBudget += cost;
+      updateInventoryBudgetState(inventoryBudget);
+      updateItemPickerMinusControl(minusElement, numberOfItems);
     });
+  });
+
+  /**
+   * Updates the UI elements related to the inventory budget.
+   * - Sets the text content of the inventory budget counter.
+   * - Adds/removes a CSS class to indicate a negative budget.
+   * - Enables/disables the 'plus' buttons for inventory items based on the budget.
+   * @param {number} budget - The current inventory budget value.
+   * @returns {void}
+   */
+  function updateInventoryBudgetState(budget) {
+    inventoryBudgetCounterElement.textContent = budget + "";
+
+    if (budget < 0) {
+      document
+        .querySelector(".inventory__budget")
+        ?.classList.add("inventory__budget--negative");
+    } else {
+      document
+        .querySelector(".inventory__budget")
+        ?.classList.remove("inventory__budget--negative");
+    }
+
+    if (budget <= 0) {
+      document
+        .querySelectorAll(".inventory__select__option__picker__control__plus")
+        .forEach((el) => {
+          el.classList.add(
+            "inventory__select__option__picker__control__plus--disabled",
+          );
+        });
+    } else {
+      document
+        .querySelectorAll(".inventory__select__option__picker__control__plus")
+        .forEach((el) => {
+          el.classList.remove(
+            "inventory__select__option__picker__control__plus--disabled",
+          );
+        });
+    }
+  }
+
+  /**
+   * Updates the state (enabled/disabled) of the 'minus' control button for an inventory item picker.
+   * The button is disabled if the number of items is zero, and enabled otherwise.
+   * @param {HTMLElement} el - The 'minus' control button element.
+   * @param {number} numberOfItems - The current number of items selected for this inventory item.
+   * @returns {void}
+   */
+  function updateItemPickerMinusControl(el, numberOfItems) {
+    if (numberOfItems > 0) {
+      el.classList.remove(
+        "inventory__select__option__picker__control__minus--disabled",
+      );
+    } else {
+      el.classList.add(
+        "inventory__select__option__picker__control__minus--disabled",
+      );
+    }
+  }
+
+  mondes.forEach((monde) => {
+    const clone = /** @type {HTMLElement} */ (
+      mondeTemplate.content.cloneNode(true)
+    );
+
+    const titleElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".group__select__option__title")
+    );
+    const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
+    const descriptionElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".group__select__option__description")
+    );
+
+    titleElement.textContent = monde.label;
+    descriptionElement.textContent = monde.description;
+    liElement.setAttribute("data-key", monde.key);
+
+    mondeSelect?.appendChild(clone);
+  });
+
+  // Store all races for filtering
+  const allRaces = [...races];
+  // Store all vdvs for filtering
+  const allVdvs = [...vdvs];
+
+  allRaces.forEach((race) => {
+    const clone = /** @type {HTMLElement} */ (
+      raceTemplate.content.cloneNode(true)
+    );
+
+    const titleElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".race__select__option__title")
+    );
+    const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
+    const imgElement = /** @type {HTMLElement} */ (clone.querySelector("img"));
+    const contentElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".race__select__option__content")
+    );
+    const descriptionElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".race__select__option__description")
+    );
+    const mondeBadgeElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".monde-badge")
+    );
+
+    if (race.img) {
+      contentElement.setAttribute(
+        "style",
+        Math.random() > 0.5
+          ? "flex-direction: row-reverse"
+          : "flex-direction: row",
+      );
+      imgElement.setAttribute("src", race.img);
+      imgElement.setAttribute("style", "margin-top:16px; margin-bottom:16px");
+      imgElement.setAttribute("width", "300px");
+      imgElement.setAttribute("height", "300px");
+      descriptionElement.setAttribute("style", "max-width: 400px");
+    }
+
+    titleElement.textContent = race.label;
+    descriptionElement.textContent = race.description;
+    liElement.setAttribute("data-key", race.key);
+    mondeBadgeElement.textContent =
+      mondes.find(
+        (monde) =>
+          monde.key ===
+          race.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
+      )?.label || "";
+
+    // Add a data attribute for the monde key (useful for styling)
+    liElement.setAttribute(
+      "data-monde",
+      mondes.find(
+        (monde) =>
+          monde.key ===
+          race.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
+      )?.key || "",
+    );
+
+    raceSelect?.appendChild(clone);
+  });
+
+  allVdvs.forEach((vdv) => {
+    const clone = /** @type {HTMLElement} */ (
+      vdvTemplate.content.cloneNode(true)
+    );
+
+    const titleElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".vdv__select__option__title")
+    );
+    const imgElement = /** @type {HTMLElement} */ (clone.querySelector("img"));
+    const contentElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".vdv__select__option__content")
+    );
+
+    const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
+    const descriptionElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".vdv__select__option__description")
+    );
+    const mondeBadgeElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".monde-badge")
+    );
+
+    if (vdv.img) {
+      contentElement.setAttribute(
+        "style",
+        Math.random() > 0.5
+          ? "flex-direction: row-reverse"
+          : "flex-direction: row",
+      );
+      imgElement.setAttribute("src", vdv.img);
+      imgElement.setAttribute("style", "margin-top:16px; margin-bottom:16px");
+      imgElement.setAttribute("width", "300px");
+      imgElement.setAttribute("height", "300px");
+      descriptionElement.setAttribute("style", "max-width: 400px");
+    }
+
+    titleElement.textContent = vdv.label;
+    descriptionElement.textContent = vdv.description;
+    liElement.setAttribute("data-key", vdv.key);
+    mondeBadgeElement.textContent =
+      mondes.find(
+        (monde) =>
+          monde.key ===
+          vdv.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
+      )?.label || "";
+
+    // Add a data attribute for the monde key (useful for styling)
+    liElement.setAttribute(
+      "data-monde",
+      mondes.find(
+        (monde) =>
+          monde.key ===
+          vdv.tags.find((tag) => tag.startsWith("monde:"))?.split(":")[1],
+      )?.key || "",
+    );
+
+    vdvSelect?.appendChild(clone);
+  });
+
+  /**
+   * Filter races based on the selected monde
+   * @param {string?} mondeKey - The key of the selected monde
+   */
+  function filterRacesAndVdvsByMonde(mondeKey) {
+    const elements = /** @type {NodeListOf<HTMLElement>} */ (
+      document.querySelectorAll("li[data-monde]")
+    );
+
+    elements?.forEach((el) => {
+      if (el.dataset.monde === mondeKey) {
+        el.style.display = ""; // Show skill if VDV matches requirement
+      } else {
+        el.style.display = "none"; // Hide skill if VDV doesn't match or no VDV selected
+      }
+    });
+  }
+
+  /**
+   * Attach click listeners to a list of selectable elements
+   * @param {NodeListOf<Element> | Element[]} elements - List elements to attach listeners to
+   * @param {string} formKey - Key to use in formResult object
+   */
+  function attachSelectListeners(elements, formKey) {
+    const sectionElement = document.querySelector("." + formKey);
+    const selectedSectionElement =
+      sectionElement?.querySelector(".selected-section");
+
+    elements.forEach((li, i) => {
+      li.addEventListener("click", function (e) {
+        const currentTarget = /** @type {Element} */ (e.currentTarget);
+        let classes = currentTarget.getAttribute("class")?.split(" ") || [];
+
+        const index = classes.indexOf("selected");
+        if (index !== -1) {
+          classes.splice(index, 1);
+          delete formResult[formKey];
+
+          updateSkillList();
+          console.log(formResult);
+
+          // If the section as a selected-section element, empty it.
+          if (selectedSectionElement) {
+            selectedSectionElement.textContent = "";
+          }
+        } else {
+          classes.push("selected");
+          formResult[formKey] = li.getAttribute("data-key");
+
+          updateSkillList();
+          console.log(formResult);
+
+          // If the section as a selected-section element, display the user choice there.
+          if (selectedSectionElement) {
+            const optionName = li.querySelector(
+              "." + formKey + "__select__option__title",
+            )?.textContent;
+            selectedSectionElement.textContent = optionName || "";
+
+            sectionElement?.removeAttribute("open");
+          }
+
+          // Deselect all other elements in this group
+          elements.forEach((li2, j) => {
+            if (i === j) return;
+            let classes = li2.getAttribute("class")?.split(" ") || [];
+            const index = classes.indexOf("selected");
+            if (index !== -1) classes.splice(index, 1);
+
+            li2.setAttribute("class", classes.join(" "));
+          });
+        }
+
+        currentTarget.setAttribute("class", classes.join(" "));
+      });
+    });
+  }
+
+  updateSkillList();
+
+  const matches = document.querySelectorAll(".q-select--unique");
+  matches.forEach(function (match) {
+    const label = match.querySelector("label");
+    const lis = match.querySelectorAll("li");
+
+    const forAttribute = label?.getAttribute("for");
+    if (forAttribute) {
+      attachSelectListeners(lis, forAttribute);
+    }
   });
 }
 
-updateSkillList();
-
-const matches = document.querySelectorAll(".q-select--unique");
-matches.forEach(function (match) {
-  const label = match.querySelector("label");
-  const lis = match.querySelectorAll("li");
-
-  const forAttribute = label?.getAttribute("for");
-  if (forAttribute) {
-    attachSelectListeners(lis, forAttribute);
-  }
-});
+switch (window.location.pathname) {
+  case "/personnage.html":
+    personnage();
+    break;
+}
