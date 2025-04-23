@@ -26,7 +26,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	http.HandleFunc("/state", GETState(db))
+	http.HandleFunc("/state", HandleState(db))
 	log.Fatal(http.ListenAndServe(":8081", nil))
 
 }

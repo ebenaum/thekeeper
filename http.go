@@ -75,7 +75,7 @@ func auth(db *sqlx.DB, tokenString string) (int64, string, error) {
 	return actorID, actorSpace, err
 }
 
-func GETState(db *sqlx.DB) http.HandlerFunc {
+func HandleState(db *sqlx.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method != http.MethodGet && r.Method != http.MethodOptions {
