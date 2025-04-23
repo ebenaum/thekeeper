@@ -7,13 +7,16 @@ import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv1";
 /**
  * Describes the file player_person.proto.
  */
-export const file_player_person = /*@__PURE__*/
-  fileDesc("ChNwbGF5ZXJfcGVyc29uLnByb3RvEgl0aGVrZWVwZXIi2gIKEUV2ZW50UGxheWVyUGVyc29uEhAKCHBsYXllcklkGAEgASgJEg8KB3N1cm5hbWUYAiABKAkSCwoDYWdlGAMgASgJEhQKDGNpdHlPZk9yaWdpbhgEIAEoCRITCgtwaG9uZU51bWJlchgFIAEoCRIZChFoZWFsdGhEZWNsYXJhdGlvbhgGIAEoCRIdChVhZGRpdGlvbmFsSW5mb3JtYXRpb24YByABKAkSGAoQcGVvcGxlVG9QbGF5V2l0aBgIIAEoCRINCgVza2lsbBgJIAEoCRIcChR1c2VFeGlzdGluZ0NoYXJhY3RlchgKIAEoCBIlCh1leGlzdGluZ0NoYXJhY3RlckFjaGlldmVtZW50cxgLIAEoCRIRCglnYW1lU3R5bGUYDCABKAkSFQoNZ2FtZVN0eWxlVGFncxgNIAMoCRIYChBzaXR1YXRpb25Ub0F2b2lkGA4gASgJQipaKGdpdGh1Yi5jb20vZWJlbmF1bS90aGVrZWVwZXIvcHJvdG87cHJvdG9iBnByb3RvMw");
+export const file_player_person =
+  /*@__PURE__*/
+  fileDesc(
+    "ChNwbGF5ZXJfcGVyc29uLnByb3RvEgl0aGVrZWVwZXIi2gIKEUV2ZW50UGxheWVyUGVyc29uEhAKCHBsYXllcklkGAEgASgJEg8KB3N1cm5hbWUYAiABKAkSCwoDYWdlGAMgASgJEhQKDGNpdHlPZk9yaWdpbhgEIAEoCRITCgtwaG9uZU51bWJlchgFIAEoCRIZChFoZWFsdGhEZWNsYXJhdGlvbhgGIAEoCRIdChVhZGRpdGlvbmFsSW5mb3JtYXRpb24YByABKAkSGAoQcGVvcGxlVG9QbGF5V2l0aBgIIAEoCRINCgVza2lsbBgJIAEoCRIcChR1c2VFeGlzdGluZ0NoYXJhY3RlchgKIAEoCBIlCh1leGlzdGluZ0NoYXJhY3RlckFjaGlldmVtZW50cxgLIAEoCRIRCglnYW1lU3R5bGUYDCABKAkSFQoNZ2FtZVN0eWxlVGFncxgNIAMoCRIYChBzaXR1YXRpb25Ub0F2b2lkGA4gASgJQipaKGdpdGh1Yi5jb20vZWJlbmF1bS90aGVrZWVwZXIvcHJvdG87cHJvdG9iBnByb3RvMw",
+  );
 
 /**
  * Describes the message thekeeper.EventPlayerPerson.
  * Use `create(EventPlayerPersonSchema)` to create a new message.
  */
-export const EventPlayerPersonSchema = /*@__PURE__*/
+export const EventPlayerPersonSchema =
+  /*@__PURE__*/
   messageDesc(file_player_person, 0);
-
