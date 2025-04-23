@@ -546,6 +546,11 @@ input[type="number"]::-webkit-outer-spin-button {
   text-align: justify;
 }
 
+.vdv__select__option__title {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
 /* Style for races from different mondes */
 .vdv__select__option[data-monde="ebenaum"] .monde-badge {
   background-color: #e9e3d3;
@@ -553,6 +558,18 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .vdv__select__option[data-monde="erenthyrm"] .monde-badge {
   background-color: #d3e9e3;
+}
+
+.vdv__select__option__content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.vdv__select__option__description {
+  text-align: justify;
 }
 
 /* Points Restants negative budget */

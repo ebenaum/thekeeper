@@ -4,13 +4,18 @@ package thekeeper;
 option go_package = "github.com/ebenaum/thekeeper/proto;proto";
 
 message EventPlayerPerson {
-   string playerId              = 1;
-   string surname               = 2;
-   string age                   = 3;
-   string cityOfOrigin          = 4;
-   string phoneNumber           = 5;
-   string healthDeclaration     = 6;
-   string additionalInformation = 7;
-   string peopleToPlayWith      = 8;
-   string skill                 = 9;
+   string          playerId              = 1;
+   string          surname               = 2;
+   string          age                   = 3;
+   string          cityOfOrigin          = 4;
+   string          phoneNumber           = 5;
+   string          healthDeclaration     = 6;
+   string          additionalInformation = 7;
+   string          peopleToPlayWith      = 8;
+   string          skill                 = 9;
+   bool            useExistingCharacter  = 10;
+   string          existingCharacterAchievements  = 11;
+   string          gameStyle = 12;
+   repeated string gameStyleTags = 13;
+   string          situationToAvoid = 14;
 }

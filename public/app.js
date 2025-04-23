@@ -1017,7 +1017,7 @@ allRaces.forEach((race) => {
         : "flex-direction: row",
     );
     imgElement.setAttribute("src", race.img);
-    imgElement.setAttribute("style", "margin-top:16px");
+    imgElement.setAttribute("style", "margin-top:16px; margin-bottom:16px");
     imgElement.setAttribute("width", "300px");
     imgElement.setAttribute("height", "300px");
     descriptionElement.setAttribute("style", "max-width: 400px");
@@ -1054,6 +1054,9 @@ allVdvs.forEach((vdv) => {
   const titleElement = /** @type {HTMLElement} */ (
     clone.querySelector(".vdv__select__option__title")
   );
+  const imgElement = /** @type {HTMLElement} */ (clone.querySelector("img"));
+  const contentElement =  /** @type {HTMLElement} */(clone.querySelector(".vdv__select__option__content"));
+
   const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
   const descriptionElement = /** @type {HTMLElement} */ (
     clone.querySelector(".vdv__select__option__description")
@@ -1061,6 +1064,20 @@ allVdvs.forEach((vdv) => {
   const mondeBadgeElement = /** @type {HTMLElement} */ (
     clone.querySelector(".monde-badge")
   );
+
+  if (vdv.img) {
+    contentElement.setAttribute(
+      "style",
+      Math.random() > 0.5
+        ? "flex-direction: row-reverse"
+        : "flex-direction: row",
+    );
+    imgElement.setAttribute("src", vdv.img);
+    imgElement.setAttribute("style", "margin-top:16px; margin-bottom:16px");
+    imgElement.setAttribute("width", "300px");
+    imgElement.setAttribute("height", "300px");
+    descriptionElement.setAttribute("style", "max-width: 400px");
+  }
 
   titleElement.textContent = vdv.label;
   descriptionElement.textContent = vdv.description;
