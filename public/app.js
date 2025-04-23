@@ -347,7 +347,7 @@ async function personnage() {
   );
 
   characterNameInputElement.addEventListener("input", (e) => {
-    formResult.name = e.target.value;
+    formResult.name = /** @type{HTMLInputElement}*/(e.target)?.value;
   });
 
   const /** @type {Skill[]} */ skills = univers
@@ -374,8 +374,8 @@ async function personnage() {
           tag.startsWith("require:"),
         );
 
-        let /** @type {string | null} */ requirementType;
-        let /** @type {UniversEntry | null} */ requirementEntry;
+        let /** @type {string | null} */ requirementType = null;
+        let /** @type {UniversEntry | null} */ requirementEntry = null;
 
         if (requirementTag) {
           const requirementParts = requirementTag.split(":");
@@ -520,7 +520,8 @@ async function personnage() {
     );
 
     nodeInput.addEventListener("input", (e) => {
-      const targetValue = parseInt(e.target?.value);
+      const target = /** @type{HTMLInputElement}*/(e.target);
+      const targetValue = parseInt(target?.value);
       if (isNaN(targetValue)) return;
 
       // Calculate cost of this change (positive values cost points)
@@ -529,7 +530,7 @@ async function personnage() {
       // Check if we have enough budget for this change
       if (characteristicBudget - pointChange < 0) {
         // Revert to previous value if not enough budget
-        e.target.value = previousLvl.toString();
+        target.value = previousLvl.toString();
         return;
       }
 
@@ -537,11 +538,11 @@ async function personnage() {
       let newLvl = targetValue;
       if (newLvl > 4) {
         newLvl = 4;
-        e.target.value = "4";
+        target.value = "4";
       }
       if (newLvl < -2) {
         newLvl = -2;
-        e.target.value = "-2";
+        target.value = "-2";
       }
 
       // Calculate actual point change after constraints
