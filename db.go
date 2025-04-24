@@ -1,16 +1,23 @@
 package main
 
 import (
+	cryptorand "crypto/rand"
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
-
 	"math/rand"
+	"time"
 
 	"github.com/ebenaum/thekeeper/proto"
 	"github.com/jmoiron/sqlx"
 	protolib "google.golang.org/protobuf/proto"
+)
+
+type ActorSpace string
+
+const (
+	ActorSpaceOrga   ActorSpace = "orga"
+	ActorSpacePlayer ActorSpace = "player"
 )
 
 type EventRecordStatus uint64
@@ -36,9 +43,73 @@ func (e EventRecordStatus) MarshalJSON() ([]byte, error) {
 	}
 }
 
-func GetState(db *sqlx.DB, publicKey []byte) (int64, string, error) {
+func LinkState(db *sqlx.DB, actorID int64, publicKey []byte) (ActorSpace, error) {
+	var space ActorSpace
+
+	err := db.QueryRowx(`
+	SELECT
+	  actors.space
+	FROM actors
+	WHERE actors.id=?`,
+		actorID,
+	).Scan(&space)
+	if err != nil {
+		return "", fmt.Errorf("query: %w", err)
+	}
+
+	tx, err := db.Beginx()
+	if err != nil {
+		return "", fmt.Errorf("begin: %w", err)
+	}
+
+	var publicKeyID int64
+	err = tx.QueryRowx(`INSERT INTO public_keys (public_key) VALUES (?) RETURNING id`, publicKey).Scan(&publicKeyID)
+	if err != nil {
+		return "", fmt.Errorf("insert public key: %w", err)
+	}
+
+	_, err = tx.Exec(`INSERT INTO actors_public_keys (actor_id, public_key_id) VALUES (?, ?)`, actorID, publicKeyID)
+	if err != nil {
+		return "", fmt.Errorf("insert actors_public_keys: %w", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return "", fmt.Errorf("commit: %w", err)
+	}
+
+	return space, nil
+}
+
+func InsertAuthKey(db *sqlx.DB, actorID int64) (string, error) {
+	key := cryptorand.Text()
+
+	_, err := db.Exec(`INSERT INTO auth_keys (key, actor_id, redeemed_at) VALUES (?, ?, NULL)`, key, actorID)
+	if err != nil {
+		return "", fmt.Errorf("exec: %w", err)
+	}
+
+	return key, nil
+}
+
+func UseAuthKey(db *sqlx.DB, key string) (int64, error) {
+	var actorID int64
+
+	err := db.QueryRowx(
+		`UPDATE auth_keys SET redeemed_at=? WHERE redeemed_at IS NULL AND key=? RETURNING actor_id`,
+		time.Now().UTC().Unix(),
+		key,
+	).Scan(&actorID)
+	if err != nil {
+		return -1, fmt.Errorf("query: %w", err)
+	}
+
+	return actorID, nil
+}
+
+func GetState(db *sqlx.DB, publicKey []byte) (int64, ActorSpace, error) {
 	var id int64
-	var space string
+	var space ActorSpace
 
 	err := db.QueryRowx(`
 	SELECT

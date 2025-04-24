@@ -28,9 +28,7 @@ func (e Error) Error() string {
 	return e.Private.Error()
 }
 
-func auth(db *sqlx.DB, tokenString string) (int64, string, error) {
-	var actorID int64
-	var actorSpace string
+func validatePublicKey(tokenString string) (ecdsa.PublicKey, error) {
 	var publicKey ecdsa.PublicKey
 
 	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -63,6 +61,18 @@ func auth(db *sqlx.DB, tokenString string) (int64, string, error) {
 		jwt.WithExpirationRequired(),
 		jwt.WithIssuer("self"),
 	)
+	if err != nil {
+		return publicKey, err
+	}
+
+	return publicKey, nil
+}
+
+func auth(db *sqlx.DB, tokenString string) (int64, ActorSpace, error) {
+	var actorID int64
+	var actorSpace ActorSpace
+
+	publicKey, err := validatePublicKey(tokenString)
 	if err != nil {
 		return actorID, actorSpace, err
 	}
@@ -158,6 +168,131 @@ func HandleState(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
+	}
+}
+
+func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost && r.Method != http.MethodOptions {
+			w.WriteHeader(http.StatusNotFound)
+
+			return
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+
+			return
+		}
+
+		actorID, actorSpace, err := auth(db, r.Header.Get("Authorization"))
+		if err != nil {
+			var errplus Error
+
+			w.WriteHeader(http.StatusBadRequest)
+
+			if errors.As(err, &errplus) {
+				log.Println(errplus.Private)
+				fmt.Fprintf(w, `{"message": "%s"}`, errplus.Public.Error())
+
+				return
+			}
+
+			log.Println(err)
+			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+
+			return
+		}
+
+		if actorSpace != ActorSpaceOrga {
+			w.WriteHeader(http.StatusBadRequest)
+
+			log.Printf("actor %d space:%s not authorized to create auth link", actorID, actorSpace)
+			fmt.Fprintf(w, `{"message": "not authorized"}`)
+
+			return
+		}
+
+		actorIDToLink, err := strconv.ParseInt(r.PathValue("actor_id"), 10, 64)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+
+			log.Printf("cannot parse actor_id path params %q: %v", r.PathValue("actor_id"), err)
+			fmt.Fprintf(w, `{"message": "invalid actor_id"}`)
+
+			return
+		}
+
+		authKey, err := InsertAuthKey(db, actorIDToLink)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+
+			log.Println(err)
+
+			return
+		}
+
+		fmt.Fprintf(w, `{"message": "%s"}`, authKey)
+
+	}
+}
+
+func HandleRedeemAuthKey(db *sqlx.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost && r.Method != http.MethodOptions {
+			w.WriteHeader(http.StatusNotFound)
+
+			return
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+
+			return
+		}
+
+		publicKey, err := validatePublicKey(r.Header.Get("Authorization"))
+		if err != nil {
+			var errplus Error
+
+			w.WriteHeader(http.StatusBadRequest)
+
+			if errors.As(err, &errplus) {
+				log.Println(errplus.Private)
+				fmt.Fprintf(w, `{"message": "%s"}`, errplus.Public.Error())
+
+				return
+			}
+
+			log.Println(err)
+			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+
+			return
+		}
+
+		actorID, err := UseAuthKey(db, r.PathValue("key"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+
+			log.Println(err)
+
+			return
+		}
+
+		_, err = LinkState(db, actorID, append(publicKey.X.Bytes(), publicKey.Y.Bytes()...))
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+
+			log.Println(err)
+
+			return
+		}
 	}
 }
 

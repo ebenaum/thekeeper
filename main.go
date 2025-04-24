@@ -27,6 +27,8 @@ func main() {
 	}
 
 	http.HandleFunc("/state", HandleState(db))
+	http.HandleFunc("/auth/actors/{actor_id}", HandleCreateAuthKey(db))
+	http.HandleFunc("/auth/redeem/{key}", HandleRedeemAuthKey(db))
 	log.Fatal(http.ListenAndServe(":8081", nil))
 
 }

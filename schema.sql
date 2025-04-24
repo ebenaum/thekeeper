@@ -1,5 +1,14 @@
 PRAGMA foreign_keys = ON;
 
+CREATE TABLE auth_keys (
+    key VARCHAR PRIMARY KEY,
+    actor_id INTEGER, 
+    redeemed_at INTEGER,
+
+    FOREIGN KEY(actor_id) REFERENCES actors(id),
+    CHECK (actor_id != 0)
+);
+
 CREATE TABLE actors (
     id INTEGER PRIMARY KEY,
     space TEXT CHECK( space IN ('orga','player') ) NOT NULL DEFAULT 'player'
