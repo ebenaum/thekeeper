@@ -102,6 +102,8 @@ input.q-response-text {
 
 .q-response-select {
   padding: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .q-response-select > :last-child {
@@ -158,6 +160,7 @@ input.q-response-text {
   border: solid 3px black;
   background-color: black;
   color: white;
+  order: -1;
 }
 
 .q-response-select .selected:hover {

@@ -347,7 +347,7 @@ async function personnage() {
   );
 
   characterNameInputElement.addEventListener("input", (e) => {
-    formResult.name = /** @type{HTMLInputElement}*/(e.target)?.value;
+    formResult.name = /** @type{HTMLInputElement}*/ (e.target)?.value;
   });
 
   const /** @type {Skill[]} */ skills = univers
@@ -520,7 +520,7 @@ async function personnage() {
     );
 
     nodeInput.addEventListener("input", (e) => {
-      const target = /** @type{HTMLInputElement}*/(e.target);
+      const target = /** @type{HTMLInputElement}*/ (e.target);
       const targetValue = parseInt(target?.value);
       if (isNaN(targetValue)) return;
 
@@ -1164,7 +1164,7 @@ async function personnage() {
           // If the section as a selected-section element, display the user choice there.
           if (selectedSectionElement) {
             const optionName = li.querySelector(
-              "." + formKey + "__select__option__title",
+              `.${formKey}__select__option__title`,
             )?.textContent;
             selectedSectionElement.textContent = optionName || "";
 
