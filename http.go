@@ -293,6 +293,39 @@ func HandleRedeemAuthKey(db *sqlx.DB) http.HandlerFunc {
 
 			return
 		}
+
+		events, err := FetchEvents(db, actorID, -1)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+
+			log.Println(err)
+
+			return
+		}
+
+		response := &proto.Events{
+			Events: events,
+		}
+
+		responseEncoded, err := protolib.Marshal(response)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+
+			log.Println(err)
+
+			return
+		}
+
+		//		w.Header().Set("Content-Type", "application/x-protobuf")
+
+		_, err = w.Write(responseEncoded)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+
+			log.Println(err)
+
+			return
+		}
 	}
 }
 

@@ -37,28 +37,44 @@ const localStorage = window.localStorage;
 
 function newData() {
   return {
+    handle: "",
     players: {},
   };
 }
 
-async function init() {
-  const storeEntry = {};
+/**
+ * Generates an ES256 key pair using the jose library.
+ * The generated keys are marked as extractable.
+ * @returns {Promise<jose.KeyPairResult>} A promise that resolves to the generated key pair.
+ */
+async function generateKeypair() {
+  return jose.generateKeyPair("ES256", { extractable: true });
+}
 
-  const keypair = await jose.generateKeyPair("ES256", { extractable: true });
+/**
+ * @typedef {Object} KeyEntry
+ * @property {JsonWebKey} public
+ * @property {JsonWebKey} private
+ */
 
-  storeEntry.key = {
-    public: await window.crypto.subtle.exportKey("jwk", keypair.publicKey),
-    private: await window.crypto.subtle.exportKey("jwk", keypair.privateKey),
-  };
+/**
+ * 
+ * @param {jose.KeyPairResult} keypair 
+ * @param {string} handle 
+ */
+async function init(keypair, handle) {
+  const /** @type{KeyEntry} */ keysEntry = {};
 
-  storeEntry.handle = createRandomString(16);
+  keysEntry.public = await window.crypto.subtle.exportKey("jwk", keypair.publicKey)
+  keysEntry.private = await window.crypto.subtle.exportKey("jwk", keypair.privateKey)
+
   const seed = create(EventsSchema, {
     events: [
       {
         msg: {
           case: "SeedActor",
           value: {
-            handle: storeEntry.handle,
+            handle: handle,
           },
         },
       },
@@ -79,36 +95,40 @@ async function init() {
     throw jsonResponse[0].error;
   }
 
-  localStorage.setItem("state", JSON.stringify(storeEntry));
+  localStorage.setItem("keys", JSON.stringify(keysEntry));
   localStorage.setItem("cursor", jsonResponse[0].ts);
   localStorage.setItem("data", JSON.stringify(newData()));
 }
 
 /**
+ * @typedef {Object} Data
+ * @property {Object.<string, {playerId: string}>} players
+ * @property {string} handle
+ */
+
+/**
  * @typedef {Object} State
  * @property {string} handle
- * @property {{players: Object.<string, {playerId: string}>}} data
+ * @property {Data} data
  * @property {number} cursor
- * @prop {CryptoKey} privateKey
- * @prop {CryptoKey} publicKey
+ * @prop {JsonWebKey} privateKey
+ * @prop {JsonWebKey} publicKey
  */
 
 /**
  *
- * @returns {Promise<State>}
+ * @returns {Promise<State|null>}
  */
 async function getState() {
   const state = JSON.parse(
-    /** @type {string} */ (localStorage.getItem("state")),
+    /** @type {string} */ (localStorage.getItem("keys")),
   );
   const cursor = Number(/** @type {string} */ (localStorage.getItem("cursor")));
 
   const data = JSON.parse(/** @type {string} */ (localStorage.getItem("data")));
 
   if (!state) {
-    await init();
-
-    return getState();
+    return null;
   }
 
   return {
@@ -188,14 +208,10 @@ async function sync(state, reset) {
   localStorage.setItem("data", JSON.stringify(state.data));
 }
 
-const state = await getState();
-
-await sync(state, true);
-
 /**
- * @param {{ players: any; }} data
+ * @param {Data} data
  * @param {any} eventType
- * @param {{ playerId: string | number; }} eventValue
+ * @param {any} eventValue
  */
 function processEvent(data, eventType, eventValue) {
   switch (eventType) {
@@ -204,40 +220,17 @@ function processEvent(data, eventType, eventValue) {
         throw Error(`player ${eventValue.playerId} already exists`);
       }
 
-      data.players[eventValue.playerId] = {};
+      data.players[eventValue.playerId] = {playerId: eventValue.playerId};
 
       break;
     case "SeedActor":
+      data.handle = eventValue.handle
+
       break;
     default:
       console.log(`unknown event ${eventType} ${eventValue}`);
   }
 }
-
-let seed = create(EventsSchema, {
-  events: [
-    {
-      msg: {
-        case: "SeedPlayer",
-        value: {
-          handle: state.handle,
-          playerId: createRandomString(8),
-        },
-      },
-    },
-  ],
-});
-
-const response = await fetch("http://localhost:8081/state", {
-  method: "POST",
-  headers: {
-    Authorization: await auth(state.privateKey, state.publicKey),
-    "Content-Type": "application/x-protobuf",
-  },
-  body: toBinary(EventsSchema, seed),
-});
-
-await sync(state, false);
 
 async function personnage() {
   /* TEMPLATES */
@@ -1201,8 +1194,79 @@ async function personnage() {
   });
 }
 
+async function index() {
+  const stateExists = localStorage.getItem("keys") !== null;
+  const url = new URL(window.location.href);
+  const authCode = url.searchParams.get("code");
+
+  if (authCode) {
+    const keypair = await generateKeypair();
+
+    const response = await fetch(
+      `http://localhost:8081/auth/redeem/${authCode}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: await auth(keypair.privateKey, keypair.publicKey),
+          "Content-Type": "application/x-protobuf",
+        },
+      },
+    );
+
+    if (response.status != 200) {
+      const containerElement = document.querySelector(".container");
+      const messageElement = document.createElement("h1");
+
+      messageElement.textContent = "Le lien ne marche pas :(";
+
+      containerElement?.appendChild(messageElement);
+
+      return;
+    }
+
+    localStorage.clear()
+  } else if (!stateExists) {
+    await init(await generateKeypair(), createRandomString(16));
+  }
+
+  /*
+const state = await getState();
+
+await sync(state, true);
+
+
+let seed = create(EventsSchema, {
+  events: [
+    {
+      msg: {
+        case: "SeedPlayer",
+        value: {
+          handle: state.handle,
+          playerId: createRandomString(8),
+        },
+      },
+    },
+  ],
+});
+
+const response = await fetch("http://localhost:8081/state", {
+  method: "POST",
+  headers: {
+    Authorization: await auth(state.privateKey, state.publicKey),
+    "Content-Type": "application/x-protobuf",
+  },
+  body: toBinary(EventsSchema, seed),
+});
+
+await sync(state, false);
+*/
+}
+
 switch (window.location.pathname) {
   case "/personnage.html":
     personnage();
     break;
+  case "/index.html":
+  case "/":
+    index();
 }
