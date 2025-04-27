@@ -70,6 +70,7 @@ async function generateKeypair() {
  *
  * @param {KeyEntry} keypair
  * @param {string} handle
+ * @returns {Promise<State>}
  */
 async function init(keypair, handle) {
   const seed = create(EventsSchema, {
@@ -99,8 +100,17 @@ async function init(keypair, handle) {
     throw jsonResponse[0].error;
   }
 
-  localStorage.setItem("cursor", jsonResponse[0].ts);
-  localStorage.setItem("data", JSON.stringify(newData()));
+  const state = {
+    handle: handle,
+    keys: keypair,
+
+    data: newData(),
+    cursor: -1,
+  };
+
+  await sync(state, true);
+
+  return state;
 }
 
 /**
@@ -154,25 +164,6 @@ async function getState() {
       ),
     },
   };
-}
-
-/**
- *
- * @param {CryptoKey} privateKey
- * @param {CryptoKey} publicKey
- * @returns
- */
-async function auth(privateKey, publicKey) {
-  return await new jose.SignJWT({})
-    .setProtectedHeader({
-      alg: "ES256",
-      jwk: await window.crypto.subtle.exportKey("jwk", publicKey),
-    })
-    .setIssuedAt()
-    .setIssuer("self")
-    .setAudience("thekeeper")
-    .setExpirationTime("5s")
-    .sign(privateKey);
 }
 
 /**
@@ -234,6 +225,25 @@ function processEvent(data, eventType, eventValue) {
     default:
       console.log(`unknown event ${eventType} ${eventValue}`);
   }
+}
+
+/**
+ *
+ * @param {CryptoKey} privateKey
+ * @param {CryptoKey} publicKey
+ * @returns
+ */
+async function auth(privateKey, publicKey) {
+  return await new jose.SignJWT({})
+    .setProtectedHeader({
+      alg: "ES256",
+      jwk: await window.crypto.subtle.exportKey("jwk", publicKey),
+    })
+    .setIssuedAt()
+    .setIssuer("self")
+    .setAudience("thekeeper")
+    .setExpirationTime("5s")
+    .sign(privateKey);
 }
 
 async function personnage() {
@@ -1199,7 +1209,7 @@ async function personnage() {
 }
 
 async function index() {
-  const stateExists = localStorage.getItem("keys") !== null;
+  let state = await getState();
   const url = new URL(window.location.href);
   const authCode = url.searchParams.get("code");
 
@@ -1229,8 +1239,10 @@ async function index() {
 
       return;
     }
-  } else if (!stateExists) {
-    await init(await generateKeypair(), createRandomString(16));
+
+    await sync(state, true);
+  } else if (!state) {
+    state = await init(await generateKeypair(), createRandomString(16));
   }
 
   /*
