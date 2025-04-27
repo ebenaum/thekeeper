@@ -50,16 +50,14 @@ function newData() {
 async function generateKeypair() {
   const keypair = await jose.generateKeyPair("ES256", { extractable: true });
 
-
   const keysEntry = {
     public: await window.crypto.subtle.exportKey("jwk", keypair.publicKey),
     private: await window.crypto.subtle.exportKey("jwk", keypair.privateKey),
   };
 
-
   localStorage.setItem(" keys", JSON.stringify(keysEntry));
 
-  return {public: keypair.public, private: keypair.private}
+  return { public: keypair.public, private: keypair.private };
 }
 
 /**
@@ -69,9 +67,9 @@ async function generateKeypair() {
  */
 
 /**
- * 
- * @param {KeyEntry} keypair 
- * @param {string} handle 
+ *
+ * @param {KeyEntry} keypair
+ * @param {string} handle
  */
 async function init(keypair, handle) {
   const seed = create(EventsSchema, {
@@ -116,8 +114,7 @@ async function init(keypair, handle) {
  * @property {string} handle
  * @property {Data} data
  * @property {number} cursor
- * @prop {CryptoKey} privateKey
- * @prop {CryptoKey} publicKey
+ * @property {KeyEntry} keys
  */
 
 /**
@@ -140,20 +137,22 @@ async function getState() {
     handle: state.handle,
     data: data,
     cursor: cursor,
-    privateKey: await window.crypto.subtle.importKey(
-      "jwk",
-      state.key.private,
-      { name: "ECDSA", namedCurve: "P-256" },
-      false,
-      ["sign"],
-    ),
-    publicKey: await window.crypto.subtle.importKey(
-      "jwk",
-      state.key.public,
-      { name: "ECDSA", namedCurve: "P-256" },
-      true,
-      ["verify"],
-    ),
+    keys: {
+      private: await window.crypto.subtle.importKey(
+        "jwk",
+        state.key.private,
+        { name: "ECDSA", namedCurve: "P-256" },
+        false,
+        ["sign"],
+      ),
+      public: await window.crypto.subtle.importKey(
+        "jwk",
+        state.key.public,
+        { name: "ECDSA", namedCurve: "P-256" },
+        true,
+        ["verify"],
+      ),
+    },
   };
 }
 
@@ -191,7 +190,7 @@ async function sync(state, reset) {
   const response = await fetch("http://localhost:8081/state?from=" + cursor, {
     method: "GET",
     headers: {
-      Authorization: await auth(state.privateKey, state.publicKey),
+      Authorization: await auth(state.keys.private, state.keys.public),
     },
   });
 
@@ -225,11 +224,11 @@ function processEvent(data, eventType, eventValue) {
         throw Error(`player ${eventValue.playerId} already exists`);
       }
 
-      data.players[eventValue.playerId] = {playerId: eventValue.playerId};
+      data.players[eventValue.playerId] = { playerId: eventValue.playerId };
 
       break;
     case "SeedActor":
-      data.handle = eventValue.handle
+      data.handle = eventValue.handle;
 
       break;
     default:
@@ -1206,7 +1205,7 @@ async function index() {
 
   if (authCode) {
     localStorage.clear();
-    
+
     const keypair = await generateKeypair();
 
     const response = await fetch(
@@ -1230,8 +1229,6 @@ async function index() {
 
       return;
     }
-
-
   } else if (!stateExists) {
     await init(await generateKeypair(), createRandomString(16));
   }
