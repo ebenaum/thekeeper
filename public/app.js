@@ -45,29 +45,35 @@ function newData() {
 /**
  * Generates an ES256 key pair using the jose library.
  * The generated keys are marked as extractable.
- * @returns {Promise<jose.KeyPairResult>} A promise that resolves to the generated key pair.
+ * @returns {Promise<KeyEntry>} A promise that resolves to the generated key pair.
  */
 async function generateKeypair() {
-  return jose.generateKeyPair("ES256", { extractable: true });
+  const keypair = await jose.generateKeyPair("ES256", { extractable: true });
+
+
+  const keysEntry = {
+    public: await window.crypto.subtle.exportKey("jwk", keypair.publicKey),
+    private: await window.crypto.subtle.exportKey("jwk", keypair.privateKey),
+  };
+
+
+  localStorage.setItem(" keys", JSON.stringify(keysEntry));
+
+  return {public: keypair.public, private: keypair.private}
 }
 
 /**
  * @typedef {Object} KeyEntry
- * @property {JsonWebKey} public
- * @property {JsonWebKey} private
+ * @property {CryptoKey} public
+ * @property {CryptoKey} private
  */
 
 /**
  * 
- * @param {jose.KeyPairResult} keypair 
+ * @param {KeyEntry} keypair 
  * @param {string} handle 
  */
 async function init(keypair, handle) {
-  const /** @type{KeyEntry} */ keysEntry = {};
-
-  keysEntry.public = await window.crypto.subtle.exportKey("jwk", keypair.publicKey)
-  keysEntry.private = await window.crypto.subtle.exportKey("jwk", keypair.privateKey)
-
   const seed = create(EventsSchema, {
     events: [
       {
@@ -84,7 +90,7 @@ async function init(keypair, handle) {
   const response = await fetch("http://localhost:8081/state", {
     method: "POST",
     headers: {
-      Authorization: await auth(keypair.privateKey, keypair.publicKey),
+      Authorization: await auth(keypair.private, keypair.public),
       "Content-Type": "application/x-protobuf",
     },
     body: toBinary(EventsSchema, seed),
@@ -95,7 +101,6 @@ async function init(keypair, handle) {
     throw jsonResponse[0].error;
   }
 
-  localStorage.setItem("keys", JSON.stringify(keysEntry));
   localStorage.setItem("cursor", jsonResponse[0].ts);
   localStorage.setItem("data", JSON.stringify(newData()));
 }
@@ -111,8 +116,8 @@ async function init(keypair, handle) {
  * @property {string} handle
  * @property {Data} data
  * @property {number} cursor
- * @prop {JsonWebKey} privateKey
- * @prop {JsonWebKey} publicKey
+ * @prop {CryptoKey} privateKey
+ * @prop {CryptoKey} publicKey
  */
 
 /**
@@ -1200,6 +1205,8 @@ async function index() {
   const authCode = url.searchParams.get("code");
 
   if (authCode) {
+    localStorage.clear();
+    
     const keypair = await generateKeypair();
 
     const response = await fetch(
@@ -1207,7 +1214,7 @@ async function index() {
       {
         method: "POST",
         headers: {
-          Authorization: await auth(keypair.privateKey, keypair.publicKey),
+          Authorization: await auth(keypair.private, keypair.public),
           "Content-Type": "application/x-protobuf",
         },
       },
@@ -1224,7 +1231,7 @@ async function index() {
       return;
     }
 
-    localStorage.clear()
+
   } else if (!stateExists) {
     await init(await generateKeypair(), createRandomString(16));
   }
