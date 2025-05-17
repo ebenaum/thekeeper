@@ -55,9 +55,9 @@ async function generateKeypair() {
     private: await window.crypto.subtle.exportKey("jwk", keypair.privateKey),
   };
 
-  localStorage.setItem(" keys", JSON.stringify(keysEntry));
+  localStorage.setItem("keys", JSON.stringify(keysEntry));
 
-  return { public: keypair.public, private: keypair.private };
+  return { public: keypair.publicKey, private: keypair.privateKey };
 }
 
 /**
@@ -101,9 +101,7 @@ async function init(keypair, handle) {
   }
 
   const state = {
-    handle: handle,
     keys: keypair,
-
     data: newData(),
     cursor: -1,
   };
@@ -121,7 +119,6 @@ async function init(keypair, handle) {
 
 /**
  * @typedef {Object} State
- * @property {string} handle
  * @property {Data} data
  * @property {number} cursor
  * @property {KeyEntry} keys
@@ -144,7 +141,6 @@ async function getState() {
   }
 
   return {
-    handle: state.handle,
     data: data,
     cursor: cursor,
     keys: {
@@ -1209,7 +1205,6 @@ async function personnage() {
 }
 
 async function index() {
-  let state = await getState();
   const url = new URL(window.location.href);
   const authCode = url.searchParams.get("code");
 
@@ -1240,9 +1235,25 @@ async function index() {
       return;
     }
 
+    /*  const state = {
+    handle: handle,
+    keys: keypair,
+
+    data: newData(),
+    cursor: -1,
+  };
+
+  
     await sync(state, true);
-  } else if (!state) {
-    state = await init(await generateKeypair(), createRandomString(16));
+  */
+
+    // await sync(state, true);
+  } else {
+    let state = await getState();
+    if (state) {
+    } else {
+      state = await init(await generateKeypair(), createRandomString(16));
+    }
   }
 
   /*
