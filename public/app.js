@@ -50,11 +50,6 @@ function newData() {
 async function generateKeypair() {
   const keypair = await jose.generateKeyPair("ES256", { extractable: true });
 
-  const keysEntry = {
-    public: await window.crypto.subtle.exportKey("jwk", keypair.publicKey),
-    private: await window.crypto.subtle.exportKey("jwk", keypair.privateKey),
-  };
-
   return { public: keypair.publicKey, private: keypair.privateKey };
 }
 
@@ -62,8 +57,13 @@ async function generateKeypair() {
  *
  * @param {KeyEntry} keypair
  */
-function storeKeypair(keypair) {
-  localStorage.setItem("keys", JSON.stringify(keypair));
+async function storeKeypair(keypair) {
+  const keysEntry = {
+    public: await window.crypto.subtle.exportKey("jwk", keypair.public),
+    private: await window.crypto.subtle.exportKey("jwk", keypair.private),
+  };
+
+  localStorage.setItem("keys", JSON.stringify(keysEntry));
 }
 
 /**
@@ -133,14 +133,12 @@ async function init(keypair, handle) {
  * @returns {Promise<State|null>}
  */
 async function getState() {
-  const state = JSON.parse(
-    /** @type {string} */ (localStorage.getItem("keys")),
-  );
+  const keys = JSON.parse(/** @type {string} */ (localStorage.getItem("keys")));
   const cursor = Number(/** @type {string} */ (localStorage.getItem("cursor")));
 
   const data = JSON.parse(/** @type {string} */ (localStorage.getItem("data")));
 
-  if (!state) {
+  if (!keys) {
     return null;
   }
 
@@ -150,14 +148,14 @@ async function getState() {
     keys: {
       private: await window.crypto.subtle.importKey(
         "jwk",
-        state.key.private,
+        keys.private,
         { name: "ECDSA", namedCurve: "P-256" },
         false,
         ["sign"],
       ),
       public: await window.crypto.subtle.importKey(
         "jwk",
-        state.key.public,
+        keys.public,
         { name: "ECDSA", namedCurve: "P-256" },
         true,
         ["verify"],
@@ -1239,7 +1237,7 @@ async function index() {
       return;
     }
 
-    storeKeypair(keypair);
+    await storeKeypair(keypair);
 
     const state = {
       keys: keypair,
