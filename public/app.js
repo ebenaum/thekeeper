@@ -55,9 +55,15 @@ async function generateKeypair() {
     private: await window.crypto.subtle.exportKey("jwk", keypair.privateKey),
   };
 
-  localStorage.setItem("keys", JSON.stringify(keysEntry));
-
   return { public: keypair.publicKey, private: keypair.privateKey };
+}
+
+/**
+ *
+ * @param {KeyEntry} keypair
+ */
+function storeKeypair(keypair) {
+  localStorage.setItem("keys", JSON.stringify(keypair));
 }
 
 /**
@@ -105,8 +111,6 @@ async function init(keypair, handle) {
     data: newData(),
     cursor: -1,
   };
-
-  await sync(state, true);
 
   return state;
 }
@@ -1235,24 +1239,27 @@ async function index() {
       return;
     }
 
-    /*  const state = {
-    handle: handle,
-    keys: keypair,
+    storeKeypair(keypair);
 
-    data: newData(),
-    cursor: -1,
-  };
+    const state = {
+      keys: keypair,
+      data: newData(),
+      cursor: -1,
+    };
 
-  
     await sync(state, true);
-  */
-
-    // await sync(state, true);
   } else {
     let state = await getState();
+
     if (state) {
+      await sync(state, false);
     } else {
-      state = await init(await generateKeypair(), createRandomString(16));
+      const keypair = await generateKeypair();
+      storeKeypair(keypair);
+
+      state = await init(keypair, createRandomString(16));
+
+      await sync(state, true);
     }
   }
 
