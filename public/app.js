@@ -263,6 +263,68 @@ async function auth(privateKey, publicKey) {
     .sign(privateKey);
 }
 
+/**
+ * @callback attachSelectListenersCallback
+ * @param {'select'|'unselect'} op
+ * @param {string} key
+ * @param {string} value
+ */
+
+/**
+ * Attach click listeners to a list of selectable elements
+ * @param {NodeListOf<Element> | Element[]} elements - List elements to attach listeners to
+ * @param {string} formKey - Key to use in formResult object$
+ * @param {attachSelectListenersCallback} callback
+ */
+function attachSelectListeners(elements, formKey, callback) {
+  const sectionElement = document.querySelector("." + formKey);
+  const selectedSectionElement =
+    sectionElement?.querySelector(".selected-section");
+
+  elements.forEach((li, i) => {
+    li.addEventListener("click", function (e) {
+      const currentTarget = /** @type {Element} */ (e.currentTarget);
+      let classes = currentTarget.getAttribute("class")?.split(" ") || [];
+
+      const index = classes.indexOf("selected");
+      if (index !== -1) {
+        classes.splice(index, 1);
+        callback("unselect", formKey, "");
+
+        // If the section as a selected-section element, empty it.
+        if (selectedSectionElement) {
+          selectedSectionElement.textContent = "";
+        }
+      } else {
+        classes.push("selected");
+        callback("select", formKey, li.getAttribute("data-key"));
+
+        // If the section as a selected-section element, display the user choice there.
+        if (selectedSectionElement) {
+          const optionName = li.querySelector(
+            `.${formKey}__select__option__title`,
+          )?.textContent;
+          selectedSectionElement.textContent = optionName || "";
+
+          sectionElement?.removeAttribute("open");
+        }
+
+        // Deselect all other elements in this group
+        elements.forEach((li2, j) => {
+          if (i === j) return;
+          let classes = li2.getAttribute("class")?.split(" ") || [];
+          const index = classes.indexOf("selected");
+          if (index !== -1) classes.splice(index, 1);
+
+          li2.setAttribute("class", classes.join(" "));
+        });
+      }
+
+      currentTarget.setAttribute("class", classes.join(" "));
+    });
+  });
+}
+
 async function personnage() {
   /* TEMPLATES */
   /** @type {HTMLTemplateElement | null} */
@@ -1151,66 +1213,6 @@ async function personnage() {
     });
   }
 
-  /**
-   * Attach click listeners to a list of selectable elements
-   * @param {NodeListOf<Element> | Element[]} elements - List elements to attach listeners to
-   * @param {string} formKey - Key to use in formResult object
-   */
-  function attachSelectListeners(elements, formKey) {
-    const sectionElement = document.querySelector("." + formKey);
-    const selectedSectionElement =
-      sectionElement?.querySelector(".selected-section");
-
-    elements.forEach((li, i) => {
-      li.addEventListener("click", function (e) {
-        const currentTarget = /** @type {Element} */ (e.currentTarget);
-        let classes = currentTarget.getAttribute("class")?.split(" ") || [];
-
-        const index = classes.indexOf("selected");
-        if (index !== -1) {
-          classes.splice(index, 1);
-          delete formResult[formKey];
-
-          updateSkillList();
-          console.log(formResult);
-
-          // If the section as a selected-section element, empty it.
-          if (selectedSectionElement) {
-            selectedSectionElement.textContent = "";
-          }
-        } else {
-          classes.push("selected");
-          formResult[formKey] = li.getAttribute("data-key");
-
-          updateSkillList();
-          console.log(formResult);
-
-          // If the section as a selected-section element, display the user choice there.
-          if (selectedSectionElement) {
-            const optionName = li.querySelector(
-              `.${formKey}__select__option__title`,
-            )?.textContent;
-            selectedSectionElement.textContent = optionName || "";
-
-            sectionElement?.removeAttribute("open");
-          }
-
-          // Deselect all other elements in this group
-          elements.forEach((li2, j) => {
-            if (i === j) return;
-            let classes = li2.getAttribute("class")?.split(" ") || [];
-            const index = classes.indexOf("selected");
-            if (index !== -1) classes.splice(index, 1);
-
-            li2.setAttribute("class", classes.join(" "));
-          });
-        }
-
-        currentTarget.setAttribute("class", classes.join(" "));
-      });
-    });
-  }
-
   updateSkillList();
 
   const matches = document.querySelectorAll(".q-select--unique");
@@ -1220,7 +1222,16 @@ async function personnage() {
 
     const forAttribute = label?.getAttribute("for");
     if (forAttribute) {
-      attachSelectListeners(lis, forAttribute);
+      attachSelectListeners(lis, forAttribute, (op, key, value) => {
+        if (op === "select") {
+          formResult[key] = value;
+        } else {
+          delete formResult[key];
+        }
+
+        updateSkillList();
+        console.log(formResult);
+      });
     }
   });
 }
@@ -1300,6 +1311,27 @@ await sync(state, false);
 
 async function informations() {
   const state = await getState();
+
+  const formResult = {};
+
+  const matches = document.querySelectorAll(".q-select--unique");
+  matches.forEach(function (match) {
+    const label = match.querySelector("label");
+    const lis = match.querySelectorAll("li");
+
+    const forAttribute = label?.getAttribute("for");
+    if (forAttribute) {
+      attachSelectListeners(lis, forAttribute, (op, key, value) => {
+        if (op === "select") {
+          formResult[key] = value;
+        } else {
+          delete formResult[key];
+        }
+
+        console.log(formResult);
+      });
+    }
+  });
 }
 
 /*

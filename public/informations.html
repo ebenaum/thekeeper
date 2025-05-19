@@ -92,24 +92,22 @@
             >
             <input type="checkbox" name="conditions" required />
           </div>
-
-          <div class="button-group">
-            <button type="submit" class="button primary">Envoyer</button>
-          </div>
         </fieldset>
-      </form>
 
-      <form class="form">
         <fieldset class="form-element active">
           <legend>Informations de jeu</legend>
 
-          <div class="q-select">
+          <div class="q-select q-select--unique">
             <label for="returning-player"
               >Souhaitez-vous reprendre un personnage existant ?</label
             >
             <ul class="q-response-select d-inline">
-              <li class="input-select-choice active d-inline">Oui</li>
-              <li class="input-select-choice active d-inline">Non</li>
+              <li class="input-select-choice active d-inline" data-key="true">
+                Oui
+              </li>
+              <li class="input-select-choice active d-inline" data-key="false">
+                Non
+              </li>
             </ul>
           </div>
 
@@ -190,6 +188,10 @@
             ></textarea>
           </div>
         </fieldset>
+
+        <div class="button-group">
+          <button type="submit" class="button primary">Envoyer</button>
+        </div>
       </form>
     </div>
   </body>
