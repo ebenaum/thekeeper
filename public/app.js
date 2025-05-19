@@ -130,7 +130,7 @@ async function init(keypair, handle) {
 
 /**
  *
- * @returns {Promise<State|null>}
+ * @returns {Promise<State>}
  */
 async function getState() {
   const keys = JSON.parse(/** @type {string} */ (localStorage.getItem("keys")));
@@ -139,10 +139,21 @@ async function getState() {
   const data = JSON.parse(/** @type {string} */ (localStorage.getItem("data")));
 
   if (!keys) {
-    return null;
+    const keypair = await generateKeypair();
+    storeKeypair(keypair);
+
+    console.log(
+      `no keypair, generate new one: ${buf2hex(await window.crypto.subtle.exportKey("raw", keypair.public))}`,
+    );
+
+    const state = await init(keypair, createRandomString(16));
+
+    await sync(state, true);
+
+    return state;
   }
 
-  return {
+  const state = {
     data: data,
     cursor: cursor,
     keys: {
@@ -162,6 +173,14 @@ async function getState() {
       ),
     },
   };
+
+  console.log(
+    `keypair exists: ${buf2hex(await window.crypto.subtle.exportKey("raw", state.keys.public))}`,
+  );
+
+  await sync(state, false);
+
+  return state;
 }
 
 /**
@@ -1209,6 +1228,7 @@ async function personnage() {
 async function index() {
   const url = new URL(window.location.href);
   const authCode = url.searchParams.get("code");
+  let /** @type{State} */ state;
 
   if (authCode) {
     localStorage.clear();
@@ -1239,7 +1259,7 @@ async function index() {
 
     await storeKeypair(keypair);
 
-    const state = {
+    state = {
       keys: keypair,
       data: newData(),
       cursor: -1,
@@ -1247,26 +1267,10 @@ async function index() {
 
     await sync(state, true);
   } else {
-    let state = await getState();
-
-    if (state) {
-      await sync(state, false);
-    } else {
-      const keypair = await generateKeypair();
-      storeKeypair(keypair);
-
-      state = await init(keypair, createRandomString(16));
-
-      await sync(state, true);
-    }
+    state = await getState();
   }
 
   /*
-const state = await getState();
-
-await sync(state, true);
-
-
 let seed = create(EventsSchema, {
   events: [
     {
@@ -1294,11 +1298,48 @@ await sync(state, false);
 */
 }
 
+async function informations() {
+  const state = await getState();
+}
+
+/*
+let seed = create(EventsSchema, {
+  events: [
+    {
+      msg: {
+        case: "SeedPlayer",
+        value: {
+          handle: state.handle,
+          playerId: createRandomString(8),
+        },
+      },
+    },
+  ],
+});
+
+const response = await fetch("http://localhost:8081/state", {
+  method: "POST",
+  headers: {
+    Authorization: await auth(state.privateKey, state.publicKey),
+    "Content-Type": "application/x-protobuf",
+  },
+  body: toBinary(EventsSchema, seed),
+});
+
+await sync(state, false);
+*/
+
 switch (window.location.pathname) {
   case "/personnage.html":
+  case "/personnage":
     personnage();
+    break;
+  case "/informations.html":
+  case "/informations":
+    informations();
     break;
   case "/index.html":
   case "/":
     index();
+    break;
 }

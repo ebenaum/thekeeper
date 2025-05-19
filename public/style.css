@@ -713,3 +713,7 @@ details {
 .selected-section:not(:empty)::before {
   content: " - ";
 }
+
+.character-creation-button {
+  border: solid black;
+}

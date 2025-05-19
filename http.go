@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/ecdsa"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -76,6 +77,8 @@ func auth(db *sqlx.DB, tokenString string) (int64, ActorSpace, error) {
 	if err != nil {
 		return actorID, actorSpace, err
 	}
+
+	fmt.Println(hex.EncodeToString(append(publicKey.X.Bytes(), publicKey.Y.Bytes()...)))
 
 	actorID, actorSpace, err = GetState(db, append(publicKey.X.Bytes(), publicKey.Y.Bytes()...))
 	if err != nil {
