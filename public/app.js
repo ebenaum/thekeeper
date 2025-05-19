@@ -274,9 +274,10 @@ async function auth(privateKey, publicKey) {
  * Attach click listeners to a list of selectable elements
  * @param {NodeListOf<Element> | Element[]} elements - List elements to attach listeners to
  * @param {string} formKey - Key to use in formResult object$
+ * @param {boolean} allowMultiple
  * @param {attachSelectListenersCallback} callback
  */
-function attachSelectListeners(elements, formKey, callback) {
+function attachSelectListeners(elements, formKey, allowMultiple, callback) {
   const sectionElement = document.querySelector("." + formKey);
   const selectedSectionElement =
     sectionElement?.querySelector(".selected-section");
@@ -289,7 +290,7 @@ function attachSelectListeners(elements, formKey, callback) {
       const index = classes.indexOf("selected");
       if (index !== -1) {
         classes.splice(index, 1);
-        callback("unselect", formKey, "");
+        callback("unselect", formKey, li.getAttribute("data-key"));
 
         // If the section as a selected-section element, empty it.
         if (selectedSectionElement) {
@@ -309,15 +310,17 @@ function attachSelectListeners(elements, formKey, callback) {
           sectionElement?.removeAttribute("open");
         }
 
-        // Deselect all other elements in this group
-        elements.forEach((li2, j) => {
-          if (i === j) return;
-          let classes = li2.getAttribute("class")?.split(" ") || [];
-          const index = classes.indexOf("selected");
-          if (index !== -1) classes.splice(index, 1);
+        if (!allowMultiple) {
+          // Deselect all other elements in this group
+          elements.forEach((li2, j) => {
+            if (i === j) return;
+            let classes = li2.getAttribute("class")?.split(" ") || [];
+            const index = classes.indexOf("selected");
+            if (index !== -1) classes.splice(index, 1);
 
-          li2.setAttribute("class", classes.join(" "));
-        });
+            li2.setAttribute("class", classes.join(" "));
+          });
+        }
       }
 
       currentTarget.setAttribute("class", classes.join(" "));
@@ -1222,7 +1225,7 @@ async function personnage() {
 
     const forAttribute = label?.getAttribute("for");
     if (forAttribute) {
-      attachSelectListeners(lis, forAttribute, (op, key, value) => {
+      attachSelectListeners(lis, forAttribute, false, (op, key, value) => {
         if (op === "select") {
           formResult[key] = value;
         } else {
@@ -1314,18 +1317,38 @@ async function informations() {
 
   const formResult = {};
 
-  const matches = document.querySelectorAll(".q-select--unique");
-  matches.forEach(function (match) {
+  document.querySelectorAll(".q-select--unique").forEach(function (match) {
     const label = match.querySelector("label");
     const lis = match.querySelectorAll("li");
 
     const forAttribute = label?.getAttribute("for");
     if (forAttribute) {
-      attachSelectListeners(lis, forAttribute, (op, key, value) => {
+      attachSelectListeners(lis, forAttribute, false, (op, key, value) => {
         if (op === "select") {
           formResult[key] = value;
         } else {
           delete formResult[key];
+        }
+
+        console.log(formResult);
+      });
+    }
+  });
+
+  document.querySelectorAll(".q-select--multiple").forEach(function (match) {
+    const label = match.querySelector("label");
+    const lis = match.querySelectorAll("li");
+
+    const forAttribute = label?.getAttribute("for");
+    if (forAttribute) {
+      attachSelectListeners(lis, forAttribute, true, (op, key, value) => {
+        if (op === "select") {
+          formResult[key] = (formResult[key] || []).concat([value]);
+        } else {
+          var index = formResult[key].indexOf(value);
+          if (index !== -1) {
+            formResult[key].splice(index, 1);
+          }
         }
 
         console.log(formResult);

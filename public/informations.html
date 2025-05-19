@@ -38,12 +38,18 @@
             <input type="text" name="urgency-tel" required />
           </div>
 
-          <div class="q-select">
+          <div class="q-select q-select q-select--unique">
             <label for="age">Age :</label>
             <ul class="q-response-select d-inline">
-              <li class="input-select-choice active d-inline">- de 12 ans</li>
-              <li class="input-select-choice active d-inline">- de 18 ans</li>
-              <li class="input-select-choice active d-inline">- de 99 ans</li>
+              <li class="input-select-choice active d-inline" data-key="-12ans">
+                - de 12 ans
+              </li>
+              <li class="input-select-choice active d-inline" data-key="-18ans">
+                - de 18 ans
+              </li>
+              <li class="input-select-choice active d-inline" data-key="-99ans">
+                - de 99 ans
+              </li>
             </ul>
           </div>
 
@@ -140,38 +146,152 @@
             ></textarea>
           </div>
 
-          <div class="q-select">
+          <div class="q-select q-select q-select--multiple">
             <label for="player-game-style"
               >Quel type de jeu appréciez-vous en particulier ?</label
             >
             <ul class="q-response-select d-inline">
-              <li class="input-select-choice active d-inline">Herboristerie</li>
-              <li class="input-select-choice active d-inline">Extravagance</li>
-              <li class="input-select-choice active d-inline">Rôles légers</li>
-              <li class="input-select-choice active d-inline">Rôles sérieux</li>
-              <li class="input-select-choice active d-inline">Espionnage</li>
-              <li class="input-select-choice active d-inline">Jeux de cour</li>
-              <li class="input-select-choice active d-inline">Rituels</li>
-              <li class="input-select-choice active d-inline">Premier plan</li>
-              <li class="input-select-choice active d-inline">Antagonismes</li>
-              <li class="input-select-choice active d-inline">Exploration</li>
-              <li class="input-select-choice active d-inline">Commerce</li>
-              <li class="input-select-choice active d-inline">Artisanat</li>
-              <li class="input-select-choice active d-inline">
+              <li class="input-select-choice active d-inline" data-key="">
+                Herboristerie
+              </li>
+              <li class="input-select-choice active d-inline" data-key="">
+                Extravagance
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Rôles légers"
+              >
+                Rôles légers
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Rôles sérieux"
+              >
+                Rôles sérieux
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Espionnage"
+              >
+                Espionnage
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Jeux de cour"
+              >
+                Jeux de cour
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Rituels"
+              >
+                Rituels
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Premier plan"
+              >
+                Premier plan
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Antagonismes"
+              >
+                Antagonismes
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Exploration"
+              >
+                Exploration
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Commerce"
+              >
+                Commerce
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Artisanat"
+              >
+                Artisanat
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Plutôt suiveur"
+              >
                 Plutôt suiveur
               </li>
-              <li class="input-select-choice active d-inline">Enquêtes</li>
-              <li class="input-select-choice active d-inline">Jeu religieux</li>
-              <li class="input-select-choice active d-inline">Diplomatie</li>
-              <li class="input-select-choice active d-inline">Combat</li>
-              <li class="input-select-choice active d-inline">Plutôt acteur</li>
-              <li class="input-select-choice active d-inline">Intrigues</li>
-              <li class="input-select-choice active d-inline">Eloquences</li>
-              <li class="input-select-choice active d-inline">Mysticisme</li>
-              <li class="input-select-choice active d-inline">Apprentissage</li>
-              <li class="input-select-choice active d-inline">Initiateur</li>
-              <li class="input-select-choice active d-inline">Dilemmes</li>
-              <li class="input-select-choice active d-inline">Leadership</li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Enquêtes"
+              >
+                Enquêtes
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Jeu religieux"
+              >
+                Jeu religieux
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Diplomatie"
+              >
+                Diplomatie
+              </li>
+              <li class="input-select-choice active d-inline" data-key="Combat">
+                Combat
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Plutôt acteur"
+              >
+                Plutôt acteur
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Intrigues"
+              >
+                Intrigues
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Eloquences"
+              >
+                Eloquences
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Mysticisme"
+              >
+                Mysticisme
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Apprentissage"
+              >
+                Apprentissage
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Initiateur"
+              >
+                Initiateur
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Dilemmes"
+              >
+                Dilemmes
+              </li>
+              <li
+                class="input-select-choice active d-inline"
+                data-key="Leadership"
+              >
+                Leadership
+              </li>
             </ul>
           </div>
 
