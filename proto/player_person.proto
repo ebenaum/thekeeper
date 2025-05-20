@@ -8,14 +8,16 @@ message EventPlayerPerson {
    string          surname               = 2;
    string          age                   = 3;
    string          cityOfOrigin          = 4;
-   string          phoneNumber           = 5;
-   string          healthDeclaration     = 6;
-   string          additionalInformation = 7;
-   string          peopleToPlayWith      = 8;
-   string          skill                 = 9;
-   bool            useExistingCharacter  = 10;
-   string          existingCharacterAchievements  = 11;
-   string          gameStyle = 12;
-   repeated string gameStyleTags = 13;
-   string          situationToAvoid = 14;
+   string          contact               = 5;
+   string          emergencyContact      = 6;
+   string          health                = 7;
+   string          additionalInformation = 8;
+   string          peopleToPlayWith      = 9;
+   string          skills                = 10;
+   bool            useExistingCharacter  = 11;
+   bool            approvedConditions    = 12;
+   string          existingCharacterAchievements  = 13;
+   string          gameStyle = 14;
+   repeated string gameStyleTags = 15;
+   string          situationToAvoid = 16;
 }

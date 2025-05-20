@@ -7,24 +7,20 @@ import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv1";
 /**
  * Describes the file player_character.proto.
  */
-export const file_player_character =
-  /*@__PURE__*/
-  fileDesc(
-    "ChZwbGF5ZXJfY2hhcmFjdGVyLnByb3RvEgl0aGVrZWVwZXIiVgoPQ2hhcmFjdGVyaXN0aWNzEg0KBWNvcnBzGAEgASgFEhEKCWRleHRlcml0ZRgCIAEoBRIRCglpbmZsdWVuY2UYAyABKAUSDgoGc2F2b2lyGAQgASgFIscCChRFdmVudFBsYXllckNoYXJhY3RlchILCgN2ZHYYASABKAkSDAoEcmFjZRgCIAEoCRI7CgZza2lsbHMYAyADKAsyKy50aGVrZWVwZXIuRXZlbnRQbGF5ZXJDaGFyYWN0ZXIuU2tpbGxzRW50cnkSMwoPY2hhcmFjdGVyaXN0aWNzGAQgASgLMhoudGhla2VlcGVyLkNoYXJhY3RlcmlzdGljcxJBCglpbnZlbnRvcnkYBSADKAsyLi50aGVrZWVwZXIuRXZlbnRQbGF5ZXJDaGFyYWN0ZXIuSW52ZW50b3J5RW50cnkaLQoLU2tpbGxzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgFOgI4ARowCg5JbnZlbnRvcnlFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAU6AjgBQipaKGdpdGh1Yi5jb20vZWJlbmF1bS90aGVrZWVwZXIvcHJvdG87cHJvdG9iBnByb3RvMw",
-  );
+export const file_player_character = /*@__PURE__*/
+  fileDesc("ChZwbGF5ZXJfY2hhcmFjdGVyLnByb3RvEgl0aGVrZWVwZXIiVgoPQ2hhcmFjdGVyaXN0aWNzEg0KBWNvcnBzGAEgASgFEhEKCWRleHRlcml0ZRgCIAEoBRIRCglpbmZsdWVuY2UYAyABKAUSDgoGc2F2b2lyGAQgASgFIscCChRFdmVudFBsYXllckNoYXJhY3RlchILCgN2ZHYYASABKAkSDAoEcmFjZRgCIAEoCRI7CgZza2lsbHMYAyADKAsyKy50aGVrZWVwZXIuRXZlbnRQbGF5ZXJDaGFyYWN0ZXIuU2tpbGxzRW50cnkSMwoPY2hhcmFjdGVyaXN0aWNzGAQgASgLMhoudGhla2VlcGVyLkNoYXJhY3RlcmlzdGljcxJBCglpbnZlbnRvcnkYBSADKAsyLi50aGVrZWVwZXIuRXZlbnRQbGF5ZXJDaGFyYWN0ZXIuSW52ZW50b3J5RW50cnkaLQoLU2tpbGxzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgFOgI4ARowCg5JbnZlbnRvcnlFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAU6AjgBQipaKGdpdGh1Yi5jb20vZWJlbmF1bS90aGVrZWVwZXIvcHJvdG87cHJvdG9iBnByb3RvMw");
 
 /**
  * Describes the message thekeeper.Characteristics.
  * Use `create(CharacteristicsSchema)` to create a new message.
  */
-export const CharacteristicsSchema =
-  /*@__PURE__*/
+export const CharacteristicsSchema = /*@__PURE__*/
   messageDesc(file_player_character, 0);
 
 /**
  * Describes the message thekeeper.EventPlayerCharacter.
  * Use `create(EventPlayerCharacterSchema)` to create a new message.
  */
-export const EventPlayerCharacterSchema =
-  /*@__PURE__*/
+export const EventPlayerCharacterSchema = /*@__PURE__*/
   messageDesc(file_player_character, 1);
+

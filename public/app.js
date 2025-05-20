@@ -228,15 +228,16 @@ async function sync(state, reset) {
 function processEvent(data, eventType, eventValue) {
   switch (eventType) {
     case "SeedPlayer":
-      if (data.players[eventValue.playerId]) {
-        throw Error(`player ${eventValue.playerId} already exists`);
-      }
-
       data.players[eventValue.playerId] = { playerId: eventValue.playerId };
 
       break;
     case "SeedActor":
       data.handle = eventValue.handle;
+
+      break;
+
+    case "PlayerPerson":
+      console.log(eventValue);
 
       break;
     default:
@@ -1374,27 +1375,80 @@ async function informations() {
             formResult[key].splice(index, 1);
           }
         }
-
-        console.log(formResult);
       });
     }
   });
+
+  const formElement = document.getElementById("form");
+
+  async function submitForm() {
+    const playerId = createRandomString(8);
+
+    let seed = create(EventsSchema, {
+      events: [
+        {
+          msg: {
+            case: "SeedPlayer",
+            value: {
+              handle: state.data.handle,
+              playerId: playerId,
+            },
+          },
+        },
+        {
+          msg: {
+            case: "PlayerPerson",
+            value: {
+              playerId: playerId,
+              surname: formResult.surname,
+              age: formResult.age,
+              cityOfOrigin: formResult.cityOfOrigin,
+              contact: formResult.contact,
+              approvedConditions: formResult.approvedConditions,
+              emergencyContact: formResult.emergencyContact,
+              health: formResult.health,
+              peopleToPlayWith: formResult.peopleToPlayWith,
+              skills: formResult.skills,
+              useExistingCharacter: formResult.useExistingCharacter,
+              existingCharacterAchievements:
+                formResult.existingCharacterAchievements,
+              gameStyle: formResult.gameStyle,
+              gameStyleTags: formResult.gameStyleTags,
+              situationToAvoid: formResult.situationToAvoid,
+            },
+          },
+        },
+      ],
+    });
+
+    const response = await fetch("http://localhost:8081/state", {
+      method: "POST",
+      headers: {
+        Authorization: await auth(state.keys.private, state.keys.public),
+        "Content-Type": "application/x-protobuf",
+      },
+      body: toBinary(EventsSchema, seed),
+    });
+
+    const jsonResponse = await response.json();
+    if (jsonResponse[0].error) {
+      throw jsonResponse[0].error;
+    }
+  }
+
+  if (formElement) {
+    formElement.onsubmit = function () {
+      console.log(formResult);
+
+      submitForm();
+
+      return false;
+    };
+  }
 }
 
 /*
-let seed = create(EventsSchema, {
-  events: [
-    {
-      msg: {
-        case: "SeedPlayer",
-        value: {
-          handle: state.handle,
-          playerId: createRandomString(8),
-        },
-      },
-    },
-  ],
-});
+
 
 const response = await fetch("http://localhost:8081/state", {
   method: "POST",

@@ -19,13 +19,13 @@
 
   <body>
     <div class="container">
-      <form class="form">
+      <form id="form">
         <fieldset class="administrative form-element active">
           <legend>Informations administratives</legend>
 
           <div class="input-text">
-            <label for="fullname">Prénom & Nom :</label>
-            <input type="text" name="fullname" required />
+            <label for="surname">Prénom & Nom :</label>
+            <input type="text" name="surname" required />
           </div>
 
           <div class="input-text">
@@ -34,8 +34,8 @@
           </div>
 
           <div class="input-text">
-            <label for="urgency-tel">Contact d'urgence (téléphone) :</label>
-            <input type="text" name="urgency-tel" required />
+            <label for="emergencyContact">Contact d'urgence (téléphone) :</label>
+            <input type="text" name="emergencyContact" required />
           </div>
 
           <div class="q-select q-select q-select--unique">
@@ -54,8 +54,8 @@
           </div>
 
           <div class="input-text">
-            <label for="city-of-origin">Ville d'origine :</label>
-            <input type="text" name="city-of-origin" required />
+            <label for="cityOfOrigin">Ville d'origine :</label>
+            <input type="text" name="cityOfOrigin" required />
           </div>
 
           <div class="input-text">
@@ -72,10 +72,10 @@
           </div>
 
           <div class="input-text">
-            <label for="player-group"
+            <label for="peopleToPlayWith"
               >Avec quelles autres personnes voulez-vous vraiment jouer ?</label
             >
-            <input class="player-group-input" type="text" name="player-group" />
+            <input class="player-group-input" type="text" name="peopleToPlayWith" />
           </div>
 
           <div class="input-text">
@@ -91,12 +91,12 @@
           </div>
 
           <div class="input-checkbox">
-            <label class="d-block" for="conditions"
+            <label class="d-block" for="approvedConditions"
               >En participant à l'événement, vous acceptez de respecter les
               consignes des livres de règles, de sécurité ainsi que celles
               données par les membres d'organisation lors de l'évènement</label
             >
-            <input type="checkbox" name="conditions" required />
+            <input type="checkbox" name="approvedConditions" required />
           </div>
         </fieldset>
 
@@ -104,7 +104,7 @@
           <legend>Informations de jeu</legend>
 
           <div class="q-select q-select--unique">
-            <label for="returning-player"
+            <label for="useExistingCharacter"
               >Souhaitez-vous reprendre un personnage existant ?</label
             >
             <ul class="q-response-select d-inline">
@@ -118,13 +118,13 @@
           </div>
 
           <div class="input-text">
-            <label for="return-player-info" class="d-inline"
+            <label for="existingCharacterAchievements" class="d-inline"
               >Décrivez si vous le voulez ce qu'a accompli votre personnage et
               son inventaire à la fin du GN précédent (objets, gemmes, formules
               acquises, Saison choisie...) :</label
             >
             <textarea
-              name="return-player-info"
+              name="existingCharacterAchievements"
               class="q-response-text"
               cols="50"
               rows="5"
@@ -132,14 +132,14 @@
           </div>
 
           <div class="input-text">
-            <label for="player-description" class="d-inline"
+            <label for="gameStyle" class="d-inline"
               >Décrivez ici le personnage que vous aimeriez jouer et ce que vous
               aimeriez vivre pendant ce évènement. N'hésitez pas à intégrer le
               max de mots-clés ! C'est la case la plus importante surtout si
               vous souhaitez nous laisser improviser pour la création.</label
             >
             <textarea
-              name="player-description"
+              name="gameStyle"
               class="q-response-text"
               cols="50"
               rows="5"
@@ -147,7 +147,7 @@
           </div>
 
           <div class="q-select q-select q-select--multiple">
-            <label for="player-game-style"
+            <label for="gameStyleTags"
               >Quel type de jeu appréciez-vous en particulier ?</label
             >
             <ul class="q-response-select d-inline">
@@ -296,12 +296,12 @@
           </div>
 
           <div class="input-text">
-            <label for="player-position-to-avoid" class="d-inline"
+            <label for="situationToAvoid" class="d-inline"
               >Quelles situations (ou personnes) voulez-vous absolument éviter
               ?</label
             >
             <textarea
-              name="player-position-to-avoid"
+              name="situationToAvoid"
               class="q-response-text"
               cols="50"
               rows="5"
