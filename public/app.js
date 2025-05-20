@@ -5,6 +5,7 @@ import * as jose from "jose";
 // @ts-ignore
 import { create, toJson, toBinary, fromBinary } from "@bufbuild/protobuf";
 import { EventsSchema } from "./event_pb.js";
+import { EventPlayerPersonSchema } from "./player_person_pb.js";
 
 /**
  *
@@ -237,7 +238,11 @@ function processEvent(data, eventType, eventValue) {
       break;
 
     case "PlayerPerson":
-      console.log(eventValue);
+      console.log(toJson(EventPlayerPersonSchema, eventValue));
+      data.players[eventValue.playerId] = toJson(
+        EventPlayerPersonSchema,
+        eventValue,
+      );
 
       break;
     default:
