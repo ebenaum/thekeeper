@@ -1302,8 +1302,12 @@ async function index() {
         playerTemplate.content.cloneNode(true)
       );
 
-      const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
-      liElement.textContent = player.surname;
+      const aElement = /** @type {HTMLElement} */ (clone.querySelector("a"));
+      aElement.textContent = player.surname;
+      aElement.setAttribute(
+        "href",
+        "/informations.html?playerId=" + player.playerId,
+      );
 
       containerElement?.prepend(clone);
     });
