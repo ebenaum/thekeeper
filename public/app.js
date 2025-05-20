@@ -1335,6 +1335,30 @@ async function informations() {
     }
   });
 
+  document.querySelectorAll(".input-text").forEach(function (match) {
+    const label = match.querySelector("label");
+    const input = match.querySelector("input");
+
+    const forAttribute = label?.getAttribute("for");
+
+    match.addEventListener("input", (event) => {
+      const target = /** @type{HTMLInputElement}*/ (event.target);
+      formResult[forAttribute] = target.value;
+    });
+  });
+
+  document.querySelectorAll(".input-checkbox").forEach(function (match) {
+    const label = match.querySelector("label");
+    const input = match.querySelector("input");
+
+    const forAttribute = label?.getAttribute("for");
+
+    match.addEventListener("input", (event) => {
+      const target = /** @type{HTMLInputElement}*/ (event.target);
+      formResult[forAttribute] = target.checked;
+    });
+  });
+
   document.querySelectorAll(".q-select--multiple").forEach(function (match) {
     const label = match.querySelector("label");
     const lis = match.querySelectorAll("li");
