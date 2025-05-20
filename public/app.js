@@ -118,7 +118,7 @@ async function init(keypair, handle) {
 
 /**
  * @typedef {Object} Data
- * @property {Object.<string, {playerId: string}>} players
+ * @property {Object.<string, {playerId: string, surname: string}>} players
  * @property {string} handle
  */
 
@@ -229,8 +229,6 @@ async function sync(state, reset) {
 function processEvent(data, eventType, eventValue) {
   switch (eventType) {
     case "SeedPlayer":
-      data.players[eventValue.playerId] = { playerId: eventValue.playerId };
-
       break;
     case "SeedActor":
       data.handle = eventValue.handle;
@@ -1246,6 +1244,17 @@ async function personnage() {
 }
 
 async function index() {
+  /* TEMPLATES */
+  /** @type {HTMLTemplateElement | null} */
+  const playerTemplate = document.querySelector("#template__player");
+  if (!playerTemplate) {
+    throw new Error("cannot retrieve player template");
+  }
+
+  /* TEMPLATES */
+
+  const containerElement = document.querySelector(".container");
+
   const url = new URL(window.location.href);
   const authCode = url.searchParams.get("code");
   let /** @type{State} */ state;
@@ -1267,7 +1276,6 @@ async function index() {
     );
 
     if (response.status != 200) {
-      const containerElement = document.querySelector(".container");
       const messageElement = document.createElement("h1");
 
       messageElement.textContent = "Le lien ne marche pas :(";
@@ -1288,6 +1296,17 @@ async function index() {
     await sync(state, true);
   } else {
     state = await getState();
+
+    Object.values(state.data.players).forEach((player) => {
+      const clone = /** @type {HTMLElement} */ (
+        playerTemplate.content.cloneNode(true)
+      );
+
+      const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
+      liElement.textContent = player.surname;
+
+      containerElement?.prepend(clone);
+    });
   }
 
   /*
