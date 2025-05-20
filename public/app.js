@@ -1312,37 +1312,16 @@ async function index() {
       containerElement?.prepend(clone);
     });
   }
-
-  /*
-let seed = create(EventsSchema, {
-  events: [
-    {
-      msg: {
-        case: "SeedPlayer",
-        value: {
-          handle: state.handle,
-          playerId: createRandomString(8),
-        },
-      },
-    },
-  ],
-});
-
-const response = await fetch("http://localhost:8081/state", {
-  method: "POST",
-  headers: {
-    Authorization: await auth(state.privateKey, state.publicKey),
-    "Content-Type": "application/x-protobuf",
-  },
-  body: toBinary(EventsSchema, seed),
-});
-
-await sync(state, false);
-*/
 }
 
 async function informations() {
   const state = await getState();
+
+  const url = new URL(window.location.href);
+  const playerId = url.searchParams.get("playerId");
+  if (playerId) {
+    console.log("do something with playerId", playerId);
+  }
 
   const formResult = {};
 
@@ -1493,14 +1472,20 @@ await sync(state, false);
 switch (window.location.pathname) {
   case "/personnage.html":
   case "/personnage":
+    console.log("route: personnage");
+
     personnage();
     break;
   case "/informations.html":
   case "/informations":
+    console.log("route: informations");
+
     informations();
     break;
   case "/index.html":
   case "/":
+    console.log("route: index");
+
     index();
     break;
 }
