@@ -254,7 +254,6 @@ function processEvent(data, eventType, eventValue) {
       break;
 
     case "PlayerPerson":
-      console.log(toJson(EventPlayerPersonSchema, eventValue));
       data.players[eventValue.playerId] = toJson(
         EventPlayerPersonSchema,
         eventValue,
@@ -913,7 +912,6 @@ async function personnage() {
     } else {
       delete formResult.skills[skillKey];
     }
-    console.log(formResult);
     budgetCounterElement.textContent = skillBudget + "";
     updateSkillButtonStates();
   }
@@ -1255,7 +1253,6 @@ async function personnage() {
         }
 
         updateSkillList();
-        console.log(formResult);
       });
     }
   });
@@ -1334,13 +1331,7 @@ async function index() {
 async function informations() {
   const state = await getState();
 
-  const url = new URL(window.location.href);
-  const playerId = url.searchParams.get("playerId");
-  if (playerId) {
-    console.log("do something with playerId", playerId);
-  }
-
-  const /** @type{InformationsForm} */ formResult = {
+  let /** @type{InformationsForm} */ formResult = {
       surname: "",
       age: "",
       cityOfOrigin: "",
@@ -1357,32 +1348,78 @@ async function informations() {
       situationToAvoid: "",
     };
 
+  const url = new URL(window.location.href);
+  const playerId = url.searchParams.get("playerId");
+  if (playerId) {
+    formResult = state.data.players[playerId];
+  }
+
   document.querySelectorAll(".q-select--unique").forEach(function (match) {
     const label = match.querySelector("label");
     const lis = match.querySelectorAll("li");
 
     const forAttribute = label?.getAttribute("for");
-    if (forAttribute) {
-      attachSelectListeners(lis, forAttribute, false, (op, key, value) => {
-        if (op === "select") {
-          formResult[key] = value;
-        } else {
-          delete formResult[key];
-        }
-
-        console.log(formResult);
-      });
+    if (!forAttribute) {
+      return;
     }
+
+    lis.forEach((li) => {
+      if (formResult[forAttribute].toString() === li.getAttribute("data-key")) {
+        li.classList.add("selected");
+      }
+    });
+
+    attachSelectListeners(lis, forAttribute, false, (op, key, value) => {
+      if (op === "select") {
+        formResult[key] = value;
+      } else {
+        delete formResult[key];
+      }
+    });
   });
 
-  document.querySelectorAll(".input-text").forEach(function (match) {
+  document.querySelectorAll(".q-select--multiple").forEach(function (match) {
     const label = match.querySelector("label");
-    const input = match.querySelector("input");
+    const lis = match.querySelectorAll("li");
 
     const forAttribute = label?.getAttribute("for");
     if (!forAttribute) {
       return;
     }
+
+    if (formResult[forAttribute]) {
+      lis.forEach((li) => {
+        if (
+          formResult[forAttribute].indexOf(li.getAttribute("data-key")) !== -1
+        ) {
+          li.classList.add("selected");
+        }
+      });
+    }
+
+    attachSelectListeners(lis, forAttribute, true, (op, key, value) => {
+      if (op === "select") {
+        formResult[key] = (formResult[key] || []).concat([value]);
+      } else {
+        var index = formResult[key].indexOf(value);
+        if (index !== -1) {
+          formResult[key].splice(index, 1);
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll(".input-text").forEach(function (match) {
+    const label = match.querySelector("label");
+    const input =
+      match.querySelector("input") || match.querySelector("textarea");
+
+    const forAttribute = label?.getAttribute("for");
+    if (!forAttribute || !input) {
+      return;
+    }
+
+    input.value = formResult[forAttribute] || "";
 
     match.addEventListener("input", (event) => {
       const target = /** @type{HTMLInputElement}*/ (event.target);
@@ -1395,9 +1432,11 @@ async function informations() {
     const input = match.querySelector("input");
 
     const forAttribute = label?.getAttribute("for");
-    if (!forAttribute) {
+    if (!forAttribute || !input) {
       return;
     }
+
+    input.checked = formResult[forAttribute] || false;
 
     match.addEventListener("input", (event) => {
       const target = /** @type{HTMLInputElement}*/ (event.target);
@@ -1405,65 +1444,56 @@ async function informations() {
     });
   });
 
-  document.querySelectorAll(".q-select--multiple").forEach(function (match) {
-    const label = match.querySelector("label");
-    const lis = match.querySelectorAll("li");
-
-    const forAttribute = label?.getAttribute("for");
-    if (forAttribute) {
-      attachSelectListeners(lis, forAttribute, true, (op, key, value) => {
-        if (op === "select") {
-          formResult[key] = (formResult[key] || []).concat([value]);
-        } else {
-          var index = formResult[key].indexOf(value);
-          if (index !== -1) {
-            formResult[key].splice(index, 1);
-          }
-        }
-      });
-    }
-  });
-
   const formElement = document.getElementById("form");
 
-  async function submitForm() {
-    const playerId = createRandomString(8);
+  /**
+   *
+   * @param {string | null} existingPlayerId
+   */
+  async function submitForm(existingPlayerId) {
+    const events = [];
+
+    let playerId = existingPlayerId;
+
+    if (!existingPlayerId) {
+      playerId = createRandomString(8);
+      events.push({
+        msg: {
+          case: "SeedPlayer",
+          value: {
+            handle: state.data.handle,
+            playerId: playerId,
+          },
+        },
+      });
+    }
+
+    events.push({
+      msg: {
+        case: "PlayerPerson",
+        value: {
+          playerId: playerId,
+          surname: formResult.surname,
+          age: formResult.age,
+          cityOfOrigin: formResult.cityOfOrigin,
+          contact: formResult.contact,
+          approvedConditions: formResult.approvedConditions,
+          emergencyContact: formResult.emergencyContact,
+          health: formResult.health,
+          peopleToPlayWith: formResult.peopleToPlayWith,
+          skills: formResult.skills,
+          useExistingCharacter: formResult.useExistingCharacter,
+          existingCharacterAchievements:
+            formResult.existingCharacterAchievements,
+          gameStyle: formResult.gameStyle,
+          gameStyleTags: formResult.gameStyleTags,
+          situationToAvoid: formResult.situationToAvoid,
+        },
+      },
+    });
 
     let seed = create(EventsSchema, {
-      events: [
-        {
-          msg: {
-            case: "SeedPlayer",
-            value: {
-              handle: state.data.handle,
-              playerId: playerId,
-            },
-          },
-        },
-        {
-          msg: {
-            case: "PlayerPerson",
-            value: {
-              playerId: playerId,
-              surname: formResult.surname,
-              age: formResult.age,
-              cityOfOrigin: formResult.cityOfOrigin,
-              contact: formResult.contact,
-              approvedConditions: formResult.approvedConditions,
-              emergencyContact: formResult.emergencyContact,
-              health: formResult.health,
-              peopleToPlayWith: formResult.peopleToPlayWith,
-              skills: formResult.skills,
-              useExistingCharacter: formResult.useExistingCharacter,
-              existingCharacterAchievements:
-                formResult.existingCharacterAchievements,
-              gameStyle: formResult.gameStyle,
-              gameStyleTags: formResult.gameStyleTags,
-              situationToAvoid: formResult.situationToAvoid,
-            },
-          },
-        },
-      ],
+      events: events,
     });
 
     const response = await fetch("http://localhost:8081/state", {
@@ -1479,13 +1509,15 @@ async function informations() {
     if (jsonResponse[0].error) {
       throw jsonResponse[0].error;
     }
+
+    if (!existingPlayerId) {
+      window.location.href = `?playerId=${playerId}`;
+    }
   }
 
   if (formElement) {
     formElement.onsubmit = function () {
-      console.log(formResult);
-
-      submitForm();
+      submitForm(playerId);
 
       return false;
     };
