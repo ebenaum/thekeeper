@@ -1363,11 +1363,15 @@ async function informations() {
       return;
     }
 
-    lis.forEach((li) => {
-      if (formResult[forAttribute].toString() === li.getAttribute("data-key")) {
-        li.classList.add("selected");
-      }
-    });
+    if (formResult[forAttribute]) {
+      lis.forEach((li) => {
+        if (
+          formResult[forAttribute].toString() === li.getAttribute("data-key")
+        ) {
+          li.classList.add("selected");
+        }
+      });
+    }
 
     attachSelectListeners(lis, forAttribute, false, (op, key, value) => {
       if (op === "select") {
@@ -1523,21 +1527,6 @@ async function informations() {
     };
   }
 }
-
-/*
-
-
-const response = await fetch("http://localhost:8081/state", {
-  method: "POST",
-  headers: {
-    Authorization: await auth(state.privateKey, state.publicKey),
-    "Content-Type": "application/x-protobuf",
-  },
-  body: toBinary(EventsSchema, seed),
-});
-
-await sync(state, false);
-*/
 
 switch (window.location.pathname) {
   case "/personnage.html":
