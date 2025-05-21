@@ -136,7 +136,7 @@ async function init(keypair, handle) {
 
 /**
  * @typedef {Object} Data
- * @property {Object.<string, InformationsForm>} players
+ * @property {Object.<string, {personal?: InformationsForm, character?: any}>} players
  * @property {string} handle
  */
 
@@ -247,6 +247,7 @@ async function sync(state, reset) {
 function processEvent(data, eventType, eventValue) {
   switch (eventType) {
     case "SeedPlayer":
+      data.players[eventValue.playerId] = {};
       break;
     case "SeedActor":
       data.handle = eventValue.handle;
@@ -254,7 +255,7 @@ function processEvent(data, eventType, eventValue) {
       break;
 
     case "PlayerPerson":
-      data.players[eventValue.playerId] = toJson(
+      data.players[eventValue.playerId].personal = toJson(
         EventPlayerPersonSchema,
         eventValue,
       );
@@ -350,6 +351,28 @@ function attachSelectListeners(elements, formKey, allowMultiple, callback) {
 }
 
 async function personnage() {
+  const state = await getState();
+
+  const url = new URL(window.location.href);
+  const playerId = url.searchParams.get("playerId");
+  if (!playerId) {
+    window.location.href = "/informations.html";
+    return;
+  }
+
+  let formResult = {
+    skills: {},
+    inventory: {},
+    characteristics: {
+      corps: 0,
+      dexterite: 0,
+      influence: 0,
+      savoir: 0,
+    },
+  };
+
+  formResult = state.data.players[playerId].character;
+
   /* TEMPLATES */
   /** @type {HTMLTemplateElement | null} */
   const mondeTemplate = document.querySelector("#template__group-option");
@@ -413,17 +436,6 @@ async function personnage() {
   const mondes = univers.filter((entry) => entry.tags.includes("monde"));
   const vdvs = univers.filter((entry) => entry.tags.includes("vdv"));
   const inventory = univers.filter((entry) => entry.tags.includes("inventory"));
-
-  const formResult = {
-    skills: {},
-    inventory: {},
-    characteristics: {
-      corps: 0,
-      dexterite: 0,
-      influence: 0,
-      savoir: 0,
-    },
-  };
 
   /**
    * Calculates the inventory budget based on the dexterity characteristic level.
@@ -1320,7 +1332,7 @@ async function index() {
       );
 
       const aElement = /** @type {HTMLElement} */ (clone.querySelector("a"));
-      aElement.textContent = player.surname;
+      aElement.textContent = player.personal?.surname || "";
       aElement.setAttribute("href", "/informations.html?playerId=" + playerId);
 
       containerElement?.prepend(clone);
@@ -1350,8 +1362,8 @@ async function informations() {
 
   const url = new URL(window.location.href);
   const playerId = url.searchParams.get("playerId");
-  if (playerId) {
-    formResult = state.data.players[playerId];
+  if (playerId && state.data.players[playerId].personal) {
+    formResult = state.data.players[playerId].personal;
   }
 
   document.querySelectorAll(".q-select--unique").forEach(function (match) {
