@@ -117,8 +117,26 @@ async function init(keypair, handle) {
 }
 
 /**
+ * @typedef {Object} InformationsForm
+ * @property {string}   surname
+ * @property {string}   age
+ * @property {string}   cityOfOrigin
+ * @property {string}   contact
+ * @property {boolean}  approvedConditions
+ * @property {string}   emergencyContact
+ * @property {string}   health
+ * @property {string}   peopleToPlayWith
+ * @property {string}   skills
+ * @property {string}   useExistingCharacter
+ * @property {string}   existingCharacterAchievements
+ * @property {string}   gameStyle
+ * @property {string[]} gameStyleTags
+ * @property {string}   situationToAvoid
+ */
+
+/**
  * @typedef {Object} Data
- * @property {Object.<string, {playerId: string, surname: string}>} players
+ * @property {Object.<string, InformationsForm>} players
  * @property {string} handle
  */
 
@@ -1297,17 +1315,16 @@ async function index() {
   } else {
     state = await getState();
 
-    Object.values(state.data.players).forEach((player) => {
+    Object.keys(state.data.players).forEach((playerId) => {
+      const player = state.data.players[playerId];
+
       const clone = /** @type {HTMLElement} */ (
         playerTemplate.content.cloneNode(true)
       );
 
       const aElement = /** @type {HTMLElement} */ (clone.querySelector("a"));
       aElement.textContent = player.surname;
-      aElement.setAttribute(
-        "href",
-        "/informations.html?playerId=" + player.playerId,
-      );
+      aElement.setAttribute("href", "/informations.html?playerId=" + playerId);
 
       containerElement?.prepend(clone);
     });
@@ -1323,7 +1340,22 @@ async function informations() {
     console.log("do something with playerId", playerId);
   }
 
-  const formResult = {};
+  const /** @type{InformationsForm} */ formResult = {
+      surname: "",
+      age: "",
+      cityOfOrigin: "",
+      contact: "",
+      approvedConditions: false,
+      emergencyContact: "",
+      health: "",
+      peopleToPlayWith: "",
+      skills: "",
+      useExistingCharacter: "",
+      existingCharacterAchievements: "",
+      gameStyle: "",
+      gameStyleTags: [],
+      situationToAvoid: "",
+    };
 
   document.querySelectorAll(".q-select--unique").forEach(function (match) {
     const label = match.querySelector("label");
@@ -1348,6 +1380,9 @@ async function informations() {
     const input = match.querySelector("input");
 
     const forAttribute = label?.getAttribute("for");
+    if (!forAttribute) {
+      return;
+    }
 
     match.addEventListener("input", (event) => {
       const target = /** @type{HTMLInputElement}*/ (event.target);
@@ -1360,6 +1395,9 @@ async function informations() {
     const input = match.querySelector("input");
 
     const forAttribute = label?.getAttribute("for");
+    if (!forAttribute) {
+      return;
+    }
 
     match.addEventListener("input", (event) => {
       const target = /** @type{HTMLInputElement}*/ (event.target);
