@@ -105,11 +105,15 @@ type SpacePlayer struct {
 	PlayerIDs map[string]struct{}
 }
 
-func NewSpacePlayer(actorID int64) SpacePlayer {
-	return SpacePlayer{
+func NewSpacePlayer(actorID int64) *SpacePlayer {
+	return &SpacePlayer{
 		ActorID:   actorID,
 		PlayerIDs: map[string]struct{}{},
 	}
+}
+
+func (s *SpacePlayer) GetEvents() []*proto.Event {
+	return s.Events
 }
 
 func (s *SpacePlayer) Process(sourceActorID int64, event *proto.Event) error {
@@ -127,6 +131,52 @@ func (s *SpacePlayer) Process(sourceActorID int64, event *proto.Event) error {
 			s.Events = append(s.Events, event)
 			s.PlayerIDs[v.SeedPlayer.PlayerId] = struct{}{}
 		}
+
+		return nil
+	case *proto.Event_PlayerPerson:
+		if _, exists := s.PlayerIDs[v.PlayerPerson.PlayerId]; exists {
+			s.Events = append(s.Events, event)
+		}
+
+		return nil
+	case *proto.Event_Permission:
+		return nil
+	default:
+		return fmt.Errorf("event %v not handled", v)
+	}
+
+}
+
+type ProjectionSpace interface {
+	Process(sourceActorID int64, event *proto.Event) error
+	GetEvents() []*proto.Event
+}
+
+type SpaceOrga struct {
+	ActorID   int64
+	Events    []*proto.Event
+	PlayerIDs map[string]struct{}
+}
+
+func NewSpaceOrga(actorID int64) *SpaceOrga {
+	return &SpaceOrga{
+		ActorID:   actorID,
+		PlayerIDs: map[string]struct{}{},
+	}
+}
+
+func (s *SpaceOrga) GetEvents() []*proto.Event {
+	return s.Events
+}
+
+func (s *SpaceOrga) Process(sourceActorID int64, event *proto.Event) error {
+	switch v := event.Msg.(type) {
+	case *proto.Event_SeedActor:
+		return nil
+
+	case *proto.Event_SeedPlayer:
+		s.Events = append(s.Events, event)
+		s.PlayerIDs[v.SeedPlayer.PlayerId] = struct{}{}
 
 		return nil
 	case *proto.Event_PlayerPerson:

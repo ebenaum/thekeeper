@@ -73,8 +73,14 @@ func Run(db *sqlx.DB, tsResultsToInclude map[int64]bool) ([]RunEventResult, erro
 	return results, nil
 }
 
-func FetchEvents(db *sqlx.DB, sourceActorID int64, from int64) ([]*proto.Event, error) {
-	space := NewSpacePlayer(sourceActorID)
+func FetchEvents(db *sqlx.DB, sourceActorID int64, space ActorSpace, from int64) ([]*proto.Event, error) {
+	var projection ProjectionSpace
+
+	if space == ActorSpaceOrga {
+		projection = NewSpaceOrga(sourceActorID)
+	} else {
+		projection = NewSpacePlayer(sourceActorID)
+	}
 
 	records, err := GetEvents(db, -1, EventRecordStatusAccepted)
 	if err != nil {
@@ -82,7 +88,7 @@ func FetchEvents(db *sqlx.DB, sourceActorID int64, from int64) ([]*proto.Event, 
 	}
 
 	for _, record := range records {
-		err := space.Process(record.SourceActorID, &record.Event)
+		err := projection.Process(record.SourceActorID, &record.Event)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"corrupted state: event %d has status %v. Process returned: %w",
@@ -94,17 +100,19 @@ func FetchEvents(db *sqlx.DB, sourceActorID int64, from int64) ([]*proto.Event, 
 	}
 
 	var cursor int
-	for cursor = range space.Events {
-		if space.Events[cursor].Ts > from {
+	events := projection.GetEvents()
+
+	for cursor = range events {
+		if events[cursor].Ts > from {
 			break
 		}
 	}
 
-	if len(space.Events) > 0 && space.Events[cursor].Ts == from {
+	if len(events) > 0 && events[cursor].Ts == from {
 		return nil, nil
 	}
 
-	return space.Events[cursor:], nil
+	return events[cursor:], nil
 }
 
 func InsertAndCheckEvents(db *sqlx.DB, from int64, sourceActorID int64, newEvents []*proto.Event) ([]RunEventResult, error) {

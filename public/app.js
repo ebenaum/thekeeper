@@ -136,7 +136,7 @@ async function init(keypair, handle) {
 
 /**
  * @typedef {Object} Data
- * @property {Object.<string, {personal?: InformationsForm, character?: any}>} players
+ * @property {Object.<string, {handle: string, personal?: InformationsForm, character?: any}>} players
  * @property {string} handle
  */
 
@@ -247,7 +247,8 @@ async function sync(state, reset) {
 function processEvent(data, eventType, eventValue) {
   switch (eventType) {
     case "SeedPlayer":
-      data.players[eventValue.playerId] = {};
+      data.players[eventValue.playerId] = { handle: eventValue.handle };
+
       break;
     case "SeedActor":
       data.handle = eventValue.handle;
@@ -1287,7 +1288,10 @@ async function index() {
   let /** @type{State} */ state;
 
   if (authCode) {
-    localStorage.clear();
+    if (localStorage.getItem("redeemed_code") === authCode) {
+      window.location.href = "/";
+      return;
+    }
 
     const keypair = await generateKeypair();
 
@@ -1312,7 +1316,10 @@ async function index() {
       return;
     }
 
+    localStorage.clear();
     await storeKeypair(keypair);
+
+    localStorage.setItem("redeemed_code", authCode);
 
     state = {
       keys: keypair,
@@ -1323,21 +1330,21 @@ async function index() {
     await sync(state, true);
   } else {
     state = await getState();
-
-    Object.keys(state.data.players).forEach((playerId) => {
-      const player = state.data.players[playerId];
-
-      const clone = /** @type {HTMLElement} */ (
-        playerTemplate.content.cloneNode(true)
-      );
-
-      const aElement = /** @type {HTMLElement} */ (clone.querySelector("a"));
-      aElement.textContent = player.personal?.surname || "";
-      aElement.setAttribute("href", "/informations.html?playerId=" + playerId);
-
-      containerElement?.prepend(clone);
-    });
   }
+
+  Object.keys(state.data.players).forEach((playerId) => {
+    const player = state.data.players[playerId];
+
+    const clone = /** @type {HTMLElement} */ (
+      playerTemplate.content.cloneNode(true)
+    );
+
+    const aElement = /** @type {HTMLElement} */ (clone.querySelector("a"));
+    aElement.textContent = player.personal?.surname || "";
+    aElement.setAttribute("href", "/informations.html?playerId=" + playerId);
+
+    containerElement?.prepend(clone);
+  });
 }
 
 async function informations() {

@@ -1,6 +1,6 @@
 PRAGMA foreign_keys = ON;
 
-CREATE TABLE auth_keys (
+CREATE TABLE IF NOT EXISTS auth_keys (
     key VARCHAR PRIMARY KEY,
     actor_id INTEGER, 
     redeemed_at INTEGER,
@@ -9,21 +9,21 @@ CREATE TABLE auth_keys (
     CHECK (actor_id != 0)
 );
 
-CREATE TABLE actors (
+CREATE TABLE IF NOT EXISTS actors (
     id INTEGER PRIMARY KEY,
     space TEXT CHECK( space IN ('orga','player') ) NOT NULL DEFAULT 'player'
 );
 
-INSERT INTO actors (id) VALUES (0);
+INSERT OR IGNORE INTO actors (id) VALUES (0);
 
-CREATE TABLE public_keys (
+CREATE TABLE IF NOT EXISTS public_keys (
     id INTEGER PRIMARY KEY,
     public_key BLOB NOT NULL
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS unique_public_keys_public_key ON public_keys (public_key);
 
-CREATE TABLE actors_public_keys (
+CREATE TABLE IF NOT EXISTS actors_public_keys (
     actor_id INTEGER,
     public_key_id INTEGER,
 
@@ -32,7 +32,7 @@ CREATE TABLE actors_public_keys (
     CHECK (actor_id != 0)
 );
 
-CREATE TABLE events (
+CREATE TABLE IF NOT EXISTS events (
   ts INTEGER PRIMARY KEY,
   source_actor_id INTEGER NOT NULL,
   data BLOB,

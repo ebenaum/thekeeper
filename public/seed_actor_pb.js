@@ -7,13 +7,16 @@ import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv1";
 /**
  * Describes the file seed_actor.proto.
  */
-export const file_seed_actor = /*@__PURE__*/
-  fileDesc("ChBzZWVkX2FjdG9yLnByb3RvEgl0aGVrZWVwZXIiIAoORXZlbnRTZWVkQWN0b3ISDgoGaGFuZGxlGAEgASgJQipaKGdpdGh1Yi5jb20vZWJlbmF1bS90aGVrZWVwZXIvcHJvdG87cHJvdG9iBnByb3RvMw");
+export const file_seed_actor =
+  /*@__PURE__*/
+  fileDesc(
+    "ChBzZWVkX2FjdG9yLnByb3RvEgl0aGVrZWVwZXIiIAoORXZlbnRTZWVkQWN0b3ISDgoGaGFuZGxlGAEgASgJQipaKGdpdGh1Yi5jb20vZWJlbmF1bS90aGVrZWVwZXIvcHJvdG87cHJvdG9iBnByb3RvMw",
+  );
 
 /**
  * Describes the message thekeeper.EventSeedActor.
  * Use `create(EventSeedActorSchema)` to create a new message.
  */
-export const EventSeedActorSchema = /*@__PURE__*/
+export const EventSeedActorSchema =
+  /*@__PURE__*/
   messageDesc(file_seed_actor, 0);
-

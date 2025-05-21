@@ -106,7 +106,7 @@ func HandleState(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		actorID, _, err := auth(db, r.Header.Get("Authorization"))
+		actorID, space, err := auth(db, r.Header.Get("Authorization"))
 		if err != nil {
 			var errplus Error
 
@@ -138,7 +138,7 @@ func HandleState(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		events, err := FetchEvents(db, actorID, from)
+		events, err := FetchEvents(db, actorID, space, from)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 
@@ -289,39 +289,6 @@ func HandleRedeemAuthKey(db *sqlx.DB) http.HandlerFunc {
 		}
 
 		_, err = LinkState(db, actorID, append(publicKey.X.Bytes(), publicKey.Y.Bytes()...))
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-
-			log.Println(err)
-
-			return
-		}
-
-		events, err := FetchEvents(db, actorID, -1)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-
-			log.Println(err)
-
-			return
-		}
-
-		response := &proto.Events{
-			Events: events,
-		}
-
-		responseEncoded, err := protolib.Marshal(response)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-
-			log.Println(err)
-
-			return
-		}
-
-		//		w.Header().Set("Content-Type", "application/x-protobuf")
-
-		_, err = w.Write(responseEncoded)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 

@@ -167,8 +167,10 @@ func InsertEvents(db *sqlx.DB, sourceActorID int64, events []*proto.Event) ([]in
 
 	ids := make([]int64, len(events))
 
+	ts := time.Now().UnixMilli()*1000 + rand.Int63n(1000)
+
 	for i, event := range events {
-		ts := time.Now().UnixMilli()*1000 + rand.Int63n(1000)
+		ts += int64(i)
 
 		event.Ts = ts
 
