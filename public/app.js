@@ -144,6 +144,25 @@ async function init() {
  */
 
 /**
+ * @typedef {Object} Characteristics
+ * @property {number} corps
+ * @property {number} dexterite
+ * @property {number} influence
+ * @property {number} savoir
+ */
+
+/**
+ * @typedef {Object} CharacterForm
+ * @property {string}                 name
+ * @property {string}                 group
+ * @property {string}                 vdv
+ * @property {string}                 race
+ * @property {Object.<string,number>} skills
+ * @property {Object.<string,number>} inventory
+ * @property {Characteristics}        characteristics
+ */
+
+/**
  * @typedef {Object} Data
  * @property {Object.<string, {handle: string, personal?: InformationsForm, character?: any}>} players
  * @property {string} handle
@@ -366,17 +385,20 @@ async function personnage() {
   }
     */
 
-  let formResult = {
-    name: "",
-    skills: {},
-    inventory: {},
-    characteristics: {
-      corps: 0,
-      dexterite: 0,
-      influence: 0,
-      savoir: 0,
-    },
-  };
+  let /** @type{CharacterForm} */ formResult = {
+      name: "",
+      group: "",
+      vdv: "",
+      race: "",
+      skills: {},
+      inventory: {},
+      characteristics: {
+        corps: 0,
+        dexterite: 0,
+        influence: 0,
+        savoir: 0,
+      },
+    };
 
   /* TEMPLATES */
   /** @type {HTMLTemplateElement | null} */
@@ -1255,8 +1277,7 @@ async function personnage() {
 
   updateSkillList();
 
-  const matches = document.querySelectorAll(".q-select--unique");
-  matches.forEach(function (match) {
+  document.querySelectorAll(".q-select--unique").forEach(function (match) {
     const label = match.querySelector("label");
     const lis = match.querySelectorAll("li");
 
@@ -1273,6 +1294,17 @@ async function personnage() {
       });
     }
   });
+
+  const formElement = document.getElementById("form");
+
+  if (formElement) {
+    console.log("here");
+    formElement.onsubmit = function () {
+      console.log(formResult);
+
+      return false;
+    };
+  }
 }
 
 async function index() {
