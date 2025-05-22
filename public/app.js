@@ -500,13 +500,15 @@ async function personnage() {
     }
   }
 
-  const characterNameInputElement = /** @type {HTMLElement} */ (
+  const characterNameInputElement = /** @type {HTMLInputElement} */ (
     document.querySelector(".character-name__input")
   );
 
   characterNameInputElement.addEventListener("input", (e) => {
     formResult.name = /** @type{HTMLInputElement}*/ (e.target)?.value;
   });
+
+  characterNameInputElement.value = formResult.name;
 
   const /** @type {Skill[]} */ skills = univers
       .filter((entry) => entry.tags.includes("skill"))
@@ -591,12 +593,17 @@ async function personnage() {
       return { levels, ...characteristic };
     });
 
-  let characteristicBudget = parseInt(
-    univers
-      .find((entry) => entry.key === "characteristics-default-points")
-      ?.tags.find((tag) => tag.startsWith("n:"))
-      ?.split(":")[1] || "0",
-  );
+  let characteristicBudget =
+    parseInt(
+      univers
+        .find((entry) => entry.key === "characteristics-default-points")
+        ?.tags.find((tag) => tag.startsWith("n:"))
+        ?.split(":")[1] || "0",
+    ) -
+    Object.values(formResult.characteristics).reduce(
+      (acc, cur) => acc + cur,
+      0,
+    );
 
   let skillBudget = parseInt(
     univers
@@ -604,6 +611,7 @@ async function personnage() {
       ?.tags.find((tag) => tag.startsWith("n:"))
       ?.split(":")[1] || "0",
   );
+
   let inventoryBudget = dexteriteToInventoryBudget(
     formResult.characteristics.dexterite,
   );
@@ -642,8 +650,8 @@ async function personnage() {
 
   characteristics.forEach((characteristic) => {
     const characteristicF = characteristic;
-    let lvl = 0;
-    let previousLvl = 0;
+    let lvl = formResult.characteristics[characteristic.key] || 0;
+    let previousLvl = formResult.characteristics[characteristic.key] || 0;
     let previousPcValue =
       characteristic.key === "savoir" ? defaultSavoirPcValue : null; // Initialize with default PC value for savoir
 
@@ -658,9 +666,11 @@ async function personnage() {
         el.querySelector(".characteristic__description")
       );
 
-      const inputElement = /** @type {HTMLElement} */ (
+      const inputElement = /** @type {HTMLInputElement} */ (
         el.querySelector(".characteristic__input")
       );
+
+      inputElement.value = lvl.toString();
 
       labelElement.textContent = characteristicF.label;
       labelElement.setAttribute("for", characteristicF.key);
