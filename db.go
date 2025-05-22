@@ -92,6 +92,26 @@ func InsertAuthKey(db *sqlx.DB, actorID int64) (string, error) {
 	return key, nil
 }
 
+func FindActorIDByHandle(db *sqlx.DB, handle string) (int64, error) {
+	records, err := GetEvents(db, -1, EventRecordStatusAccepted)
+	if err != nil {
+		return -1, fmt.Errorf("get events: %w", err)
+	}
+
+	for _, record := range records {
+		event := record.Event
+
+		switch v := event.Msg.(type) {
+		case *proto.Event_SeedActor:
+			if v.SeedActor.Handle == handle {
+				return record.SourceActorID, nil
+			}
+		}
+	}
+
+	return -1, fmt.Errorf("handle not found for handle %q", handle)
+}
+
 func UseAuthKey(db *sqlx.DB, key string) (int64, error) {
 	var actorID int64
 

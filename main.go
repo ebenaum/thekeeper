@@ -60,7 +60,7 @@ func main() {
 
 func httpserver(db *sqlx.DB) error {
 	http.HandleFunc("/state", HandleState(db))
-	http.HandleFunc("/auth/actors/{actor_id}", HandleCreateAuthKey(db))
+	http.HandleFunc("/auth/handles/{handle}", HandleCreateAuthKey(db))
 	http.HandleFunc("/auth/redeem/{key}", HandleRedeemAuthKey(db))
 
 	return http.ListenAndServe(":8081", nil)

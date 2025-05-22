@@ -219,12 +219,11 @@ func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		actorIDToLink, err := strconv.ParseInt(r.PathValue("actor_id"), 10, 64)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+		handleToLink := r.PathValue("handle")
 
-			log.Printf("cannot parse actor_id path params %q: %v", r.PathValue("actor_id"), err)
-			fmt.Fprintf(w, `{"message": "invalid actor_id"}`)
+		actorIDToLink, err := FindActorIDByHandle(db, handleToLink)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
 
 			return
 		}
@@ -239,7 +238,6 @@ func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
 		}
 
 		fmt.Fprintf(w, `{"message": "%s"}`, authKey)
-
 	}
 }
 

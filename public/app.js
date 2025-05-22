@@ -1329,6 +1329,11 @@ async function index() {
     };
 
     await sync(state, true);
+
+    if (state.data.permission === "orga") {
+      window.location.href = "/orga.html";
+      return;
+    }
   } else {
     state = await getState();
   }
@@ -1348,6 +1353,76 @@ async function index() {
       containerElement?.prepend(clone);
     });
   }
+}
+
+async function orga() {
+  /* TEMPLATES */
+  /** @type {HTMLTemplateElement | null} */
+  const playerTemplate = document.querySelector("#template__player");
+  if (!playerTemplate) {
+    throw new Error("cannot retrieve player template");
+  }
+
+  /* TEMPLATES */
+
+  const containerElement = document.querySelector(".container");
+
+  const state = await getState();
+  if (!state || state.data.permission != "orga") {
+    window.location.href = "/";
+
+    return;
+  }
+
+  Object.keys(state.data.players).forEach((playerId) => {
+    const player = state.data.players[playerId];
+
+    const clone = /** @type {HTMLElement} */ (
+      playerTemplate.content.cloneNode(true)
+    );
+
+    const aElement = /** @type {HTMLElement} */ (clone.querySelector("a"));
+    aElement.textContent = player.personal?.surname || "";
+    aElement.setAttribute("href", "/informations.html?playerId=" + playerId);
+
+    const spanElement = /** @type {HTMLElement} */ (
+      clone.querySelector("span")
+    );
+    spanElement.textContent = "Copy Link";
+    spanElement.setAttribute("data-handle", player.handle);
+
+    containerElement?.prepend(clone);
+  });
+
+  containerElement?.querySelectorAll("span").forEach((span) => {
+    span.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const handle = span.getAttribute("data-handle");
+      if (handle) {
+        navigator.clipboard.writeText(handle);
+
+        const response = await fetch(
+          `http://localhost:8081/auth/handles/${handle}`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: await auth(state.keys.private, state.keys.public),
+            },
+          },
+        );
+
+        if (response.status != 200) {
+          console.error("Error getting sharing link", response);
+          return;
+        }
+
+        const jsonResponse = await response.json();
+        navigator.clipboard.writeText(
+          `http://localhost:8080?code=${jsonResponse.message}`,
+        );
+      }
+    });
+  });
 }
 
 async function informations() {
@@ -1569,6 +1644,12 @@ switch (window.location.pathname) {
     console.log("route: informations");
 
     informations();
+    break;
+  case "/orga.html":
+  case "/orga":
+    console.log("route: orga");
+
+    orga();
     break;
   case "/index.html":
   case "/":

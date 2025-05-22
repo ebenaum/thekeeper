@@ -718,3 +718,7 @@ details {
 .character-creation-button {
   border: solid black;
 }
+
+.player-card__sharelink {
+  cursor: pointer;
+}
