@@ -75,11 +75,18 @@ async function storeKeypair(keypair) {
 
 /**
  *
- * @param {KeyEntry} keypair
- * @param {string} handle
  * @returns {Promise<State>}
  */
-async function init(keypair, handle) {
+async function init() {
+  const keypair = await generateKeypair();
+  const handle = createRandomString(16);
+
+  storeKeypair(keypair);
+
+  console.log(
+    `no keypair, generate new one: ${buf2hex(await window.crypto.subtle.exportKey("raw", keypair.public))}`,
+  );
+
   const seed = create(EventsSchema, {
     events: [
       {
@@ -112,6 +119,8 @@ async function init(keypair, handle) {
     data: newData(),
     cursor: -1,
   };
+
+  await sync(state, true);
 
   return state;
 }
@@ -150,7 +159,7 @@ async function init(keypair, handle) {
 
 /**
  *
- * @returns {Promise<State>}
+ * @returns {Promise<State|null>}
  */
 async function getState() {
   const keys = JSON.parse(/** @type {string} */ (localStorage.getItem("keys")));
@@ -159,18 +168,7 @@ async function getState() {
   const data = JSON.parse(/** @type {string} */ (localStorage.getItem("data")));
 
   if (!keys) {
-    const keypair = await generateKeypair();
-    storeKeypair(keypair);
-
-    console.log(
-      `no keypair, generate new one: ${buf2hex(await window.crypto.subtle.exportKey("raw", keypair.public))}`,
-    );
-
-    const state = await init(keypair, createRandomString(16));
-
-    await sync(state, true);
-
-    return state;
+    return null;
   }
 
   const state = {
@@ -376,8 +374,6 @@ async function personnage() {
       savoir: 0,
     },
   };
-
-  formResult = state.data.players[playerId].character;
 
   /* TEMPLATES */
   /** @type {HTMLTemplateElement | null} */
@@ -1290,7 +1286,7 @@ async function index() {
 
   const url = new URL(window.location.href);
   const authCode = url.searchParams.get("code");
-  let /** @type{State} */ state;
+  let /** @type{State|null} */ state;
 
   if (authCode) {
     if (localStorage.getItem("redeemed_code") === authCode) {
@@ -1337,23 +1333,25 @@ async function index() {
     state = await getState();
   }
 
-  Object.keys(state.data.players).forEach((playerId) => {
-    const player = state.data.players[playerId];
+  if (state) {
+    Object.keys(state.data.players).forEach((playerId) => {
+      const player = state.data.players[playerId];
 
-    const clone = /** @type {HTMLElement} */ (
-      playerTemplate.content.cloneNode(true)
-    );
+      const clone = /** @type {HTMLElement} */ (
+        playerTemplate.content.cloneNode(true)
+      );
 
-    const aElement = /** @type {HTMLElement} */ (clone.querySelector("a"));
-    aElement.textContent = player.personal?.surname || "";
-    aElement.setAttribute("href", "/informations.html?playerId=" + playerId);
+      const aElement = /** @type {HTMLElement} */ (clone.querySelector("a"));
+      aElement.textContent = player.personal?.surname || "";
+      aElement.setAttribute("href", "/informations.html?playerId=" + playerId);
 
-    containerElement?.prepend(clone);
-  });
+      containerElement?.prepend(clone);
+    });
+  }
 }
 
 async function informations() {
-  const state = await getState();
+  let state = await getState();
 
   let /** @type{InformationsForm} */ formResult = {
       surname: "",
@@ -1374,8 +1372,11 @@ async function informations() {
 
   const url = new URL(window.location.href);
   const playerId = url.searchParams.get("playerId");
-  if (playerId && state.data.players[playerId].personal) {
-    formResult = state.data.players[playerId].personal;
+
+  if (state) {
+    if (playerId && state.data.players[playerId].personal) {
+      formResult = state.data.players[playerId].personal;
+    }
   }
 
   document.querySelectorAll(".q-select--unique").forEach(function (match) {
@@ -1480,6 +1481,10 @@ async function informations() {
    */
   async function submitForm(existingPlayerId) {
     const events = [];
+
+    if (!state) {
+      state = await init();
+    }
 
     let playerId = existingPlayerId;
 
