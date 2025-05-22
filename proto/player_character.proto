@@ -11,9 +11,11 @@ message Characteristics {
 }
 
 message EventPlayerCharacter {
-   string vdv                      = 1;
-   string race                     = 2;
-   map<string, int32> skills       = 3;
-   Characteristics characteristics = 4;
-   map<string, int32> inventory    = 5;
+   string name                     = 1;
+   string group                    = 2;
+   string vdv                      = 3;
+   string race                     = 4;
+   map<string, int32> skills       = 5;
+   Characteristics characteristics = 6;
+   map<string, int32> inventory    = 7;
 }

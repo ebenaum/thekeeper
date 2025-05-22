@@ -357,14 +357,17 @@ function attachSelectListeners(elements, formKey, allowMultiple, callback) {
 async function personnage() {
   const state = await getState();
 
+  /*
   const url = new URL(window.location.href);
   const playerId = url.searchParams.get("playerId");
   if (!playerId) {
     window.location.href = "/informations.html";
     return;
   }
+    */
 
   let formResult = {
+    name: "",
     skills: {},
     inventory: {},
     characteristics: {
