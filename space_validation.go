@@ -47,11 +47,11 @@ func (h Handles) Process(sourceActorID int64, event *proto.EventSeedActor) error
 	}
 
 	if _, exists := h.HandleToID[event.Handle]; exists {
-		return fmt.Errorf("handle already exists")
+		return fmt.Errorf("handle %q already exists", event.Handle)
 	}
 
 	if _, exists := h.IDToHandle[sourceActorID]; exists {
-		return fmt.Errorf("handle already exists")
+		return fmt.Errorf("actor already has an handle")
 	}
 
 	h.HandleToID[event.Handle] = sourceActorID
@@ -171,9 +171,6 @@ func (s *SpaceOrga) GetEvents() []*proto.Event {
 
 func (s *SpaceOrga) Process(sourceActorID int64, event *proto.Event) error {
 	switch v := event.Msg.(type) {
-	case *proto.Event_SeedActor:
-		return nil
-
 	case *proto.Event_SeedPlayer:
 		s.Events = append(s.Events, event)
 		s.PlayerIDs[v.SeedPlayer.PlayerId] = struct{}{}
@@ -185,7 +182,7 @@ func (s *SpaceOrga) Process(sourceActorID int64, event *proto.Event) error {
 		}
 
 		return nil
-	case *proto.Event_Permission:
+	case *proto.Event_SeedActor, *proto.Event_Permission:
 		s.Events = append(s.Events, event)
 
 		return nil

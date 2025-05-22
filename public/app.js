@@ -252,6 +252,7 @@ function processEvent(data, eventType, eventValue) {
 
       break;
     case "SeedActor":
+      console.log(eventValue);
       data.handle = eventValue.handle;
 
       break;
