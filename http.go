@@ -78,7 +78,7 @@ func auth(db *sqlx.DB, tokenString string) (int64, ActorSpace, error) {
 		return actorID, actorSpace, err
 	}
 
-	fmt.Println(hex.EncodeToString(append(publicKey.X.Bytes(), publicKey.Y.Bytes()...)))
+	log.Print(hex.EncodeToString(append(publicKey.X.Bytes(), publicKey.Y.Bytes()...)))
 
 	actorID, actorSpace, err = GetState(db, append(publicKey.X.Bytes(), publicKey.Y.Bytes()...))
 	if err != nil {
@@ -127,7 +127,7 @@ func HandleState(db *sqlx.DB) http.HandlerFunc {
 
 		start := time.Now()
 		defer func() {
-			fmt.Println("APP GET", time.Since(start))
+			log.Printf("APP GET %v", time.Since(start))
 		}()
 
 		from, err := strconv.ParseInt(r.URL.Query().Get("from"), 10, 64)
@@ -146,6 +146,8 @@ func HandleState(db *sqlx.DB) http.HandlerFunc {
 
 			return
 		}
+
+		log.Printf("%d events", len(events))
 
 		response := &proto.Events{
 			Events: events,
@@ -310,7 +312,7 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 
 		start := time.Now()
 		actorID, _, err := auth(db, r.Header.Get("Authorization"))
-		fmt.Println("AUTH", time.Since(start))
+		log.Printf("AUTH %v", time.Since(start))
 		if err != nil {
 			var errplus Error
 
@@ -331,7 +333,7 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 
 		start = time.Now()
 		defer func() {
-			fmt.Println("APP POST", time.Since(start))
+			log.Printf("APP POST %v", time.Since(start))
 		}()
 
 		var eventsRequests proto.Events

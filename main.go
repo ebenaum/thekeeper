@@ -11,7 +11,7 @@ import (
 )
 
 func usage() string {
-	return fmt.Sprintf("./cmd http|create-orga <handle>")
+	return fmt.Sprintf("./cmd http|create-orga <handle>|link-orga <handle>")
 }
 
 func main() {
@@ -47,6 +47,12 @@ func main() {
 		}
 
 		err = createorga(db, os.Args[2])
+	case "link-orga":
+		if len(os.Args) < 3 {
+			fmt.Println(usage())
+			os.Exit(1)
+		}
+		err = linkorga(db, os.Args[2])
 	default:
 		fmt.Println(usage())
 		os.Exit(1)
@@ -118,6 +124,22 @@ func createorga(db *sqlx.DB, orgaHandle string) error {
 	}
 
 	fmt.Println("Code:", code)
+
+	return nil
+}
+
+func linkorga(db *sqlx.DB, orgaHandle string) error {
+	actorIDToLink, err := FindActorIDByHandle(db, orgaHandle)
+	if err != nil {
+		return fmt.Errorf("find actor by handle: %w", err)
+	}
+
+	authKey, err := InsertAuthKey(db, actorIDToLink)
+	if err != nil {
+		return fmt.Errorf("inserting link code %w", err)
+	}
+
+	fmt.Printf("http://localhost:8080?code=%s\n", authKey)
 
 	return nil
 }
