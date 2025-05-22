@@ -93,6 +93,17 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 		}
 
 		return nil
+
+	case *proto.Event_PlayerCharacter:
+		player, exists := s.PlayersIDs[v.PlayerCharacter.PlayerId]
+		if !exists {
+			return fmt.Errorf("player does not exist")
+		}
+		if sourceActorID != player.ActorID && s.Permission.Actors[sourceActorID] != PermissionOrga {
+			return fmt.Errorf("not authorized")
+		}
+
+		return nil
 	default:
 		return fmt.Errorf("event %v not handled", v)
 	}
@@ -139,6 +150,12 @@ func (s *SpacePlayer) Process(sourceActorID int64, event *proto.Event) error {
 		}
 
 		return nil
+	case *proto.Event_PlayerCharacter:
+		if _, exists := s.PlayerIDs[v.PlayerCharacter.PlayerId]; exists {
+			s.Events = append(s.Events, event)
+		}
+
+		return nil
 	case *proto.Event_Permission:
 		return nil
 	default:
@@ -153,15 +170,13 @@ type ProjectionSpace interface {
 }
 
 type SpaceOrga struct {
-	ActorID   int64
-	Events    []*proto.Event
-	PlayerIDs map[string]struct{}
+	ActorID int64
+	Events  []*proto.Event
 }
 
 func NewSpaceOrga(actorID int64) *SpaceOrga {
 	return &SpaceOrga{
-		ActorID:   actorID,
-		PlayerIDs: map[string]struct{}{},
+		ActorID: actorID,
 	}
 }
 
@@ -173,13 +188,14 @@ func (s *SpaceOrga) Process(sourceActorID int64, event *proto.Event) error {
 	switch v := event.Msg.(type) {
 	case *proto.Event_SeedPlayer:
 		s.Events = append(s.Events, event)
-		s.PlayerIDs[v.SeedPlayer.PlayerId] = struct{}{}
 
 		return nil
 	case *proto.Event_PlayerPerson:
-		if _, exists := s.PlayerIDs[v.PlayerPerson.PlayerId]; exists {
-			s.Events = append(s.Events, event)
-		}
+		s.Events = append(s.Events, event)
+
+		return nil
+	case *proto.Event_PlayerCharacter:
+		s.Events = append(s.Events, event)
 
 		return nil
 	case *proto.Event_SeedActor, *proto.Event_Permission:

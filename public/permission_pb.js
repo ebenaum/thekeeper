@@ -7,16 +7,13 @@ import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv1";
 /**
  * Describes the file permission.proto.
  */
-export const file_permission =
-  /*@__PURE__*/
-  fileDesc(
-    "ChBwZXJtaXNzaW9uLnByb3RvEgl0aGVrZWVwZXIiNwoPRXZlbnRQZXJtaXNzaW9uEhIKCnBlcm1pc3Npb24YASABKAkSEAoIYWN0b3JfaWQYAiABKANCKlooZ2l0aHViLmNvbS9lYmVuYXVtL3RoZWtlZXBlci9wcm90bztwcm90b2IGcHJvdG8z",
-  );
+export const file_permission = /*@__PURE__*/
+  fileDesc("ChBwZXJtaXNzaW9uLnByb3RvEgl0aGVrZWVwZXIiNwoPRXZlbnRQZXJtaXNzaW9uEhIKCnBlcm1pc3Npb24YASABKAkSEAoIYWN0b3JfaWQYAiABKANCKlooZ2l0aHViLmNvbS9lYmVuYXVtL3RoZWtlZXBlci9wcm90bztwcm90b2IGcHJvdG8z");
 
 /**
  * Describes the message thekeeper.EventPermission.
  * Use `create(EventPermissionSchema)` to create a new message.
  */
-export const EventPermissionSchema =
-  /*@__PURE__*/
+export const EventPermissionSchema = /*@__PURE__*/
   messageDesc(file_permission, 0);
+

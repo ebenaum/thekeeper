@@ -6,6 +6,7 @@ import * as jose from "jose";
 import { create, toJson, toBinary, fromBinary } from "@bufbuild/protobuf";
 import { EventsSchema } from "./event_pb.js";
 import { EventPlayerPersonSchema } from "./player_person_pb.js";
+import { EventPlayerCharacterSchema } from "./player_character_pb.js";
 
 /**
  *
@@ -164,7 +165,7 @@ async function init() {
 
 /**
  * @typedef {Object} Data
- * @property {Object.<string, {handle: string, personal?: InformationsForm, character?: any}>} players
+ * @property {Object.<string, {handle: string, personal?: InformationsForm, character?: CharacterForm}>} players
  * @property {string} handle
  * @property {string} [permission]
  */
@@ -269,7 +270,6 @@ function processEvent(data, eventType, eventValue) {
 
       break;
     case "SeedActor":
-      console.log(eventValue);
       data.handle = eventValue.handle;
 
       break;
@@ -281,6 +281,15 @@ function processEvent(data, eventType, eventValue) {
       data.players[eventValue.playerId].personal = toJson(
         EventPlayerPersonSchema,
         eventValue,
+        { alwaysEmitImplicit: true },
+      );
+
+      break;
+    case "PlayerCharacter":
+      data.players[eventValue.playerId].character = toJson(
+        EventPlayerCharacterSchema,
+        eventValue,
+        { alwaysEmitImplicit: true },
       );
 
       break;
@@ -374,16 +383,10 @@ function attachSelectListeners(elements, formKey, allowMultiple, callback) {
 }
 
 async function personnage() {
-  const state = await getState();
+  let state = await getState();
 
-  /*
   const url = new URL(window.location.href);
   const playerId = url.searchParams.get("playerId");
-  if (!playerId) {
-    window.location.href = "/informations.html";
-    return;
-  }
-    */
 
   let /** @type{CharacterForm} */ formResult = {
       name: "",
@@ -399,6 +402,12 @@ async function personnage() {
         savoir: 0,
       },
     };
+
+  if (state) {
+    if (playerId && state.data.players[playerId].character) {
+      formResult = state.data.players[playerId].character;
+    }
+  }
 
   /* TEMPLATES */
   /** @type {HTMLTemplateElement | null} */
@@ -487,7 +496,7 @@ async function personnage() {
       case 4:
         return 5;
       default:
-        throw new Error("dexeterite " + dexterite + "not handled");
+        throw new Error("dexterite " + dexterite + "not handled");
     }
   }
 
@@ -1297,10 +1306,74 @@ async function personnage() {
 
   const formElement = document.getElementById("form");
 
+  /**
+   *
+   * @param {string | null} existingPlayerId
+   */
+  async function submitForm(existingPlayerId) {
+    const events = [];
+
+    if (!state) {
+      state = await init();
+    }
+
+    let playerId = existingPlayerId;
+
+    if (!existingPlayerId) {
+      playerId = createRandomString(8);
+      events.push({
+        msg: {
+          case: "SeedPlayer",
+          value: {
+            handle: state.data.handle,
+            playerId: playerId,
+          },
+        },
+      });
+    }
+
+    events.push({
+      msg: {
+        case: "PlayerCharacter",
+        value: {
+          name: formResult.name,
+          playerId: playerId,
+          race: formResult.race,
+          vdv: formResult.vdv,
+          group: formResult.group,
+          characteristics: formResult.characteristics,
+          skills: formResult.skills,
+          inventory: formResult.inventory,
+        },
+      },
+    });
+
+    const payload = create(EventsSchema, {
+      events: events,
+    });
+
+    const response = await fetch("http://localhost:8081/state", {
+      method: "POST",
+      headers: {
+        Authorization: await auth(state.keys.private, state.keys.public),
+        "Content-Type": "application/x-protobuf",
+      },
+      body: toBinary(EventsSchema, payload),
+    });
+
+    const jsonResponse = await response.json();
+    if (jsonResponse[0].error) {
+      throw jsonResponse[0].error;
+    }
+
+    if (!existingPlayerId) {
+      window.location.href = `?playerId=${playerId}`;
+    }
+  }
+
   if (formElement) {
-    console.log("here");
     formElement.onsubmit = function () {
-      console.log(formResult);
+      submitForm(playerId);
 
       return false;
     };
