@@ -138,6 +138,7 @@ async function init(keypair, handle) {
  * @typedef {Object} Data
  * @property {Object.<string, {handle: string, personal?: InformationsForm, character?: any}>} players
  * @property {string} handle
+ * @property {string} [permission]
  */
 
 /**
@@ -254,7 +255,10 @@ function processEvent(data, eventType, eventValue) {
       data.handle = eventValue.handle;
 
       break;
+    case "Permission":
+      data.permission = eventValue.permission;
 
+      break;
     case "PlayerPerson":
       data.players[eventValue.playerId].personal = toJson(
         EventPlayerPersonSchema,

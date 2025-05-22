@@ -186,6 +186,8 @@ func (s *SpaceOrga) Process(sourceActorID int64, event *proto.Event) error {
 
 		return nil
 	case *proto.Event_Permission:
+		s.Events = append(s.Events, event)
+
 		return nil
 	default:
 		return fmt.Errorf("event %v not handled", v)
