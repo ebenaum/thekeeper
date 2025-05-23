@@ -974,6 +974,8 @@ async function personnage() {
     }
   }
 
+  updateSkillButtonStates();
+
   // Replace the budget check in onSkillPick with the new function
   function onSkillPick(skillKey, rank, cost) {
     skillBudget += cost;
@@ -1328,19 +1330,37 @@ async function personnage() {
   document.querySelectorAll(".q-select--unique").forEach(function (match) {
     const label = match.querySelector("label");
     const lis = match.querySelectorAll("li");
+    const selectedSectionElement = match?.querySelector(".selected-section");
 
     const forAttribute = label?.getAttribute("for");
-    if (forAttribute) {
-      attachSelectListeners(lis, forAttribute, false, (op, key, value) => {
-        if (op === "select") {
-          formResult[key] = value;
-        } else {
-          delete formResult[key];
-        }
-
-        updateSkillList();
-      });
+    if (!forAttribute) {
+      return;
     }
+
+    lis.forEach((li) => {
+      if (formResult[forAttribute].toString() === li.getAttribute("data-key")) {
+        li.classList.add("selected");
+        updateSkillList();
+
+        // If the section as a selected-section element, display the user choice there.
+        if (selectedSectionElement) {
+          const optionName = li.querySelector(
+            `.${forAttribute}__select__option__title`,
+          )?.textContent;
+          selectedSectionElement.textContent = optionName || "";
+        }
+      }
+    });
+
+    attachSelectListeners(lis, forAttribute, false, (op, key, value) => {
+      if (op === "select") {
+        formResult[key] = value;
+      } else {
+        delete formResult[key];
+      }
+
+      updateSkillList();
+    });
   });
 
   const formElement = document.getElementById("form");
