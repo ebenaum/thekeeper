@@ -6,13 +6,18 @@ import (
 	"net/http"
 	"os"
 
+	_ "embed"
+
 	"github.com/ebenaum/thekeeper/proto"
 	"github.com/jmoiron/sqlx"
 )
 
 func usage() string {
-	return fmt.Sprintf("./cmd http|create-orga <handle>|link-orga <handle>")
+	return fmt.Sprintf("./cmd http|https <certfile> <keyfile>|create-orga <handle>|link-orga <handle>")
 }
+
+//go:embed schema.sql
+var schema string
 
 func main() {
 	db, err := sqlx.Open("sqlite3", "./foo.db?_journal_mode=WAL&_busy_timeout=5000")
@@ -22,12 +27,7 @@ func main() {
 
 	defer db.Close()
 
-	migration, err := os.ReadFile("schema.sql")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = db.Exec(string(migration))
+	_, err = db.Exec(schema)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,6 +40,12 @@ func main() {
 	switch os.Args[1] {
 	case "http":
 		err = httpserver(db)
+	case "https":
+		if len(os.Args) < 4 {
+			fmt.Println(usage())
+			os.Exit(1)
+		}
+		err = httpsserver(db)
 	case "create-orga":
 		if len(os.Args) < 3 {
 			fmt.Println(usage())
@@ -69,7 +75,15 @@ func httpserver(db *sqlx.DB) error {
 	http.HandleFunc("/auth/handles/{handle}", HandleCreateAuthKey(db))
 	http.HandleFunc("/auth/redeem/{key}", HandleRedeemAuthKey(db))
 
-	return http.ListenAndServe(":8081", nil)
+	return http.ListenAndServe(":80", nil)
+}
+
+func httpsserver(db *sqlx.DB) error {
+	http.HandleFunc("/state", HandleState(db))
+	http.HandleFunc("/auth/handles/{handle}", HandleCreateAuthKey(db))
+	http.HandleFunc("/auth/redeem/{key}", HandleRedeemAuthKey(db))
+
+	return http.ListenAndServeTLS(":443", os.Args[2], os.Args[3], nil)
 }
 
 func createorga(db *sqlx.DB, orgaHandle string) error {
