@@ -25,7 +25,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	db, err := sqlx.Open("sqlite3", fmt.Sprintf("./%s?_journal_mode=WAL&_busy_timeout=5000", os.Args[2]))
+	db, err := sqlx.Open("sqlite3", fmt.Sprintf("%s?_journal_mode=WAL&_busy_timeout=5000", os.Args[2]))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -75,7 +75,7 @@ func httpserver(db *sqlx.DB) error {
 	http.HandleFunc("/auth/handles/{handle}", HandleCreateAuthKey(db))
 	http.HandleFunc("/auth/redeem/{key}", HandleRedeemAuthKey(db))
 
-	return http.ListenAndServe(":80", nil)
+	return http.ListenAndServe(":8081", nil)
 }
 
 func httpsserver(db *sqlx.DB) error {
