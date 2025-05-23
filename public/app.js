@@ -605,12 +605,46 @@ async function personnage() {
       0,
     );
 
-  let skillBudget = parseInt(
-    univers
-      .find((entry) => entry.key === "skills-default-points")
-      ?.tags.find((tag) => tag.startsWith("n:"))
-      ?.split(":")[1] || "0",
+  // Extract the default PC value from savoir characteristic level 0
+  const savoirCharacteristic = characteristics.find(
+    (char) => char.key === "savoir",
   );
+  const defaultSavoirLevel = savoirCharacteristic?.levels.find(
+    (level) => level.rank === formResult.characteristics.savoir,
+  );
+
+  const defaultSavoirPcValue = defaultSavoirLevel?.pcValue || 0; // Fallback to 1 if not found
+
+  let skillBudget =
+    parseInt(
+      univers
+        .find((entry) => entry.key === "skills-default-points")
+        ?.tags.find((tag) => tag.startsWith("n:"))
+        ?.split(":")[1] || "0",
+    ) -
+    Object.keys(formResult.skills).reduce((acc, cur) => {
+      const lvls = skills.find((skill) => skill.key === cur)?.levels;
+
+      if (!lvls) {
+        return acc;
+      }
+
+      let cost = 0;
+
+      for (let i = 0; i < formResult.skills[cur]; i++) {
+        cost += lvls[i].cost;
+      }
+
+      return acc + cost;
+    }, 0) +
+    defaultSavoirPcValue;
+
+  const characteristicsSelect = document.querySelector(".characteristics");
+  const characteristicBudgetElement = /** @type {HTMLElement} */ (
+    document.querySelector(".characteristics__budget")
+  );
+
+  characteristicBudgetElement.textContent = `${characteristicBudget}`;
 
   const budgetElement = /** @type {HTMLElement} */ (
     document.querySelector(".skills__budget")
@@ -626,22 +660,6 @@ async function personnage() {
   const inventoryBudgetCounterElement = /** @type {HTMLElement} */ (
     document.querySelector(".inventory__budget__counter")
   );
-
-  // Extract the default PC value from savoir characteristic level 0
-  const savoirCharacteristic = characteristics.find(
-    (char) => char.key === "savoir",
-  );
-  const defaultSavoirLevel = savoirCharacteristic?.levels.find(
-    (level) => level.rank === 0,
-  );
-  const defaultSavoirPcValue = defaultSavoirLevel?.pcValue || 0; // Fallback to 1 if not found
-
-  const characteristicsSelect = document.querySelector(".characteristics");
-  const characteristicBudgetElement = /** @type {HTMLElement} */ (
-    document.querySelector(".characteristics__budget")
-  );
-
-  characteristicBudgetElement.textContent = `${characteristicBudget}`;
 
   characteristics.forEach((characteristic) => {
     const characteristicF = characteristic;
@@ -965,6 +983,7 @@ async function personnage() {
     } else {
       delete formResult.skills[skillKey];
     }
+
     budgetCounterElement.textContent = skillBudget + "";
     updateSkillButtonStates();
   }
