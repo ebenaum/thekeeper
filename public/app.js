@@ -1588,7 +1588,7 @@ async function orga() {
 
         const jsonResponse = await response.json();
         navigator.clipboard.writeText(
-          `${globalThis.env.thekeeperURL}/index.html?code=${jsonResponse.message}`,
+          `${globalThis.env.appURL}/index.html?code=${jsonResponse.message}`,
         );
       }
     });
