@@ -13,14 +13,19 @@ import (
 )
 
 func usage() string {
-	return fmt.Sprintf("./cmd http|https <certfile> <keyfile>|create-orga <handle>|link-orga <handle>")
+	return fmt.Sprintf("./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle>|link-orga <db-path> <handle>")
 }
 
 //go:embed schema.sql
 var schema string
 
 func main() {
-	db, err := sqlx.Open("sqlite3", "./foo.db?_journal_mode=WAL&_busy_timeout=5000")
+	if len(os.Args) < 3 {
+		fmt.Println(usage())
+		os.Exit(1)
+	}
+
+	db, err := sqlx.Open("sqlite3", fmt.Sprintf("./%s?_journal_mode=WAL&_busy_timeout=5000", os.Args[2]))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,33 +37,28 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if len(os.Args) < 2 {
-		fmt.Println(usage())
-		os.Exit(1)
-	}
-
 	switch os.Args[1] {
 	case "http":
 		err = httpserver(db)
 	case "https":
-		if len(os.Args) < 4 {
+		if len(os.Args) < 5 {
 			fmt.Println(usage())
 			os.Exit(1)
 		}
 		err = httpsserver(db)
 	case "create-orga":
-		if len(os.Args) < 3 {
+		if len(os.Args) < 4 {
 			fmt.Println(usage())
 			os.Exit(1)
 		}
 
-		err = createorga(db, os.Args[2])
+		err = createorga(db, os.Args[3])
 	case "link-orga":
-		if len(os.Args) < 3 {
+		if len(os.Args) < 4 {
 			fmt.Println(usage())
 			os.Exit(1)
 		}
-		err = linkorga(db, os.Args[2])
+		err = linkorga(db, os.Args[3])
 	default:
 		fmt.Println(usage())
 		os.Exit(1)
@@ -83,7 +83,7 @@ func httpsserver(db *sqlx.DB) error {
 	http.HandleFunc("/auth/handles/{handle}", HandleCreateAuthKey(db))
 	http.HandleFunc("/auth/redeem/{key}", HandleRedeemAuthKey(db))
 
-	return http.ListenAndServeTLS(":443", os.Args[2], os.Args[3], nil)
+	return http.ListenAndServeTLS(":443", os.Args[3], os.Args[4], nil)
 }
 
 func createorga(db *sqlx.DB, orgaHandle string) error {
