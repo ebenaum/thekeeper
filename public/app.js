@@ -612,10 +612,6 @@ async function personnage() {
       ?.split(":")[1] || "0",
   );
 
-  let inventoryBudget = dexteriteToInventoryBudget(
-    formResult.characteristics.dexterite,
-  );
-
   const budgetElement = /** @type {HTMLElement} */ (
     document.querySelector(".skills__budget")
   );
@@ -630,7 +626,6 @@ async function personnage() {
   const inventoryBudgetCounterElement = /** @type {HTMLElement} */ (
     document.querySelector(".inventory__budget__counter")
   );
-  inventoryBudgetCounterElement.textContent = inventoryBudget + "";
 
   // Extract the default PC value from savoir characteristic level 0
   const savoirCharacteristic = characteristics.find(
@@ -813,7 +808,7 @@ async function personnage() {
   const skillResets = {};
 
   skills.forEach((skill) => {
-    let lvl = 0;
+    let lvl = formResult.skills[skill.key] || 0;
 
     const clone = /** @type {HTMLElement} */ (
       skillTemplate.content.cloneNode(true)
@@ -1006,34 +1001,53 @@ async function personnage() {
     });
   }
 
+  let inventoryBudget =
+    dexteriteToInventoryBudget(formResult.characteristics.dexterite) -
+    Object.keys(formResult.inventory).reduce((acc, cur) => {
+      const cost = parseInt(
+        inventory
+          .find((item) => item.key === cur)
+          ?.tags.find((tag) => tag.startsWith("cost:"))
+          ?.split(":")[1] || "0",
+      );
+
+      return acc + formResult.inventory[cur] * cost;
+    }, 0);
+
   inventory.forEach((item) => {
-    let numberOfItems = 0;
+    let numberOfItems = formResult.inventory[item.key] || 0;
 
     const clone = /** @type {HTMLElement} */ (
       inventoryItemTemplate.content.cloneNode(true)
     );
 
-    const titleElement = /** @type {HTMLElement} */ (
-      clone.querySelector(".inventory__select__option__content__title")
-    );
-    const descriptionElement = /** @type {HTMLElement} */ (
-      clone.querySelector(".inventory__select__option__content__description")
-    );
-    const costElement = /** @type {HTMLElement} */ (
-      clone.querySelector(".inventory__select__option__picker__cost")
-    );
-
-    const numberElement = /** @type {HTMLElement} */ (
-      clone.querySelector(".inventory__select__option__picker__control__number")
-    );
-
-    titleElement.textContent = item.label;
-    descriptionElement.textContent = item.description;
-
     const cost = parseInt(
       item.tags.find((tag) => tag.startsWith("cost:"))?.split(":")[1] || "0",
     );
-    costElement.textContent = cost + (cost === 1 ? " gemme" : " gemmes");
+
+    const print = (/** @type {Element} */ el) => {
+      const titleElement = /** @type {HTMLElement} */ (
+        el.querySelector(".inventory__select__option__content__title")
+      );
+      const descriptionElement = /** @type {HTMLElement} */ (
+        el.querySelector(".inventory__select__option__content__description")
+      );
+      const costElement = /** @type {HTMLElement} */ (
+        el.querySelector(".inventory__select__option__picker__cost")
+      );
+
+      const numberElement = /** @type {HTMLElement} */ (
+        el.querySelector(".inventory__select__option__picker__control__number")
+      );
+
+      titleElement.textContent = item.label;
+      descriptionElement.textContent = item.description;
+      numberElement.textContent = numberOfItems + "";
+      costElement.textContent = cost + (cost === 1 ? " gemme" : " gemmes");
+
+      updateInventoryBudgetState(inventoryBudget);
+      updateItemPickerMinusControl(minusElement, numberOfItems);
+    };
 
     inventorySelect?.appendChild(clone);
     const node = /** @type {Element} */ (inventorySelect?.lastElementChild);
@@ -1044,18 +1058,18 @@ async function personnage() {
       node.querySelector(".inventory__select__option__picker__control__minus")
     );
 
+    plusElement.setAttribute("data-cost", cost.toString());
+
     plusElement?.addEventListener("click", (e) => {
-      if (inventoryBudget <= 0) {
+      if (inventoryBudget - cost < 0) {
         return;
       }
       numberOfItems++;
-      numberElement.textContent = numberOfItems + "";
-
-      formResult.inventory[item.key] = numberOfItems;
 
       inventoryBudget -= cost;
-      updateInventoryBudgetState(inventoryBudget);
-      updateItemPickerMinusControl(minusElement, numberOfItems);
+
+      formResult.inventory[item.key] = numberOfItems;
+      print(node);
     });
 
     minusElement?.addEventListener("click", (e) => {
@@ -1064,7 +1078,6 @@ async function personnage() {
       }
 
       numberOfItems--;
-      numberElement.textContent = numberOfItems + "";
 
       formResult.inventory[item.key] = numberOfItems;
       if (numberOfItems === 0) {
@@ -1072,9 +1085,10 @@ async function personnage() {
       }
 
       inventoryBudget += cost;
-      updateInventoryBudgetState(inventoryBudget);
-      updateItemPickerMinusControl(minusElement, numberOfItems);
+      print(node);
     });
+
+    print(node);
   });
 
   /**
@@ -1098,23 +1112,19 @@ async function personnage() {
         ?.classList.remove("inventory__budget--negative");
     }
 
-    if (budget <= 0) {
-      document
-        .querySelectorAll(".inventory__select__option__picker__control__plus")
-        .forEach((el) => {
+    document
+      .querySelectorAll(".inventory__select__option__picker__control__plus")
+      .forEach((el) => {
+        if (budget - parseInt(el.getAttribute("data-cost") || "0") < 0) {
           el.classList.add(
             "inventory__select__option__picker__control__plus--disabled",
           );
-        });
-    } else {
-      document
-        .querySelectorAll(".inventory__select__option__picker__control__plus")
-        .forEach((el) => {
+        } else {
           el.classList.remove(
             "inventory__select__option__picker__control__plus--disabled",
           );
-        });
-    }
+        }
+      });
   }
 
   /**
