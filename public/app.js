@@ -1572,7 +1572,7 @@ async function orga() {
         navigator.clipboard.writeText(handle);
 
         const response = await fetch(
-          `http://${globalThis.env.thekeeperURL}/auth/handles/${handle}`,
+          `${globalThis.env.thekeeperURL}/auth/handles/${handle}`,
           {
             method: "POST",
             headers: {
