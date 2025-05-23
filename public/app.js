@@ -101,7 +101,7 @@ async function init() {
     ],
   });
 
-  const response = await fetch("http://localhost:8081/state", {
+  const response = await fetch(`${globalThis.env.thekeeperURL}/state`, {
     method: "POST",
     headers: {
       Authorization: await auth(keypair.private, keypair.public),
@@ -233,12 +233,15 @@ async function sync(state, reset) {
     state.data = newData();
   }
 
-  const response = await fetch("http://localhost:8081/state?from=" + cursor, {
-    method: "GET",
-    headers: {
-      Authorization: await auth(state.keys.private, state.keys.public),
+  const response = await fetch(
+    `${globalThis.env.thekeeperURL}/state?from=` + cursor,
+    {
+      method: "GET",
+      headers: {
+        Authorization: await auth(state.keys.private, state.keys.public),
+      },
     },
-  });
+  );
 
   const msg = await fromBinary(
     EventsSchema,
@@ -466,10 +469,7 @@ async function personnage() {
    * @property {string} description
    */
 
-  //const universResponse = await fetch("http://localhost:8080/univers.json");
-  const universResponse = await fetch(
-    "https://raw.githubusercontent.com/ebenaum/cosmos/refs/heads/master/content/world/univers.json",
-  );
+  const universResponse = await fetch(globalThis.env.univers);
   const /** @type {UniversEntry[]} */ univers = await universResponse.json();
   const races = univers.filter((entry) => entry.tags.includes("race"));
   const mondes = univers.filter((entry) => entry.tags.includes("monde"));
@@ -1414,7 +1414,7 @@ async function personnage() {
       events: events,
     });
 
-    const response = await fetch("http://localhost:8081/state", {
+    const response = await fetch(`${globalThis.env.thekeeperURL}/state`, {
       method: "POST",
       headers: {
         Authorization: await auth(state.keys.private, state.keys.public),
@@ -1467,7 +1467,7 @@ async function index() {
     const keypair = await generateKeypair();
 
     const response = await fetch(
-      `http://localhost:8081/auth/redeem/${authCode}`,
+      `${globalThis.env.thekeeperURL}/auth/redeem/${authCode}`,
       {
         method: "POST",
         headers: {
@@ -1572,7 +1572,7 @@ async function orga() {
         navigator.clipboard.writeText(handle);
 
         const response = await fetch(
-          `http://localhost:8081/auth/handles/${handle}`,
+          `http://${globalThis.env.thekeeperURL}/auth/handles/${handle}`,
           {
             method: "POST",
             headers: {
@@ -1588,7 +1588,7 @@ async function orga() {
 
         const jsonResponse = await response.json();
         navigator.clipboard.writeText(
-          `http://localhost:8080?code=${jsonResponse.message}`,
+          `${globalThis.env.thekeeperURL}/index.html?code=${jsonResponse.message}`,
         );
       }
     });
@@ -1774,7 +1774,7 @@ async function informations() {
       events: events,
     });
 
-    const response = await fetch("http://localhost:8081/state", {
+    const response = await fetch(`${globalThis.env.thekeeperURL}/state`, {
       method: "POST",
       headers: {
         Authorization: await auth(state.keys.private, state.keys.public),
