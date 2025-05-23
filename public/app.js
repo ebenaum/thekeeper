@@ -466,7 +466,10 @@ async function personnage() {
    * @property {string} description
    */
 
-  const universResponse = await fetch("http://localhost:8080/univers.json");
+  //const universResponse = await fetch("http://localhost:8080/univers.json");
+  const universResponse = await fetch(
+    "https://raw.githubusercontent.com/ebenaum/cosmos/refs/heads/master/content/world/univers.json",
+  );
   const /** @type {UniversEntry[]} */ univers = await universResponse.json();
   const races = univers.filter((entry) => entry.tags.includes("race"));
   const mondes = univers.filter((entry) => entry.tags.includes("monde"));
