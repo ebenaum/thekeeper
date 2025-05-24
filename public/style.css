@@ -85,6 +85,10 @@ a {
   color: inherit;
 }
 
+.a-underline {
+  text-decoration: underline;
+}
+
 a:hover {
   color: inherit;
 }
@@ -377,6 +381,25 @@ input[type="number"]::-webkit-outer-spin-button {
   border: 2px solid #000000;
 }
 
+.double-border {
+  position: relative;
+  border: solid 3px black;
+  padding: 10px 10px 10px 10px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.double-border:before {
+  content: " ";
+  position: absolute;
+  z-index: -1;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border: 2px solid #000000;
+}
+
 .skill__head {
   display: flex;
   align-items: center;
@@ -658,9 +681,18 @@ details {
 }
 
 .character-creation-button {
-  border: solid black;
+  border: dashed black;
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  font-weight: bold;
 }
 
 .player-card__sharelink {
   cursor: pointer;
+}
+
+.index__player {
+  list-style: none;
+  width: 100%;
 }

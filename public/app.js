@@ -1487,9 +1487,17 @@ async function index() {
     throw new Error("cannot retrieve player template");
   }
 
+  /** @type {HTMLTemplateElement | null} */
+  const characterTemplate = document.querySelector("#template__character");
+  if (!characterTemplate) {
+    throw new Error("cannot retrieve character template");
+  }
   /* TEMPLATES */
 
   const containerElement = document.querySelector(".container");
+  if (!containerElement) {
+    throw new Error("no container element");
+  }
 
   const url = new URL(window.location.href);
   const authCode = url.searchParams.get("code");
@@ -1519,7 +1527,8 @@ async function index() {
 
       messageElement.textContent = "Le lien ne marche pas :(";
 
-      containerElement?.appendChild(messageElement);
+      containerElement.textContent = "";
+      containerElement.appendChild(messageElement);
 
       return;
     }
@@ -1553,12 +1562,66 @@ async function index() {
         playerTemplate.content.cloneNode(true)
       );
 
+      const nameElement = /** @type {HTMLElement} */ (
+        clone.querySelector(".index__player__name")
+      );
+      nameElement.textContent = player.personal?.surname || "";
+
       const aElement = /** @type {HTMLElement} */ (clone.querySelector("a"));
-      aElement.textContent = player.personal?.surname || "";
       aElement.setAttribute("href", "/informations.html?playerId=" + playerId);
+
+      const charactersElement = /** @type {HTMLElement} */ (
+        clone.querySelector(".index__player__characters")
+      );
+
+      const createCharacterElement = /** @type {HTMLElement} */ (
+        clone.querySelector(".index__player__characters__create")
+      );
+      createCharacterElement.setAttribute(
+        "href",
+        "/personnage.html?playerId=" + playerId,
+      );
+
+      player.characters.forEach((characterId) => {
+        const character = state.data.characters[characterId];
+        if (!character) {
+          console.warn(
+            `Character with ID ${characterId} not found for player ${playerId}`,
+          );
+          return;
+        }
+        const characterClone = /** @type {HTMLElement} */ (
+          characterTemplate.content.cloneNode(true)
+        );
+        const characterNameElement = /** @type {HTMLElement} */ (
+          characterClone.querySelector(
+            ".index__player__characters__character__name",
+          )
+        );
+
+        const characterLinkElement = /** @type {HTMLElement} */ (
+          characterClone.querySelector(
+            ".index__player__characters__character__link",
+          )
+        );
+        characterLinkElement.setAttribute(
+          "href",
+          `/personnage.html?characterId=${characterId}`,
+        );
+
+        characterNameElement.textContent = character.name || "Sans nom";
+
+        charactersElement.prepend(characterClone);
+      });
 
       containerElement?.prepend(clone);
     });
+
+    const creationButton = document.createElement("a");
+    creationButton.classList.add("character-creation-button");
+    creationButton.setAttribute("href", "/informations.html");
+    creationButton.textContent = "Créer un joueur";
+    containerElement?.appendChild(creationButton);
   }
 }
 

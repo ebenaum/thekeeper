@@ -2,7 +2,12 @@
 // @generated from file event.proto (package thekeeper, syntax proto3)
 /* eslint-disable */
 
-import { enumDesc, fileDesc, messageDesc, tsEnum } from "@bufbuild/protobuf/codegenv1";
+import {
+  enumDesc,
+  fileDesc,
+  messageDesc,
+  tsEnum,
+} from "@bufbuild/protobuf/codegenv1";
 import { file_permission } from "./permission_pb.js";
 import { file_seed_player } from "./seed_player_pb.js";
 import { file_seed_actor } from "./seed_actor_pb.js";
@@ -12,32 +17,37 @@ import { file_player_character } from "./player_character_pb.js";
 /**
  * Describes the file event.proto.
  */
-export const file_event = /*@__PURE__*/
-  fileDesc("CgtldmVudC5wcm90bxIJdGhla2VlcGVyIqACCgVFdmVudBIKCgJ0cxgBIAEoAxIwCgpQZXJtaXNzaW9uGAIgASgLMhoudGhla2VlcGVyLkV2ZW50UGVybWlzc2lvbkgAEjAKClNlZWRQbGF5ZXIYAyABKAsyGi50aGVrZWVwZXIuRXZlbnRTZWVkUGxheWVySAASLgoJU2VlZEFjdG9yGAQgASgLMhkudGhla2VlcGVyLkV2ZW50U2VlZEFjdG9ySAASNAoMUGxheWVyUGVyc29uGAUgASgLMhwudGhla2VlcGVyLkV2ZW50UGxheWVyUGVyc29uSAASOgoPUGxheWVyQ2hhcmFjdGVyGAYgASgLMh8udGhla2VlcGVyLkV2ZW50UGxheWVyQ2hhcmFjdGVySABCBQoDbXNnIioKBkV2ZW50cxIgCgZldmVudHMYASADKAsyEC50aGVrZWVwZXIuRXZlbnQqjgEKCUV2ZW50VHlwZRIXChNFdmVudFR5cGVQZXJtaXNzaW9uEAASFwoTRXZlbnRUeXBlU2VlZFBsYXllchABEhYKEkV2ZW50VHlwZVNlZWRBY3RvchACEhkKFUV2ZW50VHlwZVBsYXllclBlcnNvbhADEhwKGEV2ZW50VHlwZVBsYXllckNoYXJhY3RlchAEQipaKGdpdGh1Yi5jb20vZWJlbmF1bS90aGVrZWVwZXIvcHJvdG87cHJvdG9iBnByb3RvMw", [file_permission, file_seed_player, file_seed_actor, file_player_person, file_player_character]);
+export const file_event =
+  /*@__PURE__*/
+  fileDesc(
+    "CgtldmVudC5wcm90bxIJdGhla2VlcGVyIqACCgVFdmVudBIKCgJ0cxgBIAEoAxIwCgpQZXJtaXNzaW9uGAIgASgLMhoudGhla2VlcGVyLkV2ZW50UGVybWlzc2lvbkgAEjAKClNlZWRQbGF5ZXIYAyABKAsyGi50aGVrZWVwZXIuRXZlbnRTZWVkUGxheWVySAASLgoJU2VlZEFjdG9yGAQgASgLMhkudGhla2VlcGVyLkV2ZW50U2VlZEFjdG9ySAASNAoMUGxheWVyUGVyc29uGAUgASgLMhwudGhla2VlcGVyLkV2ZW50UGxheWVyUGVyc29uSAASOgoPUGxheWVyQ2hhcmFjdGVyGAYgASgLMh8udGhla2VlcGVyLkV2ZW50UGxheWVyQ2hhcmFjdGVySABCBQoDbXNnIioKBkV2ZW50cxIgCgZldmVudHMYASADKAsyEC50aGVrZWVwZXIuRXZlbnQqjgEKCUV2ZW50VHlwZRIXChNFdmVudFR5cGVQZXJtaXNzaW9uEAASFwoTRXZlbnRUeXBlU2VlZFBsYXllchABEhYKEkV2ZW50VHlwZVNlZWRBY3RvchACEhkKFUV2ZW50VHlwZVBsYXllclBlcnNvbhADEhwKGEV2ZW50VHlwZVBsYXllckNoYXJhY3RlchAEQipaKGdpdGh1Yi5jb20vZWJlbmF1bS90aGVrZWVwZXIvcHJvdG87cHJvdG9iBnByb3RvMw",
+    [
+      file_permission,
+      file_seed_player,
+      file_seed_actor,
+      file_player_person,
+      file_player_character,
+    ],
+  );
 
 /**
  * Describes the message thekeeper.Event.
  * Use `create(EventSchema)` to create a new message.
  */
-export const EventSchema = /*@__PURE__*/
-  messageDesc(file_event, 0);
+export const EventSchema = /*@__PURE__*/ messageDesc(file_event, 0);
 
 /**
  * Describes the message thekeeper.Events.
  * Use `create(EventsSchema)` to create a new message.
  */
-export const EventsSchema = /*@__PURE__*/
-  messageDesc(file_event, 1);
+export const EventsSchema = /*@__PURE__*/ messageDesc(file_event, 1);
 
 /**
  * Describes the enum thekeeper.EventType.
  */
-export const EventTypeSchema = /*@__PURE__*/
-  enumDesc(file_event, 0);
+export const EventTypeSchema = /*@__PURE__*/ enumDesc(file_event, 0);
 
 /**
  * @generated from enum thekeeper.EventType
  */
-export const EventType = /*@__PURE__*/
-  tsEnum(EventTypeSchema);
-
+export const EventType = /*@__PURE__*/ tsEnum(EventTypeSchema);

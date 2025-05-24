@@ -20,17 +20,29 @@
 
   <body>
     <template id="template__player">
-      <li
-        class="player"
-      >
-       <a></a>
+      <li class="index__player double-border">
+        <div class="index__player__head">
+          Joueur: <span class="index__player__name"></span> -
+          <a class="a-underline">Voir / Éditer</a>
+        </div>
+        <div class="index__player__characters">
+          <a class="index__player__characters__create a-underline"
+            >Créer un personnage</a
+          >
+        </div>
+      </li>
+    </template>
+    <template id="template__character">
+      <li class="index__player__characters__character">
+        <span class="index__player__characters__character__name"></span
+        ><a class="index__player__characters__character__link a-underline"
+          >Voir / Éditer</a
+        >
       </li>
     </template>
 
     <div class="container">
-      <div class="character-list">
-        <a class="character-creation-button" href="/informations">Créer un personnage</button>
-      </div>
+      <div class="character-list"></div>
     </div>
   </body>
 </html>
