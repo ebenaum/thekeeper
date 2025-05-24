@@ -1650,12 +1650,6 @@ async function index() {
       containerElement?.prepend(clone);
     });
 
-    const creationButton = document.createElement("a");
-    creationButton.classList.add("character-creation-button");
-    creationButton.setAttribute("href", "/informations.html");
-    creationButton.textContent = "Créer un joueur";
-    containerElement?.appendChild(creationButton);
-
     containerElement
       ?.querySelectorAll(".player-card__sharelink")
       .forEach((span) => {
@@ -1691,6 +1685,12 @@ async function index() {
         });
       });
   }
+
+  const creationButton = document.createElement("a");
+  creationButton.classList.add("character-creation-button");
+  creationButton.setAttribute("href", "/informations.html");
+  creationButton.textContent = "Créer un joueur";
+  containerElement?.appendChild(creationButton);
 }
 
 async function informations() {
