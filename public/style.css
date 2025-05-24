@@ -696,3 +696,21 @@ details {
   list-style: none;
   width: 100%;
 }
+
+.index__player__head__name {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.index__player__head {
+  margin-bottom: 20px;
+}
+
+.index__player__characters {
+  margin-bottom: 20px;
+}
+
+.index__player__characters__character__name {
+  font-size: 1.1rem;
+  font-weight: bold;
+}

@@ -128,6 +128,15 @@ async function init() {
 }
 
 /**
+ * @typedef {Object} UniversEntry
+ * @property {string} key
+ * @property {string[]} tags
+ * @property {string} label
+ * @property {string?} img
+ * @property {string} description
+ */
+
+/**
  * @typedef {Object} InformationsForm
  * @property {string}   surname
  * @property {string}   age
@@ -489,21 +498,17 @@ async function personnage() {
   const skillSelect = document.querySelector(".skills");
   const inventorySelect = document.querySelector(".inventory__select");
 
-  /**
-   * @typedef {Object} UniversEntry
-   * @property {string} key
-   * @property {string[]} tags
-   * @property {string} label
-   * @property {string?} img
-   * @property {string} description
-   */
-
   const universResponse = await fetch(globalThis.env.univers);
   const /** @type {UniversEntry[]} */ univers = await universResponse.json();
   const races = univers.filter((entry) => entry.tags.includes("race"));
   const mondes = univers.filter((entry) => entry.tags.includes("monde"));
   const vdvs = univers.filter((entry) => entry.tags.includes("vdv"));
   const inventory = univers.filter((entry) => entry.tags.includes("inventory"));
+
+  const universMap = {};
+  univers.forEach((entry) => {
+    universMap[entry.key] = entry;
+  });
 
   /**
    * Calculates the inventory budget based on the dexterity characteristic level.
@@ -1480,6 +1485,14 @@ async function personnage() {
 }
 
 async function index() {
+  const universResponse = await fetch(globalThis.env.univers);
+  const /** @type {UniversEntry[]} */ univers = await universResponse.json();
+
+  const universMap = {};
+  univers.forEach((entry) => {
+    universMap[entry.key] = entry;
+  });
+
   /* TEMPLATES */
   /** @type {HTMLTemplateElement | null} */
   const playerTemplate = document.querySelector("#template__player");
@@ -1563,9 +1576,10 @@ async function index() {
       );
 
       const nameElement = /** @type {HTMLElement} */ (
-        clone.querySelector(".index__player__name")
+        clone.querySelector(".index__player__head__name")
       );
-      nameElement.textContent = player.personal?.surname || "";
+      nameElement.textContent =
+        `Joueur : ${player.personal?.surname}` || "Joueur : Sans nom";
 
       const aElement = /** @type {HTMLElement} */ (clone.querySelector("a"));
       aElement.setAttribute("href", "/informations.html?playerId=" + playerId);
@@ -1599,6 +1613,12 @@ async function index() {
           )
         );
 
+        const characterPeekElement = /** @type {HTMLElement} */ (
+          characterClone.querySelector(
+            ".index__player__characters__character__peek",
+          )
+        );
+
         const characterLinkElement = /** @type {HTMLElement} */ (
           characterClone.querySelector(
             ".index__player__characters__character__link",
@@ -1609,7 +1629,17 @@ async function index() {
           `/personnage.html?characterId=${characterId}`,
         );
 
-        characterNameElement.textContent = character.name || "Sans nom";
+        const characterName = character.name || "Sans nom";
+        characterNameElement.textContent = characterName;
+
+        let characterPeek = [];
+        characterPeek.push(universMap[character.group]?.label);
+        characterPeek.push(universMap[character.race]?.label);
+        characterPeek.push(universMap[character.vdv]?.label);
+
+        characterPeek = characterPeek.filter((n) => n);
+
+        characterPeekElement.textContent = characterPeek.join(" - ");
 
         charactersElement.prepend(characterClone);
       });
