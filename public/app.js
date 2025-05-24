@@ -1562,11 +1562,6 @@ async function index() {
     state = await getState();
   }
 
-  if (state && state.data.permission === "orga") {
-    window.location.href = "/orga.html";
-    return;
-  }
-
   if (state) {
     Object.keys(state.data.players).forEach((playerId) => {
       const player = state.data.players[playerId];
@@ -1575,11 +1570,19 @@ async function index() {
         playerTemplate.content.cloneNode(true)
       );
 
+      const shareElement = /** @type {HTMLElement} */ (
+        clone.querySelector(".player-card__sharelink")
+      );
+
+      if (state.data.permission === "orga") {
+        shareElement.textContent = "Lien de partage";
+        shareElement.setAttribute("data-handle", player.handle);
+      }
+
       const nameElement = /** @type {HTMLElement} */ (
         clone.querySelector(".index__player__head__name")
       );
-      nameElement.textContent =
-        `Joueur : ${player.personal?.surname}` || "Joueur : Sans nom";
+      nameElement.textContent = `Joueur : ${player.personal?.surname || "Sans nom"}`;
 
       const aElement = /** @type {HTMLElement} */ (clone.querySelector("a"));
       aElement.setAttribute("href", "/informations.html?playerId=" + playerId);
@@ -1652,77 +1655,42 @@ async function index() {
     creationButton.setAttribute("href", "/informations.html");
     creationButton.textContent = "Créer un joueur";
     containerElement?.appendChild(creationButton);
+
+    containerElement
+      ?.querySelectorAll(".player-card__sharelink")
+      .forEach((span) => {
+        span.addEventListener("click", async (e) => {
+          e.preventDefault();
+          const handle = span.getAttribute("data-handle");
+          if (handle) {
+            navigator.clipboard.writeText(handle);
+
+            const response = await fetch(
+              `${globalThis.env.thekeeperURL}/auth/handles/${handle}`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: await auth(
+                    state.keys.private,
+                    state.keys.public,
+                  ),
+                },
+              },
+            );
+
+            if (response.status != 200) {
+              console.error("Error getting sharing link", response);
+              return;
+            }
+
+            const jsonResponse = await response.json();
+            navigator.clipboard.writeText(
+              `${globalThis.env.appURL}/index.html?code=${jsonResponse.message}`,
+            );
+          }
+        });
+      });
   }
-}
-
-async function orga() {
-  /* TEMPLATES */
-  /** @type {HTMLTemplateElement | null} */
-  const playerTemplate = document.querySelector("#template__player");
-  if (!playerTemplate) {
-    throw new Error("cannot retrieve player template");
-  }
-
-  /* TEMPLATES */
-
-  const containerElement = document.querySelector(".container");
-
-  const state = await getState();
-  if (!state || state.data.permission != "orga") {
-    window.location.href = "/";
-
-    return;
-  }
-
-  Object.keys(state.data.players).forEach((playerId) => {
-    const player = state.data.players[playerId];
-
-    const clone = /** @type {HTMLElement} */ (
-      playerTemplate.content.cloneNode(true)
-    );
-
-    const aElement = /** @type {HTMLElement} */ (clone.querySelector("a"));
-    aElement.textContent = player.personal?.surname || "";
-    aElement.setAttribute("href", "/informations.html?playerId=" + playerId);
-
-    const spanElement = /** @type {HTMLElement} */ (
-      clone.querySelector("span")
-    );
-    spanElement.textContent = "Copy Link";
-    spanElement.setAttribute("data-handle", player.handle);
-
-    containerElement?.prepend(clone);
-  });
-
-  containerElement?.querySelectorAll("span").forEach((span) => {
-    span.addEventListener("click", async (e) => {
-      e.preventDefault();
-      const handle = span.getAttribute("data-handle");
-      if (handle) {
-        navigator.clipboard.writeText(handle);
-
-        const response = await fetch(
-          `${globalThis.env.thekeeperURL}/auth/handles/${handle}`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: await auth(state.keys.private, state.keys.public),
-            },
-          },
-        );
-
-        if (response.status != 200) {
-          console.error("Error getting sharing link", response);
-          return;
-        }
-
-        const jsonResponse = await response.json();
-        navigator.clipboard.writeText(
-          `${globalThis.env.appURL}/index.html?code=${jsonResponse.message}`,
-        );
-      }
-    });
-  });
 }
 
 async function informations() {
@@ -1944,12 +1912,6 @@ switch (window.location.pathname) {
     console.log("route: informations");
 
     informations();
-    break;
-  case "/orga.html":
-  case "/orga":
-    console.log("route: orga");
-
-    orga();
     break;
   case "/index.html":
   case "/":
