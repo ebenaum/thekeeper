@@ -1,7 +1,7 @@
-foo.db
+app.db
 thekeeper
-foo.db-shm
-foo.db-wal
+*.db-shm
+*.db-wal
 node_modules
 public/univers.json
 public/prompt
