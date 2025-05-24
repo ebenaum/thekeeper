@@ -41,6 +41,7 @@ function newData() {
   return {
     handle: "",
     players: {},
+    characters: {},
   };
 }
 
@@ -154,6 +155,7 @@ async function init() {
 
 /**
  * @typedef {Object} CharacterForm
+ * @property {string}                 playerId
  * @property {string}                 name
  * @property {string}                 group
  * @property {string}                 vdv
@@ -165,7 +167,8 @@ async function init() {
 
 /**
  * @typedef {Object} Data
- * @property {Object.<string, {handle: string, personal?: InformationsForm, character?: CharacterForm}>} players
+ * @property {Object.<string, {handle: string, personal?: InformationsForm, characters: string[]}>} players
+ * @property {Object.<string, CharacterForm>} characters
  * @property {string} handle
  * @property {string} [permission]
  */
@@ -269,7 +272,10 @@ async function sync(state, reset) {
 function processEvent(data, eventType, eventValue) {
   switch (eventType) {
     case "SeedPlayer":
-      data.players[eventValue.playerId] = { handle: eventValue.handle };
+      data.players[eventValue.playerId] = {
+        handle: eventValue.handle,
+        characters: [],
+      };
 
       break;
     case "SeedActor":
@@ -289,11 +295,23 @@ function processEvent(data, eventType, eventValue) {
 
       break;
     case "PlayerCharacter":
-      data.players[eventValue.playerId].character = toJson(
+      data.characters[eventValue.characterId] = toJson(
         EventPlayerCharacterSchema,
         eventValue,
-        { alwaysEmitImplicit: true },
+        {
+          alwaysEmitImplicit: true,
+        },
       );
+
+      if (
+        data.players[eventValue.playerId].characters.indexOf(
+          eventValue.characterId,
+        ) === -1
+      ) {
+        data.players[eventValue.playerId].characters.push(
+          eventValue.characterId,
+        );
+      }
 
       break;
     default:
@@ -389,9 +407,11 @@ async function personnage() {
   let state = await getState();
 
   const url = new URL(window.location.href);
-  const playerId = url.searchParams.get("playerId");
+  const characterId = url.searchParams.get("characterId");
+  let playerId = url.searchParams.get("playerId");
 
   let /** @type{CharacterForm} */ formResult = {
+      playerId: "",
       name: "",
       group: "",
       vdv: "",
@@ -406,9 +426,18 @@ async function personnage() {
       },
     };
 
-  if (state) {
-    if (playerId && state.data.players[playerId].character) {
-      formResult = state.data.players[playerId].character;
+  if ((characterId || playerId) && !state) {
+    window.location.href = "/personnage.html";
+    return;
+  }
+
+  if (state && characterId) {
+    if (state.data.characters[characterId]) {
+      formResult = state.data.characters[characterId];
+      playerId = formResult.playerId;
+    } else {
+      window.location.href = "/personnage.html";
+      return;
     }
   }
 
@@ -1370,9 +1399,10 @@ async function personnage() {
 
   /**
    *
+   * @param {string | null} existingCharacterId
    * @param {string | null} existingPlayerId
    */
-  async function submitForm(existingPlayerId) {
+  async function submitForm(existingCharacterId, existingPlayerId) {
     const events = [];
 
     if (!state) {
@@ -1394,11 +1424,18 @@ async function personnage() {
       });
     }
 
+    let characterId = existingCharacterId;
+
+    if (!existingCharacterId) {
+      characterId = createRandomString(8);
+    }
+
     events.push({
       msg: {
         case: "PlayerCharacter",
         value: {
           name: formResult.name,
+          characterId: characterId,
           playerId: playerId,
           race: formResult.race,
           vdv: formResult.vdv,
@@ -1428,14 +1465,14 @@ async function personnage() {
       throw jsonResponse[0].error;
     }
 
-    if (!existingPlayerId) {
-      window.location.href = `?playerId=${playerId}`;
+    if (!existingCharacterId) {
+      window.location.href = `?characterId=${characterId}`;
     }
   }
 
   if (formElement) {
     formElement.onsubmit = function () {
-      submitForm(playerId);
+      submitForm(characterId, playerId);
 
       return false;
     };

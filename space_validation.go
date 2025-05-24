@@ -17,6 +17,9 @@ type SpaceValidation struct {
 	PlayersIDs map[string]struct {
 		ActorID int64
 	}
+	CharacterIDs map[string]struct {
+		PlayerID string
+	}
 }
 
 func NewSpaceValidation() SpaceValidation {
@@ -32,7 +35,8 @@ func NewSpaceValidation() SpaceValidation {
 				0: PermissionRoot,
 			},
 		},
-		PlayersIDs: map[string]struct{ ActorID int64 }{},
+		PlayersIDs:   map[string]struct{ ActorID int64 }{},
+		CharacterIDs: map[string]struct{ PlayerID string }{},
 	}
 }
 
@@ -99,9 +103,16 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 		if !exists {
 			return fmt.Errorf("player does not exist")
 		}
+
 		if sourceActorID != player.ActorID && s.Permission.Actors[sourceActorID] != PermissionOrga {
 			return fmt.Errorf("not authorized")
 		}
+
+		if character, exists := s.CharacterIDs[v.PlayerCharacter.CharacterId]; exists && character.PlayerID != v.PlayerCharacter.PlayerId {
+			return fmt.Errorf("character already exists")
+		}
+
+		s.CharacterIDs[v.PlayerCharacter.CharacterId] = struct{ PlayerID string }{v.PlayerCharacter.PlayerId}
 
 		return nil
 	default:
