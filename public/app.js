@@ -1499,13 +1499,13 @@ async function index() {
     };
 
     await sync(state, true);
-
-    if (state.data.permission === "orga") {
-      window.location.href = "/orga.html";
-      return;
-    }
   } else {
     state = await getState();
+  }
+
+  if (state && state.data.permission === "orga") {
+    window.location.href = "/orga.html";
+    return;
   }
 
   if (state) {
