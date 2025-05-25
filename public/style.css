@@ -119,6 +119,7 @@ input.q-response-text {
   border-collapse: separate;
   border-spacing: 5px;
   margin-bottom: 10px;
+  margin-top: 10px;
 }
 
 .q-response-select {
@@ -508,6 +509,11 @@ body.hasHover .q-response-select .input-select-choice:hover .monde-badge {
   background-color: #333;
   color: #fff;
   border-color: #fff;
+}
+
+.group__select__option__title {
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 .worldOrigin__select__option__title {
