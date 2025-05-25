@@ -109,6 +109,7 @@ textarea {
   font-weight: 400;
   resize: none;
   font-size: 1rem;
+  width: 100%;
 }
 
 input.q-response-text {
