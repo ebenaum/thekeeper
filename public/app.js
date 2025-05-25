@@ -1660,7 +1660,11 @@ async function index() {
       const nameElement = /** @type {HTMLElement} */ (
         clone.querySelector(".index__player__head__name")
       );
-      nameElement.textContent = `Joueur : ${player.personal?.surname || "Sans nom"}`;
+
+      const playerTypeLabel = { pj: "PJ", pnj: "PNJ", unknown: "Inscrit" }[
+        player.personal?.inscriptionType || "unknown"
+      ];
+      nameElement.textContent = `${playerTypeLabel} : ${player.personal?.surname || "Sans nom"}`;
 
       const aElement = /** @type {HTMLElement} */ (clone.querySelector("a"));
       aElement.setAttribute("href", "/informations.html?playerId=" + playerId);
