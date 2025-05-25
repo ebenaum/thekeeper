@@ -761,3 +761,8 @@ details {
 b {
   font-weight: bolder;
 }
+
+.information-helloasso-link {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
