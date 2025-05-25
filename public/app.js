@@ -266,7 +266,7 @@ async function sync(state, reset) {
     function (
       /** @type {{ msg: { case: any; value: any; }; ts: number; }} */ event,
     ) {
-      processEvent(state.data, event.msg.case, event.msg.value);
+      processEvent(state.data, event.msg.case, event.msg.value, reset);
       state.cursor = event.ts;
     },
   );
@@ -279,8 +279,9 @@ async function sync(state, reset) {
  * @param {Data} data
  * @param {any} eventType
  * @param {any} eventValue
+ * @params {boolean} reset
  */
-function processEvent(data, eventType, eventValue) {
+function processEvent(data, eventType, eventValue, reset) {
   switch (eventType) {
     case "SeedPlayer":
       data.players[eventValue.playerId] = {
@@ -295,6 +296,16 @@ function processEvent(data, eventType, eventValue) {
       break;
     case "Permission":
       data.permission = eventValue.permission;
+
+      break;
+    case "Reset":
+      if (!reset) {
+        localStorage.setItem("cursor", "-1");
+        window.location.href = window.location.href;
+        console.log("reset");
+      } else {
+        console.log("alreayd resetting, ignoring reset");
+      }
 
       break;
     case "PlayerPerson":

@@ -119,6 +119,8 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 		s.CharacterIDs[v.PlayerCharacter.CharacterId] = struct{ PlayerID string }{v.PlayerCharacter.PlayerId}
 
 		return nil
+	case *proto.Event_Reset_:
+		return nil
 	default:
 		return fmt.Errorf("event %v not handled", v)
 	}
@@ -173,6 +175,10 @@ func (s *SpacePlayer) Process(sourceActorID int64, event *proto.Event) error {
 		return nil
 	case *proto.Event_Permission:
 		return nil
+	case *proto.Event_Reset_:
+		s.Events = append(s.Events, event)
+
+		return nil
 	default:
 		return fmt.Errorf("event %v not handled", v)
 	}
@@ -214,6 +220,10 @@ func (s *SpaceOrga) Process(sourceActorID int64, event *proto.Event) error {
 
 		return nil
 	case *proto.Event_SeedActor, *proto.Event_Permission:
+		s.Events = append(s.Events, event)
+
+		return nil
+	case *proto.Event_Reset_:
 		s.Events = append(s.Events, event)
 
 		return nil

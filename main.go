@@ -46,6 +46,8 @@ func main() {
 			os.Exit(1)
 		}
 		err = httpsserver(db)
+	case "reset":
+		err = insertreset(db)
 	case "create-orga":
 		if len(os.Args) < 4 {
 			fmt.Println(usage())
@@ -138,6 +140,25 @@ func createorga(db *sqlx.DB, orgaHandle string) error {
 	}
 
 	fmt.Println("Code:", code)
+
+	return nil
+}
+
+func insertreset(db *sqlx.DB) error {
+	var id int64
+
+	result, err := InsertAndCheckEvents(db, -1, id, []*proto.Event{
+		{
+			Msg: &proto.Event_Reset_{},
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("seeding actor event: %w", err)
+	}
+
+	if result[0].Status != EventRecordStatusAccepted {
+		return fmt.Errorf("seeding actor event was not accepted: %v", result[0])
+	}
 
 	return nil
 }
