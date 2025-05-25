@@ -151,6 +151,7 @@ async function init() {
  * @property {string}   gameStyle
  * @property {string[]} gameStyleTags
  * @property {string}   situationToAvoid
+ * @property {string}   inscriptionType
  */
 
 /**
@@ -1711,6 +1712,7 @@ async function informations() {
       gameStyle: "",
       gameStyleTags: [],
       situationToAvoid: "",
+      inscriptionType: "",
     };
 
   const url = new URL(window.location.href);
@@ -1868,6 +1870,7 @@ async function informations() {
           gameStyle: formResult.gameStyle,
           gameStyleTags: formResult.gameStyleTags,
           situationToAvoid: formResult.situationToAvoid,
+          inscriptionType: formResult.inscriptionType,
         },
       },
     });
@@ -1890,7 +1893,11 @@ async function informations() {
       throw jsonResponse[0].error;
     }
 
-    window.location.href = `/personnage.html?playerId=${playerId}`;
+    if (formResult.inscriptionType === "pj") {
+      window.location.href = `/personnage.html?playerId=${playerId}`;
+    } else {
+      window.location.href = "/";
+    }
   }
 
   if (formElement) {
