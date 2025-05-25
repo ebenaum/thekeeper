@@ -730,3 +730,24 @@ details {
   margin-top: 10px;
   margin-bottom: 10px;
 }
+
+.description-edition {
+  width: 100%;
+}
+
+.description-edition summary {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+.description-edition p {
+  text-align: justify;
+}
+
+.description-edition li {
+  list-style: circle;
+}
+
+b {
+  font-weight: bolder;
+}
