@@ -1544,7 +1544,7 @@ async function index() {
     }
 
     localStorage.clear();
-    
+
     await storeKeypair(keypair);
 
     localStorage.setItem("redeemed_code", authCode);
