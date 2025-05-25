@@ -112,6 +112,20 @@ func FindActorIDByHandle(db *sqlx.DB, handle string) (int64, error) {
 	return -1, fmt.Errorf("handle not found for handle %q", handle)
 }
 
+func GetActorSpaceByActorID(db *sqlx.DB, actorID int64) (ActorSpace, error) {
+	var space ActorSpace
+
+	return space, db.QueryRowx(`
+	SELECT
+	  space
+	FROM actors
+	WHERE id=?`,
+		actorID,
+	).Scan(
+		&space,
+	)
+}
+
 func UseAuthKey(db *sqlx.DB, key string) (int64, error) {
 	var actorID int64
 

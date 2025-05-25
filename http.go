@@ -221,11 +221,38 @@ func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
+		if actorSpace != ActorSpaceOrga {
+			w.WriteHeader(http.StatusBadRequest)
+
+			log.Printf("actor %d space:%s not authorized to create auth link", actorID, actorSpace)
+			fmt.Fprintf(w, `{"message": "not authorized"}`)
+
+			return
+		}
+
 		handleToLink := r.PathValue("handle")
 
 		actorIDToLink, err := FindActorIDByHandle(db, handleToLink)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
+
+			return
+		}
+
+		actorSpaceToLink, err := GetActorSpaceByActorID(db, actorIDToLink)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			fmt.Fprintf(w, `{"message": "internal error"}`)
+
+			return
+		}
+
+		if actorSpaceToLink != ActorSpacePlayer {
+			w.WriteHeader(http.StatusBadRequest)
+
+			log.Printf("actor %d not authorized to create auth link for actor %d of space %q", actorID, actorIDToLink, actorSpaceToLink)
+			fmt.Fprintf(w, `{"message": "not authorized"}`)
 
 			return
 		}
