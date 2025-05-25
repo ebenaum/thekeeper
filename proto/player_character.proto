@@ -20,4 +20,6 @@ message EventPlayerCharacter {
    map<string, int32> skills       = 7;
    Characteristics characteristics = 8;
    map<string, int32> inventory    = 9;
+   string worldOrigin              = 10;
+   string worldApproach            = 11;
 }
