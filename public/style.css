@@ -772,3 +772,12 @@ b {
   font-size: 1.2rem;
   font-weight: bold;
 }
+
+.character-description {
+  margin-top: 10px;
+  text-align: justify;
+}
+
+.character-description textarea {
+  width: 100%;
+}

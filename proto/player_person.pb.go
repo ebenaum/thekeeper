@@ -36,7 +36,7 @@ type EventPlayerPerson struct {
 	UseExistingCharacter          bool                   `protobuf:"varint,11,opt,name=useExistingCharacter,proto3" json:"useExistingCharacter,omitempty"`
 	ApprovedConditions            bool                   `protobuf:"varint,12,opt,name=approvedConditions,proto3" json:"approvedConditions,omitempty"`
 	ExistingCharacterAchievements string                 `protobuf:"bytes,13,opt,name=existingCharacterAchievements,proto3" json:"existingCharacterAchievements,omitempty"`
-	GameStyle                     string                 `protobuf:"bytes,14,opt,name=gameStyle,proto3" json:"gameStyle,omitempty"`
+	GameStyle                     string                 `protobuf:"bytes,14,opt,name=gameStyle,proto3" json:"gameStyle,omitempty"` // deprecated
 	GameStyleTags                 []string               `protobuf:"bytes,15,rep,name=gameStyleTags,proto3" json:"gameStyleTags,omitempty"`
 	SituationToAvoid              string                 `protobuf:"bytes,16,opt,name=situationToAvoid,proto3" json:"situationToAvoid,omitempty"`
 	InscriptionType               string                 `protobuf:"bytes,17,opt,name=inscriptionType,proto3" json:"inscriptionType,omitempty"`

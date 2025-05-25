@@ -174,6 +174,7 @@ async function init() {
  * @property {Object.<string,number>} skills
  * @property {Object.<string,number>} inventory
  * @property {Characteristics}        characteristics
+ * @property {string}                 description
  */
 
 /**
@@ -442,6 +443,7 @@ async function personnage() {
       inventory: {},
       worldApproach: "",
       worldOrigin: "",
+      description: "",
       characteristics: {
         corps: 0,
         dexterite: 0,
@@ -1441,6 +1443,24 @@ async function personnage() {
 
   updateSkillList();
 
+  document.querySelectorAll(".input-text").forEach(function (match) {
+    const label = match.querySelector("label");
+    const input =
+      match.querySelector("input") || match.querySelector("textarea");
+
+    const forAttribute = label?.getAttribute("for");
+    if (!forAttribute || !input) {
+      return;
+    }
+
+    input.value = formResult[forAttribute] || "";
+
+    match.addEventListener("input", (event) => {
+      const target = /** @type{HTMLInputElement}*/ (event.target);
+      formResult[forAttribute] = target.value;
+    });
+  });
+
   document.querySelectorAll(".q-select--unique").forEach(function (match) {
     const label = match.querySelector("label");
     const lis = match.querySelectorAll("li");
@@ -1526,6 +1546,7 @@ async function personnage() {
           group: formResult.group,
           characteristics: formResult.characteristics,
           skills: formResult.skills,
+          description: formResult.description,
           inventory: formResult.inventory,
         },
       },

@@ -17,7 +17,7 @@ message EventPlayerPerson {
    bool            useExistingCharacter          = 11;
    bool            approvedConditions            = 12;
    string          existingCharacterAchievements = 13;
-   string          gameStyle                     = 14;
+   string          gameStyle                     = 14; // deprecated
    repeated string gameStyleTags                 = 15;
    string          situationToAvoid              = 16;
    string          inscriptionType               = 17;

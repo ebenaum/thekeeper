@@ -22,4 +22,5 @@ message EventPlayerCharacter {
    map<string, int32> inventory    = 9;
    string worldOrigin              = 10;
    string worldApproach            = 11;
+   string description              = 12;
 }
