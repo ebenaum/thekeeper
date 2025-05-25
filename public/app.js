@@ -1686,11 +1686,13 @@ async function index() {
       });
   }
 
-  const creationButton = document.createElement("a");
-  creationButton.classList.add("character-creation-button");
-  creationButton.setAttribute("href", "/informations.html");
-  creationButton.textContent = "Créer un joueur";
-  containerElement?.appendChild(creationButton);
+  if (!state || state.data.permission !== "orga") {
+    const creationButton = document.createElement("a");
+    creationButton.classList.add("character-creation-button");
+    creationButton.setAttribute("href", "/informations.html");
+    creationButton.textContent = "Créer un joueur";
+    containerElement?.appendChild(creationButton);
+  }
 }
 
 async function informations() {
@@ -1717,6 +1719,12 @@ async function informations() {
   const playerId = url.searchParams.get("playerId");
 
   if (state) {
+    if (!playerId && state.data.permission === "orga") {
+    //  window.location.href = "/index.html";
+
+      //return;
+    }
+
     if (playerId && state.data.players[playerId].personal) {
       formResult = state.data.players[playerId].personal;
     }

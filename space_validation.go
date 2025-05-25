@@ -71,6 +71,10 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 	case *proto.Event_Permission:
 		return s.Permission.Process(sourceActorID, v.Permission)
 	case *proto.Event_SeedPlayer:
+		if s.Permission.Actors[sourceActorID] == PermissionOrga {
+			return fmt.Errorf("not authorized: orga not authorized to create players")
+		}
+
 		actorID, exists := s.Handles.HandleToID[v.SeedPlayer.Handle]
 		if !exists {
 			return fmt.Errorf("not authorized: actor does not exist")
