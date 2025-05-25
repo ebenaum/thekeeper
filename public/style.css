@@ -714,3 +714,11 @@ details {
   font-size: 1.1rem;
   font-weight: bold;
 }
+
+.save-button {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 10px 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
