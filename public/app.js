@@ -343,7 +343,7 @@ async function auth(privateKey, publicKey) {
     .setIssuedAt()
     .setIssuer("self")
     .setAudience("thekeeper")
-    .setExpirationTime("5s")
+    .setExpirationTime("30s")
     .sign(privateKey);
 }
 
@@ -1890,7 +1890,7 @@ async function informations() {
       throw jsonResponse[0].error;
     }
 
-    window.location.href = `/`;
+    window.location.href = `/personnage.html?playerId=${playerId}`;
   }
 
   if (formElement) {

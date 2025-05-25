@@ -60,6 +60,7 @@ func validatePublicKey(tokenString string) (ecdsa.PublicKey, error) {
 		jwt.WithIssuedAt(),
 		jwt.WithAudience("thekeeper"),
 		jwt.WithExpirationRequired(),
+		jwt.WithLeeway(time.Second*30),
 		jwt.WithIssuer("self"),
 	)
 	if err != nil {
