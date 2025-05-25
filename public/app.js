@@ -83,8 +83,6 @@ async function init() {
   const keypair = await generateKeypair();
   const handle = createRandomString(16);
 
-  storeKeypair(keypair);
-
   console.log(
     `no keypair, generate new one: ${buf2hex(await window.crypto.subtle.exportKey("raw", keypair.public))}`,
   );
@@ -122,6 +120,7 @@ async function init() {
     cursor: -1,
   };
 
+  storeKeypair(keypair);
   await sync(state, true);
 
   return state;
@@ -1545,6 +1544,7 @@ async function index() {
     }
 
     localStorage.clear();
+    
     await storeKeypair(keypair);
 
     localStorage.setItem("redeemed_code", authCode);
