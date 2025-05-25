@@ -26,6 +26,31 @@
       </li>
     </template>
 
+    <template id="template__worldOrigin-option">
+      <li
+        class="worldOrigin__select__option input-select-choice active d-block"
+      >
+        <span class="worldOrigin__select__option__title"></span>
+        <p class="worldOrigin__select__option__description"></p>
+      </li>
+    </template>
+
+    <template id="template__worldApproach-option">
+      <li
+        class="worldApproach__select__option input-select-choice active d-block"
+      >
+        <span class="worldApproach__select__option__title"></span>
+        <p class="worldApproach__select__option__description"></p>
+      </li>
+    </template>
+
+    <template id="template__group-option">
+      <li class="group__select__option input-select-choice active d-block">
+        <span class="group__select__option__title"></span>
+        <p class="group__select__option__description"></p>
+      </li>
+    </template>
+
     <template id="template__race-option">
       <li class="race__select__option input-select-choice active d-block">
         <div class="race__select__option__head">
@@ -189,12 +214,36 @@
 
           <details class="group q-select--unique">
             <summary>
-              <span class="group__title">Groupe de jeu</span
+              <span class="group__title">Dans quel monde vivez-vous ?</span
               ><span data-key="group" class="selected-section"></span>
             </summary>
             <div class="q-select">
               <label class="d-none" for="group">Groupe de jeu</label>
               <ul class="group__select q-response-select"></ul>
+            </div>
+          </details>
+
+          <details class="worldOrigin q-select--unique">
+            <summary>
+              <span class="worldOrigin__title"
+                >Quel est votre status dans le monde ?</span
+              ><span data-key="worldOrigin" class="selected-section"></span>
+            </summary>
+            <div class="q-select">
+              <label class="d-none" for="worldOrigin">Origine</label>
+              <ul class="worldOrigin__select q-response-select"></ul>
+            </div>
+          </details>
+
+          <details class="worldApproach q-select--unique">
+            <summary>
+              <span class="worldApproach__title"
+                >Quel est votre rapport aux mondes</span
+              ><span data-key="worldApproach" class="selected-section"></span>
+            </summary>
+            <div class="q-select">
+              <label class="d-none" for="worldApproach">Approche</label>
+              <ul class="worldApproach__select q-response-select"></ul>
             </div>
           </details>
 

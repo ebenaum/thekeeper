@@ -167,6 +167,8 @@ async function init() {
  * @property {string}                 playerId
  * @property {string}                 name
  * @property {string}                 group
+ * @property {string}                 worldOrigin
+ * @property {string}                 worldApproach
  * @property {string}                 vdv
  * @property {string}                 race
  * @property {Object.<string,number>} skills
@@ -427,6 +429,8 @@ async function personnage() {
       race: "",
       skills: {},
       inventory: {},
+      worldApproach: "",
+      worldOrigin: "",
       characteristics: {
         corps: 0,
         dexterite: 0,
@@ -455,6 +459,22 @@ async function personnage() {
   const mondeTemplate = document.querySelector("#template__group-option");
   if (!mondeTemplate) {
     throw new Error("cannot retrieve monde template");
+  }
+
+  /** @type {HTMLTemplateElement | null} */
+  const worldOriginTemplate = document.querySelector(
+    "#template__worldOrigin-option",
+  );
+  if (!worldOriginTemplate) {
+    throw new Error("cannot retrieve worldOrigin template");
+  }
+
+  /** @type {HTMLTemplateElement | null} */
+  const worldApproachTemplate = document.querySelector(
+    "#template__worldApproach-option",
+  );
+  if (!worldApproachTemplate) {
+    throw new Error("cannot retrieve worldOrigin template");
   }
 
   const /** @type {HTMLTemplateElement | null} */ raceTemplate =
@@ -494,6 +514,8 @@ async function personnage() {
 
   const mondeSelect = document.querySelector(".group__select");
   const raceSelect = document.querySelector(".race__select");
+  const originSelect = document.querySelector(".worldOrigin__select");
+  const approachSelect = document.querySelector(".worldApproach__select");
   const vdvSelect = document.querySelector(".vdv__select");
   const skillSelect = document.querySelector(".skills");
   const inventorySelect = document.querySelector(".inventory__select");
@@ -502,6 +524,10 @@ async function personnage() {
   const /** @type {UniversEntry[]} */ univers = await universResponse.json();
   const races = univers.filter((entry) => entry.tags.includes("race"));
   const mondes = univers.filter((entry) => entry.tags.includes("monde"));
+  const origins = univers.filter((entry) =>
+    entry.tags.includes("world-of-origin"),
+  );
+  const approachs = univers.filter((entry) => entry.tags.includes("approach"));
   const vdvs = univers.filter((entry) => entry.tags.includes("vdv"));
   const inventory = univers.filter((entry) => entry.tags.includes("inventory"));
 
@@ -1224,6 +1250,46 @@ async function personnage() {
     mondeSelect?.appendChild(clone);
   });
 
+  origins.forEach((origin) => {
+    const clone = /** @type {HTMLElement} */ (
+      worldOriginTemplate.content.cloneNode(true)
+    );
+
+    const titleElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".worldOrigin__select__option__title")
+    );
+    const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
+    const descriptionElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".worldOrigin__select__option__description")
+    );
+
+    titleElement.textContent = origin.label;
+    descriptionElement.textContent = origin.description;
+    liElement.setAttribute("data-key", origin.key);
+
+    originSelect?.appendChild(clone);
+  });
+
+  approachs.forEach((approach) => {
+    const clone = /** @type {HTMLElement} */ (
+      worldApproachTemplate.content.cloneNode(true)
+    );
+
+    const titleElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".worldApproach__select__option__title")
+    );
+    const liElement = /** @type {HTMLElement} */ (clone.querySelector("li"));
+    const descriptionElement = /** @type {HTMLElement} */ (
+      clone.querySelector(".worldApproach__select__option__description")
+    );
+
+    titleElement.textContent = approach.label;
+    descriptionElement.textContent = approach.description;
+    liElement.setAttribute("data-key", approach.key);
+
+    approachSelect?.appendChild(clone);
+  });
+
   // Store all races for filtering
   const allRaces = [...races];
   // Store all vdvs for filtering
@@ -1444,6 +1510,8 @@ async function personnage() {
           playerId: playerId,
           race: formResult.race,
           vdv: formResult.vdv,
+          worldApproach: formResult.worldApproach,
+          worldOrigin: formResult.worldOrigin,
           group: formResult.group,
           characteristics: formResult.characteristics,
           skills: formResult.skills,
