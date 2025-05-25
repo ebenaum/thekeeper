@@ -510,6 +510,16 @@ body.hasHover .q-response-select .input-select-choice:hover .monde-badge {
   border-color: #fff;
 }
 
+.worldOrigin__select__option__title {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.worldApproach__select__option__title {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
 /* Style for races from different mondes */
 .race__select__option[data-monde="ebenaum"] .monde-badge {
   background-color: #e9e3d3;
