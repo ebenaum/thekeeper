@@ -1470,9 +1470,7 @@ async function personnage() {
       throw jsonResponse[0].error;
     }
 
-    if (!existingCharacterId) {
-      window.location.href = `?characterId=${characterId}`;
-    }
+    window.location.href = "/";
   }
 
   if (formElement) {
@@ -1720,9 +1718,8 @@ async function informations() {
 
   if (state) {
     if (!playerId && state.data.permission === "orga") {
-    //  window.location.href = "/index.html";
-
-      //return;
+      window.location.href = "/index.html";
+      return;
     }
 
     if (playerId && state.data.players[playerId].personal) {
@@ -1827,7 +1824,6 @@ async function informations() {
   const formElement = document.getElementById("form");
 
   /**
-   *
    * @param {string | null} existingPlayerId
    */
   async function submitForm(existingPlayerId) {
@@ -1894,9 +1890,7 @@ async function informations() {
       throw jsonResponse[0].error;
     }
 
-    if (!existingPlayerId) {
-      window.location.href = `?playerId=${playerId}`;
-    }
+    window.location.href = `/`;
   }
 
   if (formElement) {
