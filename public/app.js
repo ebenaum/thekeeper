@@ -889,7 +889,7 @@ async function personnage() {
         rank === 0 ? skill.description : skill.levels[rank - 1].description,
       rankDescription: "Rang " + rank + "/" + skill.rankMax,
       nextRankDescription:
-        rank === skill.rankMax
+        (rank === skill.rankMax || skill.levels.length === 1)
           ? null
           : "Rang suivant - Coût " +
             skill.levels[rank].cost +
