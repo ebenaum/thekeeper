@@ -739,6 +739,11 @@ details {
   font-weight: bold;
 }
 
+.character-creation-button:hover {
+  background-color: black;
+  color: white;
+}
+
 .player-card__sharelink {
   cursor: pointer;
 }

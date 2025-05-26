@@ -1818,6 +1818,7 @@ async function index() {
   if (!state || state.data.permission !== "orga") {
     const creationButton = document.createElement("a");
     creationButton.classList.add("character-creation-button");
+    creationButton.classList.add("a-underline");
     creationButton.setAttribute("href", "/informations.html");
     creationButton.textContent = "Créer un joueur";
     containerElement?.appendChild(creationButton);
