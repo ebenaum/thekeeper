@@ -439,6 +439,20 @@ input[type="number"]::-webkit-outer-spin-button {
   background-color: rgb(212, 184, 0);
 }
 
+.spellbook {
+  display: inline-block;
+  font-size: 0.8em;
+  padding: 2px 6px;
+  margin-right: 8px; /* Keep margin consistent */
+  border: 1px solid #000;
+  border-radius: 3px;
+  background-color: #f0f0f0; /* Default background */
+  opacity: 0.8;
+  vertical-align: middle;
+  font-weight: normal;
+  background-color: rgb(212, 184, 0);
+}
+
 .skill__content {
   display: grid;
   grid-template-columns: 10fr 1fr;

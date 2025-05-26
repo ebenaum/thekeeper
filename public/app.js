@@ -948,10 +948,25 @@ async function personnage() {
       );
 
       titleElement.textContent = skillDesc.title;
-      descriptionElement.textContent = skillDesc.description;
+
+      if (skill.key === "sorts") {
+        skillDesc.description = skillDesc.description.replace(
+          "SORT BASIQUE",
+          `<span class="spellbook">Sort Basique</span>`,
+        );
+
+        if (skillDesc.nextRankDescription) {
+          skillDesc.nextRankDescription = skillDesc.nextRankDescription.replace(
+            "SORT BASIQUE",
+            `<span class="spellbook">Sort Basique</span>`,
+          );
+        }
+      }
+      descriptionElement.innerHTML = skillDesc.description;
+
       levelSpan1Element.textContent = skillDesc.rankDescription;
       levelSpan2Element.textContent = skillDesc.rankTitle;
-      nextLevelElement.textContent = skillDesc.nextRankDescription;
+      nextLevelElement.innerHTML = skillDesc.nextRankDescription || "";
 
       if (lvl === skill.rankMax) {
         el.querySelector(".skill__content__level__up")?.classList.add(
@@ -991,7 +1006,7 @@ async function personnage() {
     if (skill.availableToSorcerer) {
       const badgeElement = document.createElement("span");
       badgeElement.classList.add("skill__badge");
-      badgeElement.textContent = "Utilisable avec “Sorts”";
+      badgeElement.textContent = "Sort Basique";
       badgeElement.dataset.availableToSorcerer = "";
 
       badgesElement.appendChild(badgeElement);
