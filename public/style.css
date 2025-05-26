@@ -813,3 +813,7 @@ b {
 .character-description textarea {
   width: 100%;
 }
+
+.character-list {
+  width: 100%;
+}

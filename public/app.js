@@ -1636,6 +1636,11 @@ async function index() {
     throw new Error("no container element");
   }
 
+  const characterListElement = document.querySelector(".character-list");
+  if (!characterListElement) {
+    throw new Error("no characterListElement element");
+  }
+
   const url = new URL(window.location.href);
   const authCode = url.searchParams.get("code");
   let /** @type{State|null} */ state;
@@ -1776,7 +1781,7 @@ async function index() {
         charactersElement.prepend(characterClone);
       });
 
-      containerElement?.prepend(clone);
+      characterListElement?.prepend(clone);
     });
 
     containerElement
@@ -1820,7 +1825,7 @@ async function index() {
     creationButton.classList.add("character-creation-button");
     creationButton.classList.add("a-underline");
     creationButton.setAttribute("href", "/informations.html");
-    creationButton.textContent = "Créer un joueur";
+    creationButton.textContent = "Créer un personnage";
     containerElement?.appendChild(creationButton);
   }
 }
