@@ -21,4 +21,5 @@ message EventPlayerPerson {
    repeated string gameStyleTags                 = 15;
    string          situationToAvoid              = 16;
    string          inscriptionType               = 17;
+   bool            pictureRights                  = 18;
 }

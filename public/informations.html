@@ -34,18 +34,18 @@
           <legend>Informations administratives</legend>
 
           <div class="input-text">
-            <label for="surname">Prénom & Nom :</label>
+            <label for="surname">Prénom & Nom *:</label>
             <input type="text" name="surname" required />
           </div>
 
           <div class="input-text">
-            <label for="contact">Contact (email, téléphone) :</label>
+            <label for="contact">Contact (email, téléphone) *:</label>
             <input type="text" name="contact" required />
           </div>
 
           <div class="input-text">
             <label for="emergencyContact"
-              >Contact d'urgence (téléphone) :</label
+              >Contact d'urgence (téléphone) *:</label
             >
             <input type="text" name="emergencyContact" required />
           </div>
@@ -79,7 +79,7 @@
 
           <div class="input-text">
             <label for="cityOfOrigin"
-              >Ville d'origine (pour proposer des covoiturages) :</label
+              >Ville d'origine (pour proposer des covoiturages) *:</label
             >
             <input type="text" name="cityOfOrigin" required />
           </div>
@@ -104,6 +104,18 @@
           </div>
 
           <div class="input-text">
+            <label for="situationToAvoid" class="d-inline"
+              >Quelles situations (ou personnes) voulez-vous absolument éviter
+              ?</label
+            >
+            <textarea
+              name="situationToAvoid"
+              class="q-response-text"
+              rows="5"
+            ></textarea>
+          </div>
+
+          <div class="input-text">
             <label class="d-block" for="skills"
               >Avez-vous des compétences particulières quelconques ?</label
             >
@@ -112,11 +124,30 @@
 
           <div class="input-checkbox">
             <label class="d-block" for="approvedConditions"
-              >En participant à l'événement, vous acceptez de respecter les
-              consignes des livres de règles, de sécurité ainsi que celles
-              données par les membres d'organisation lors de l'évènement</label
+              >J'accepte de respecter les consignes des livres de règles, de
+              sécurité ainsi que celles données par les membres d'organisation
+              lors de l'évènement.*<br />J'accepte que les données personnelles
+              collectées sur le présent formulaire soit stockées et utilisées
+              par Ebenaum. Ebenaum stocke vos données sur un serveur
+              <a
+                class="a-underline"
+                target="_blank"
+                href="https://www.hetzner.com"
+                >Hetzner</a
+              >
+              localisé en Finlande et ne les transmet à aucun autre
+              tiers.*</label
             >
             <input type="checkbox" name="approvedConditions" required />
+          </div>
+
+          <div class="input-checkbox">
+            <label class="d-block" for="pictureRights"
+              >Un photographe officiel sera présent lors du GN 2025. J'autorise
+              Ebenaum à publier dans ses communications publiques des photos où
+              je pourrais apparaître.</label
+            >
+            <input type="checkbox" name="pictureRights" />
           </div>
         </fieldset>
 
@@ -154,6 +185,7 @@
             <label for="gameStyleTags"
               >Quels types de jeu appréciez-vous en particulier ?</label
             >
+            <div class="spacer-m"></div>
             <ul class="q-response-select d-inline">
               <li class="input-select-choice active d-inline" data-key="">
                 Herboristerie
@@ -297,18 +329,6 @@
                 Leadership
               </li>
             </ul>
-          </div>
-
-          <div class="input-text">
-            <label for="situationToAvoid" class="d-inline"
-              >Quelles situations (ou personnes) voulez-vous absolument éviter
-              ?</label
-            >
-            <textarea
-              name="situationToAvoid"
-              class="q-response-text"
-              rows="5"
-            ></textarea>
           </div>
         </fieldset>
 

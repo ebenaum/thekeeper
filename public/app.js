@@ -152,6 +152,7 @@ async function init() {
  * @property {string[]} gameStyleTags
  * @property {string}   situationToAvoid
  * @property {string}   inscriptionType
+ * @property {boolean}  pictureRights
  */
 
 /**
@@ -641,6 +642,16 @@ async function personnage() {
             -1,
           ...skill,
         };
+      })
+      .sort((a, b) => {
+        if (a.key < b.key) {
+          return -1;
+        }
+
+        if (b.key < a.key) {
+          return 1;
+        }
+        return 0;
       });
 
   const characteristics = univers
@@ -889,7 +900,7 @@ async function personnage() {
         rank === 0 ? skill.description : skill.levels[rank - 1].description,
       rankDescription: "Rang " + rank + "/" + skill.rankMax,
       nextRankDescription:
-        (rank === skill.rankMax || skill.levels.length === 1)
+        rank === skill.rankMax || skill.levels.length === 1
           ? null
           : "Rang suivant - Coût " +
             skill.levels[rank].cost +
@@ -1817,6 +1828,7 @@ async function informations() {
       gameStyleTags: [],
       situationToAvoid: "",
       inscriptionType: "",
+      pictureRights: false,
     };
 
   const url = new URL(window.location.href);
@@ -1975,6 +1987,7 @@ async function informations() {
           gameStyleTags: formResult.gameStyleTags,
           situationToAvoid: formResult.situationToAvoid,
           inscriptionType: formResult.inscriptionType,
+          pictureRights: formResult.pictureRights,
         },
       },
     });
