@@ -130,7 +130,7 @@ func UseAuthKey(db *sqlx.DB, key string) (int64, error) {
 	var actorID int64
 
 	err := db.QueryRowx(
-		`UPDATE auth_keys SET redeemed_at=? WHERE redeemed_at IS NULL AND key=? RETURNING actor_id`,
+		`UPDATE auth_keys SET redeemed_at=? WHERE key=? RETURNING actor_id`,
 		time.Now().UTC().Unix(),
 		key,
 	).Scan(&actorID)

@@ -1699,6 +1699,10 @@ async function index() {
     };
 
     await sync(state, true);
+
+    window.location.href = "/";
+
+    return;
   } else {
     state = await getState();
   }
