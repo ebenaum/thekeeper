@@ -427,6 +427,65 @@ function attachSelectListeners(elements, formKey, allowMultiple, callback) {
   });
 }
 
+/**
+ *
+ * @param {CharacterForm} player
+ * @param {Object<string, UniversEntry>} univers
+ */
+async function personnage_orga(player, characteristicsLevels, univers) {
+  const containerElement = document.querySelector(".container");
+  if (!containerElement) {
+    throw new Error("no container element");
+  }
+
+  /** @type {HTMLTemplateElement | null} */
+  const orgaTemplate = document.querySelector("#template__orga");
+  if (!orgaTemplate) {
+    throw new Error("cannot retrieve orga template");
+  }
+
+  containerElement.querySelectorAll("details").forEach((el) => {
+    el.removeAttribute("open");
+  });
+
+  const clone = orgaTemplate.content.cloneNode(true);
+
+  const print = (/** @type {Element} */ el) => {
+    const titleElement = /** @type {HTMLElement} */ (
+      el.querySelector(".orga__player-title")
+    );
+
+    const raceVdvElement = /** @type {HTMLElement} */ (
+      el.querySelector(".orga__player-race-vdv")
+    );
+
+    const characteristicsElement = /** @type {HTMLElement} */ (
+      el.querySelector(".orga__player-characteristics")
+    );
+
+    titleElement.innerHTML = `<span class="orga__player-title__name">${player.name}</span> | ${univers[player.group].label} | ${univers[player.worldOrigin].label} | ${univers[player.worldApproach].label}`;
+    raceVdvElement.textContent = `${univers[player.race]?.label || "Sans race"} | ${univers[player.vdv]?.label || "Sans Voie de Vie"}`;
+    const characteristics = [];
+
+    Object.keys(player.characteristics).forEach((characteristic) => {
+      console.log(
+        characteristicsLevels.find((c) => c.key === characteristic)?.levels,
+      );
+
+      characteristics.push(
+        `${univers[characteristic].label} : ${characteristicsLevels.find((c) => c.key === characteristic)?.levels[player.characteristics[characteristic] + 2]?.description} (${player.characteristics[characteristic]})`,
+      );
+    });
+
+    characteristicsElement.textContent = characteristics.join(" | ");
+  };
+
+  containerElement?.prepend(clone);
+  const node = /** @type {Element} */ (containerElement?.firstElementChild);
+
+  print(node);
+}
+
 async function personnage() {
   let state = await getState();
 
@@ -545,10 +604,40 @@ async function personnage() {
   const vdvs = univers.filter((entry) => entry.tags.includes("vdv"));
   const inventory = univers.filter((entry) => entry.tags.includes("inventory"));
 
-  const universMap = {};
+  const /** @type{Object<string, UniversEntry>} */ universMap = {};
   univers.forEach((entry) => {
     universMap[entry.key] = entry;
   });
+
+  const characteristics = univers
+    .filter((entry) => entry.tags.includes("characteristic"))
+    .map((characteristic) => {
+      const levels = univers
+        .filter((entry) =>
+          entry.tags.includes("characteristic:" + characteristic.key),
+        )
+        .map((level) => {
+          const rank = level.tags
+            .find((tag) => tag.startsWith("level:"))
+            ?.split(":")[1];
+
+          if (!rank) {
+            throw new Error("missing rank on " + level.toString());
+          }
+
+          // Extract pc tag if it exists
+          const pcTag = level.tags.find((tag) => tag.startsWith("pc:"));
+          const pcValue = pcTag ? parseInt(pcTag.split(":")[1]) : null;
+
+          return { rank: parseInt(rank), pcValue, ...level };
+        });
+
+      return { levels, ...characteristic };
+    });
+
+  if (state?.data.permission === "orga") {
+    await personnage_orga(formResult, characteristics, universMap);
+  }
 
   /**
    * Calculates the inventory budget based on the dexterity characteristic level.
@@ -653,32 +742,6 @@ async function personnage() {
         }
         return 0;
       });
-
-  const characteristics = univers
-    .filter((entry) => entry.tags.includes("characteristic"))
-    .map((characteristic) => {
-      const levels = univers
-        .filter((entry) =>
-          entry.tags.includes("characteristic:" + characteristic.key),
-        )
-        .map((level) => {
-          const rank = level.tags
-            .find((tag) => tag.startsWith("level:"))
-            ?.split(":")[1];
-
-          if (!rank) {
-            throw new Error("missing rank on " + level.toString());
-          }
-
-          // Extract pc tag if it exists
-          const pcTag = level.tags.find((tag) => tag.startsWith("pc:"));
-          const pcValue = pcTag ? parseInt(pcTag.split(":")[1]) : null;
-
-          return { rank: parseInt(rank), pcValue, ...level };
-        });
-
-      return { levels, ...characteristic };
-    });
 
   let characteristicBudget =
     parseInt(
@@ -2064,8 +2127,7 @@ async function informations() {
 
 function watchForHover() {
   // lastTouchTime is used for ignoring emulated mousemove events
-  // that are fired after touchstart events. Since they're
-  // indistinguishable from real events, we use the fact that they're
+  // that are fired after touchstart events. Since they're indistinguishable from real events, we use the fact that they're
   // fired a few milliseconds after touchstart to filter them.
   let lastTouchTime = 0;
 
