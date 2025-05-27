@@ -979,10 +979,12 @@ async function personnage() {
       }
 
       if (lvl === 0) {
+        el.classList.remove("selected");
         el.querySelector(".skill__content__level__down")?.classList.add(
           "skill__content__level__down--min",
         );
       } else {
+        el.classList.add("selected");
         el.querySelector(".skill__content__level__down")?.classList.remove(
           "skill__content__level__down--min",
         );

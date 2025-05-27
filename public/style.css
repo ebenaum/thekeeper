@@ -404,6 +404,11 @@ input[type="number"]::-webkit-outer-spin-button {
   border: 2px solid #000000;
 }
 
+.skill.selected {
+  background-color: black;
+  color: white;
+}
+
 .skill__head {
   display: flex;
   align-items: center;
@@ -437,6 +442,16 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .skill__badge[data-available-to-sorcerer=""] {
   background-color: rgb(212, 184, 0);
+}
+
+.skill.selected .skill__badge {
+  background-color: grey;
+  color: white;
+}
+
+.skill.selected .skill__badge[data-available-to-sorcerer=""] {
+  background-color: grey;
+  color: white;
 }
 
 .spellbook {
