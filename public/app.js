@@ -985,6 +985,7 @@ async function personnage() {
         );
       } else {
         el.classList.add("selected");
+        el.scrollIntoView();
         el.querySelector(".skill__content__level__down")?.classList.remove(
           "skill__content__level__down--min",
         );
