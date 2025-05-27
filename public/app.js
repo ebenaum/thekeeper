@@ -987,9 +987,11 @@ async function personnage() {
           "skill__content__level__down--min",
         );
       } else {
-        el.classList.add("selected");
-        if (!firstPrint) {
-          el.scrollIntoView();
+        if (!el.classList.contains("selected")) {
+          el.classList.add("selected");
+          if (!firstPrint) {
+            el.scrollIntoView();
+          }
         }
 
         el.querySelector(".skill__content__level__down")?.classList.remove(
