@@ -928,7 +928,10 @@ async function personnage() {
       skillElement.dataset.requireKey = skill.requirementEntry.key;
     }
 
-    const print = (/** @type {Element} */ el) => {
+    const print = (
+      /** @type {Element} */ el,
+      /* @type {boolean}*/ firstPrint,
+    ) => {
       const skillDesc = skillBuild(skill, lvl);
 
       const titleElement = /** @type {HTMLElement} */ (
@@ -985,7 +988,10 @@ async function personnage() {
         );
       } else {
         el.classList.add("selected");
-        el.scrollIntoView();
+        if (!firstPrint) {
+          el.scrollIntoView();
+        }
+
         el.querySelector(".skill__content__level__down")?.classList.remove(
           "skill__content__level__down--min",
         );
@@ -1031,7 +1037,7 @@ async function personnage() {
       if (lvl < skill.rankMax) {
         lvl++;
         onSkillPick(skill.key, lvl, -skill.levels[lvl - 1].cost);
-        print(node);
+        print(node, false);
       }
     });
 
@@ -1039,7 +1045,7 @@ async function personnage() {
       if (lvl > 0) {
         onSkillPick(skill.key, lvl - 1, skill.levels[lvl - 1].cost);
         lvl--;
-        print(node);
+        print(node, false);
       }
     });
 
@@ -1051,10 +1057,10 @@ async function personnage() {
 
       onSkillPick(skill.key, 0, cost);
       lvl = 0;
-      print(node);
+      print(node, false);
     };
 
-    print(node);
+    print(node, true);
   });
 
   /**
