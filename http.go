@@ -79,12 +79,12 @@ func auth(db *sqlx.DB, tokenString string) (int64, ActorSpace, error) {
 		return actorID, actorSpace, err
 	}
 
-	log.Print(hex.EncodeToString(append(publicKey.X.Bytes(), publicKey.Y.Bytes()...)))
-
 	actorID, actorSpace, err = GetState(db, append(publicKey.X.Bytes(), publicKey.Y.Bytes()...))
 	if err != nil {
 		return actorID, actorSpace, Error{errors.New("invalid public key"), fmt.Errorf("get state: %w", err)}
 	}
+
+	log.Printf("%d %q %s", actorID, actorSpace, hex.EncodeToString(append(publicKey.X.Bytes(), publicKey.Y.Bytes()...)))
 
 	return actorID, actorSpace, err
 }
