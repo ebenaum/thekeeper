@@ -463,7 +463,7 @@ async function personnage_orga(player, characteristicsLevels, univers) {
       el.querySelector(".orga__player-characteristics")
     );
 
-    titleElement.innerHTML = `<span class="orga__player-title__name">${player.name}</span> | ${univers[player.group].label} | ${univers[player.worldOrigin].label} | ${univers[player.worldApproach].label}`;
+    titleElement.innerHTML = `<span class="orga__player-title__name">${player.name}</span> | ${univers[player.group]?.label || "Sans monde"} | ${univers[player.worldOrigin]?.label || "Sans status"} | ${univers[player.worldApproach]?.label || "Sans alignement"}`;
     raceVdvElement.textContent = `${univers[player.race]?.label || "Sans race"} | ${univers[player.vdv]?.label || "Sans Voie de Vie"}`;
     const characteristics = [];
 
