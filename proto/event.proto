@@ -6,18 +6,20 @@ import "seed_player.proto";
 import "seed_actor.proto";
 import "player_person.proto";
 import "player_character.proto";
+import "player_character_orga_edit.proto";
 
 option go_package = "github.com/ebenaum/thekeeper/proto;proto";
 
 message Event {
   int64 ts = 1;
   oneof msg {
-    EventPermission      Permission      = 2;
-    EventSeedPlayer      SeedPlayer      = 3;
-    EventSeedActor       SeedActor       = 4;
-    EventPlayerPerson    PlayerPerson    = 5;
-    EventPlayerCharacter PlayerCharacter = 6;
-    bool                 Reset           = 7;
+    EventPermission              Permission              = 2;
+    EventSeedPlayer              SeedPlayer              = 3;
+    EventSeedActor               SeedActor               = 4;
+    EventPlayerPerson            PlayerPerson            = 5;
+    EventPlayerCharacter         PlayerCharacter         = 6;
+    bool                         Reset                   = 7;
+    EventPlayerCharacterOrgaEdit PlayerCharacterOrgaEdit = 8;
   }
 }
 

@@ -1,0 +1,29 @@
+syntax = "proto3";
+package thekeeper;
+
+option go_package = "github.com/ebenaum/thekeeper/proto;proto";
+
+message Gift {
+  string title       = 1;
+  string description = 2;
+}
+
+message Handicap {
+  string title       = 1;
+  string description = 2;
+}
+
+message Quest {
+  string title       = 1;
+  string description = 2;
+}
+
+message EventPlayerCharacterOrgaEdit {
+  string            characterId  = 1;
+  string            publicResume = 2;
+  string            background   = 3;
+  repeated Gift     gitfs        = 4;
+  repeated Handicap handicaps    = 5;
+  repeated Quest    quests       = 6;
+  repeated string   tags         = 7;
+}
