@@ -22,8 +22,9 @@ message EventPlayerCharacterOrgaEdit {
   string            characterId  = 1;
   string            publicResume = 2;
   string            background   = 3;
-  repeated Gift     gitfs        = 4;
-  repeated Handicap handicaps    = 5;
-  repeated Quest    quests       = 6;
-  repeated string   tags         = 7;
+  string            mentalCrisis = 4;
+  repeated Gift     gitfs        = 5;
+  repeated Handicap handicaps    = 6;
+  repeated Quest    quests       = 7;
+  repeated string   tags         = 8;
 }

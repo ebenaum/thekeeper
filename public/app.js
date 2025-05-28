@@ -179,6 +179,19 @@ async function init() {
  */
 
 /**
+ * @typedef {Object} Skill
+ * @property {string} key
+ * @property {string} label
+ * @property {string} description
+ * @property {number} rankMax
+ * @property {string[]} tags
+ * @property {boolean} availableToSorcerer
+ * @property {string?} requirementType
+ * @property {UniversEntry?} requirementEntry
+ * @property {{cost: number, rank: number, label: string, description: string}[]} levels
+ */
+
+/**
  * @typedef {Object} Data
  * @property {Object.<string, {handle: string, personal?: InformationsForm, characters: string[]}>} players
  * @property {Object.<string, CharacterForm>} characters
@@ -431,8 +444,9 @@ function attachSelectListeners(elements, formKey, allowMultiple, callback) {
  *
  * @param {CharacterForm} player
  * @param {Object<string, UniversEntry>} univers
+ * @param {Skill[]} skills
  */
-async function personnage_orga(player, characteristicsLevels, univers) {
+async function personnage_orga(player, characteristicsLevels, univers, skills) {
   const containerElement = document.querySelector(".container");
   if (!containerElement) {
     throw new Error("no container element");
@@ -463,27 +477,56 @@ async function personnage_orga(player, characteristicsLevels, univers) {
       el.querySelector(".orga__player-characteristics")
     );
 
+    const skillsElement = /** @type {HTMLElement} */ (
+      el.querySelector(".orga__player-skills")
+    );
+
+    const inventoryElement = /** @type {HTMLElement} */ (
+      el.querySelector(".orga__player-inventory")
+    );
+
     titleElement.innerHTML = `<span class="orga__player-title__name">${player.name}</span> | ${univers[player.group]?.label || "Sans monde"} | ${univers[player.worldOrigin]?.label || "Sans status"} | ${univers[player.worldApproach]?.label || "Sans alignement"}`;
     raceVdvElement.textContent = `${univers[player.race]?.label || "Sans race"} | ${univers[player.vdv]?.label || "Sans Voie de Vie"}`;
     const characteristics = [];
 
     Object.keys(player.characteristics).forEach((characteristic) => {
-      console.log(
-        characteristicsLevels.find((c) => c.key === characteristic)?.levels,
-      );
-
       characteristics.push(
         `${univers[characteristic].label} : ${characteristicsLevels.find((c) => c.key === characteristic)?.levels[player.characteristics[characteristic] + 2]?.description} (${player.characteristics[characteristic]})`,
       );
     });
 
     characteristicsElement.textContent = characteristics.join(" | ");
+
+    Object.keys(player.skills).forEach((key) => {
+      const skill = skills.find((skill) => skill.key === key);
+      if (!skill) {
+        return;
+      }
+
+      const liElement = document.createElement("li");
+      liElement.textContent = `${skill?.levels[player.skills[key] - 1].label}: ${skill?.levels[player.skills[key] - 1].description}`;
+
+      skillsElement.appendChild(liElement);
+    });
+
+    Object.keys(player.inventory).forEach((key) => {
+      const item = univers[key];
+      if (!item) {
+        return;
+      }
+
+      const liElement = document.createElement("li");
+      liElement.textContent = `${item.label} x${player.inventory[key]}`;
+
+      inventoryElement.appendChild(liElement);
+    });
   };
+
+  // @ts-ignore
+  print(clone);
 
   containerElement?.prepend(clone);
   const node = /** @type {Element} */ (containerElement?.firstElementChild);
-
-  print(node);
 }
 
 async function personnage() {
@@ -635,10 +678,6 @@ async function personnage() {
       return { levels, ...characteristic };
     });
 
-  if (state?.data.permission === "orga") {
-    await personnage_orga(formResult, characteristics, universMap);
-  }
-
   /**
    * Calculates the inventory budget based on the dexterity characteristic level.
    * @param {number} dexterite - The dexterity level (from -2 to 4).
@@ -742,6 +781,10 @@ async function personnage() {
         }
         return 0;
       });
+
+  if (state?.data.permission === "orga") {
+    await personnage_orga(formResult, characteristics, universMap, skills);
+  }
 
   let characteristicBudget =
     parseInt(
@@ -929,19 +972,6 @@ async function personnage() {
 
     print(node);
   });
-
-  /**
-   * @typedef {Object} Skill
-   * @property {string} key
-   * @property {string} label
-   * @property {string} description
-   * @property {number} rankMax
-   * @property {string[]} tags
-   * @property {boolean} availableToSorcerer
-   * @property {string?} requirementType
-   * @property {UniversEntry?} requirementEntry
-   * @property {{cost: number, rank: number, label: string, description: string}[]} levels
-   */
 
   /**
    *
