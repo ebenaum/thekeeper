@@ -235,14 +235,10 @@ textarea {
   display: grid;
   grid-template-columns: 1fr;
   opacity: 0.3;
-  transition: opacity 1.5s ease-out;
-  height: 0;
-  overflow: hidden;
 }
 
 .form-element.active {
   opacity: 1;
-  height: auto;
 }
 
 .container {
