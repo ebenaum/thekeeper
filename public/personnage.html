@@ -24,27 +24,56 @@
     </template>
 
     <template id="template__orga">
-      <div class="orga">
-        <div class="orga__player-title"></div>
-        <div class="orga__player-tags">
-          <button class="button">Ajouter tag</button>
-        </div>
-        <div class="orga__player-race-vdv"></div>
-        <div class="orga__player-characteristics"></div>
-        <div>Crise mental</div>
-        <div>Handicaps</div>
-        <ul class="orga__player-handicaps"></ul>
-        <div>Compétences</div>
-        <ul class="orga__player-skills"></ul>
-        <div>Dons</div>
-        <ul class="orga__player-dons"></ul>
-        <div>Inventaire</div>
-        <ul class="orga__player-inventory"></ul>
-        <div>Quêtes</div>
-        <ul class="orga__player-quests"></ul>
-        <div>Background</div>
-        <div>Fiche publique</div>
-      </div>
+      <form class="orga">
+        <fieldset class="form-element active">
+          <legend><h1>Orga</h1></legend>
+
+          <div class="orga__player-title"></div>
+          <div class="orga__player-tags">
+            <button class="button">Ajouter tag</button>
+          </div>
+          <div class="orga__player-race-vdv"></div>
+          <div class="orga__player-characteristics"></div>
+
+          <div class="input-text">
+            <label for="mentalCrisis">Crise mentale</label>
+            <textarea
+              name="mentalCrisis"
+              class="q-response-text"
+              rows="5"
+            ></textarea>
+          </div>
+
+          <div>Handicaps</div>
+          <ul class="orga__player-handicaps"></ul>
+          <div>Compétences</div>
+          <ul class="orga__player-skills"></ul>
+          <div>Dons</div>
+          <ul class="orga__player-dons"></ul>
+          <div>Inventaire</div>
+          <ul class="orga__player-inventory"></ul>
+          <div>Quêtes</div>
+          <ul class="orga__player-quests"></ul>
+
+          <div class="input-text">
+            <label for="background">Background</label>
+            <textarea
+              name="background"
+              class="q-response-text"
+              rows="5"
+            ></textarea>
+          </div>
+
+          <div class="input-text">
+            <label for="publicResume">Crise mentale</label>
+            <textarea
+              name="publicResume"
+              class="q-response-text"
+              rows="5"
+            ></textarea>
+          </div>
+        </fieldset>
+      </form>
     </template>
 
     <template id="template__group-option">

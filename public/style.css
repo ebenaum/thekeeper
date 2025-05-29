@@ -232,6 +232,8 @@ textarea {
 }
 
 .form-element {
+  display: grid;
+  grid-template-columns: 1fr;
   opacity: 0.3;
   transition: opacity 1.5s ease-out;
   height: 0;
