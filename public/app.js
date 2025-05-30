@@ -1703,8 +1703,15 @@ async function personnage() {
     window.location.href = "/";
   }
 
+  let submitted = false;
+
   if (formElement) {
     formElement.onsubmit = function () {
+      if (submitted) {
+        return false;
+      }
+
+      submitted = true;
       submitForm(characterId, playerId);
 
       return false;
@@ -2146,8 +2153,15 @@ async function informations() {
     }
   }
 
+  let submitted = false;
+
   if (formElement) {
     formElement.onsubmit = function () {
+      if (submitted) {
+        return false;
+      }
+
+      submitted = true;
       submitForm(playerId);
 
       return false;
