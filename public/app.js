@@ -464,6 +464,50 @@ async function personnage_orga(player, characteristicsLevels, univers, skills) {
 
   const clone = orgaTemplate.content.cloneNode(true);
 
+  ["orga__player-gifts"].forEach((sectionName) => {
+    const print = (/** @type {Element} */ el) => {
+      const sectionElement = /** @type {HTMLElement} */ (
+        el.querySelector(`.${sectionName}`)
+      );
+
+      const addButtonElement = /** @type{HTMLElement} */ (
+        sectionElement.querySelector(`.${sectionName}__add`)
+      );
+      const confirmButtonElement = /** @type{HTMLElement} */ (
+        sectionElement.querySelector(`.${sectionName}__confirm`)
+      );
+      const inputWrapperElement = /** @type{HTMLElement} */ (
+        sectionElement.querySelector(`.input-text`)
+      );
+      const inputElement = /** @type{HTMLInputElement} */ (
+        inputWrapperElement.querySelector(`input`)
+      );
+
+      addButtonElement.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        addButtonElement.classList.add("d-none");
+        confirmButtonElement.classList.remove("d-none");
+        inputWrapperElement.classList.remove("d-none");
+
+        return false;
+      });
+
+      confirmButtonElement.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        addButtonElement.classList.remove("d-none");
+        confirmButtonElement.classList.add("d-none");
+        inputWrapperElement.classList.add("d-none");
+
+        return false;
+      });
+    };
+
+    // @ts-ignore
+    print(clone);
+  });
+
   const print = (/** @type {Element} */ el) => {
     const titleElement = /** @type {HTMLElement} */ (
       el.querySelector(".orga__player-title")
@@ -487,6 +531,7 @@ async function personnage_orga(player, characteristicsLevels, univers, skills) {
 
     titleElement.innerHTML = `<span class="orga__player-title__name">${player.name}</span> | ${univers[player.group]?.label || "Sans monde"} | ${univers[player.worldOrigin]?.label || "Sans status"} | ${univers[player.worldApproach]?.label || "Sans alignement"}`;
     raceVdvElement.textContent = `${univers[player.race]?.label || "Sans race"} | ${univers[player.vdv]?.label || "Sans Voie de Vie"}`;
+
     const characteristics = [];
 
     Object.keys(player.characteristics).forEach((characteristic) => {
@@ -1579,7 +1624,7 @@ async function personnage() {
       match.querySelector("input") || match.querySelector("textarea");
 
     const forAttribute = label?.getAttribute("for");
-    if (!forAttribute || !input) {
+    if (!forAttribute || !input || formResult[forAttribute] === null) {
       return;
     }
 
@@ -2046,7 +2091,7 @@ async function informations() {
       match.querySelector("input") || match.querySelector("textarea");
 
     const forAttribute = label?.getAttribute("for");
-    if (!forAttribute || !input) {
+    if (!forAttribute || !input || formResult[forAttribute] === null) {
       return;
     }
 
@@ -2063,7 +2108,7 @@ async function informations() {
     const input = match.querySelector("input");
 
     const forAttribute = label?.getAttribute("for");
-    if (!forAttribute || !input) {
+    if (!forAttribute || !input || formResult[forAttribute] === null) {
       return;
     }
 

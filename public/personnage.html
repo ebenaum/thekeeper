@@ -23,9 +23,20 @@
       <div></div>
     </template>
 
+    <template id="template__orga__add_element">
+      <div>
+        <button class="add button"></button>
+        <div class="d-none input-text">
+          <label for="placeholder"></label>
+          <input type="text" name="placeholder" />
+        </div>
+        <button class="d-none confirm">Ajouter</button>
+      </div>
+    </template>
+
     <template id="template__orga">
       <form class="orga">
-        <fieldset class="form-element">
+        <fieldset class="form-element active">
           <legend><h1>Orga</h1></legend>
 
           <div class="orga__player-title"></div>
@@ -48,10 +59,26 @@
           <ul class="orga__player-handicaps"></ul>
           <div>Compétences</div>
           <ul class="orga__player-skills"></ul>
+
           <div>Dons</div>
-          <ul class="orga__player-dons"></ul>
+          <ul class="orga__player-gifts">
+            <button class="orga__player-gifts__add button">
+              Ajouter un Don
+            </button>
+            <div class="d-none input-text">
+              <label for="title"></label>
+              <input type="text" name="title" />
+              <label for="description"></label>
+              <input type="text" name="description" />
+            </div>
+            <button class="d-none orga__player-gifts__confirm button">
+              Ajouter
+            </button>
+          </ul>
+
           <div>Inventaire</div>
           <ul class="orga__player-inventory"></ul>
+
           <div>Quêtes</div>
           <ul class="orga__player-quests"></ul>
 
