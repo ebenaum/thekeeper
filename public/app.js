@@ -179,6 +179,11 @@ async function init() {
  */
 
 /**
+ * @typedef{Object} OrgaForm
+ * @property {{title: string, description: string}[]} gifts
+ */
+
+/**
  * @typedef {Object} Skill
  * @property {string} key
  * @property {string} label
@@ -447,6 +452,10 @@ function attachSelectListeners(elements, formKey, allowMultiple, callback) {
  * @param {Skill[]} skills
  */
 async function personnageOrga(player, characteristicsLevels, univers, skills) {
+  let /** @type{OrgaForm} */ formResult = {
+      gifts: [],
+    };
+
   const containerElement = document.querySelector(".container");
   if (!containerElement) {
     throw new Error("no container element");
@@ -462,53 +471,9 @@ async function personnageOrga(player, characteristicsLevels, univers, skills) {
     el.removeAttribute("open");
   });
 
-  const clone = orgaTemplate.content.cloneNode(true);
+  const orgaClone = orgaTemplate.content.cloneNode(true);
 
-  ["orga__player-gifts"].forEach((sectionName) => {
-    const print = (/** @type {Element} */ el) => {
-      const sectionElement = /** @type {HTMLElement} */ (
-        el.querySelector(`.${sectionName}`)
-      );
-
-      const addButtonElement = /** @type{HTMLElement} */ (
-        sectionElement.querySelector(`.${sectionName}__add`)
-      );
-      const confirmButtonElement = /** @type{HTMLElement} */ (
-        sectionElement.querySelector(`.${sectionName}__confirm`)
-      );
-      const inputWrapperElement = /** @type{HTMLElement} */ (
-        sectionElement.querySelector(`.input-text`)
-      );
-      const inputElement = /** @type{HTMLInputElement} */ (
-        inputWrapperElement.querySelector(`input`)
-      );
-
-      addButtonElement.addEventListener("click", (e) => {
-        e.preventDefault();
-
-        addButtonElement.classList.add("d-none");
-        confirmButtonElement.classList.remove("d-none");
-        inputWrapperElement.classList.remove("d-none");
-
-        return false;
-      });
-
-      confirmButtonElement.addEventListener("click", (e) => {
-        e.preventDefault();
-
-        addButtonElement.classList.remove("d-none");
-        confirmButtonElement.classList.add("d-none");
-        inputWrapperElement.classList.add("d-none");
-
-        return false;
-      });
-    };
-
-    // @ts-ignore
-    print(clone);
-  });
-
-  const print = (/** @type {Element} */ el) => {
+  const orgaPrint = (/** @type {Element} */ el) => {
     const titleElement = /** @type {HTMLElement} */ (
       el.querySelector(".orga__player-title")
     );
@@ -529,10 +494,22 @@ async function personnageOrga(player, characteristicsLevels, univers, skills) {
       el.querySelector(".orga__player-inventory")
     );
 
+    const giftsElement = /** @type {HTMLElement} */ (
+      el.querySelector(".orga__player-gifts ul")
+    );
+
     titleElement.innerHTML = `<span class="orga__player-title__name">${player.name}</span> | ${univers[player.group]?.label || "Sans monde"} | ${univers[player.worldOrigin]?.label || "Sans status"} | ${univers[player.worldApproach]?.label || "Sans alignement"}`;
     raceVdvElement.textContent = `${univers[player.race]?.label || "Sans race"} | ${univers[player.vdv]?.label || "Sans Voie de Vie"}`;
 
     const characteristics = [];
+
+    giftsElement.innerHTML = "";
+    formResult.gifts.forEach((gift) => {
+      const liElement = document.createElement("li");
+      liElement.textContent = `${gift.title}: ${gift.description}`;
+
+      giftsElement.prepend(liElement);
+    });
 
     Object.keys(player.characteristics).forEach((characteristic) => {
       characteristics.push(
@@ -568,10 +545,71 @@ async function personnageOrga(player, characteristicsLevels, univers, skills) {
   };
 
   // @ts-ignore
-  print(clone);
+  orgaPrint(orgaClone);
 
-  containerElement?.prepend(clone);
-  const node = /** @type {Element} */ (containerElement?.firstElementChild);
+  containerElement?.prepend(orgaClone);
+  const orgaNode = /** @type {Element} */ (containerElement?.firstElementChild);
+
+  ["orga__player-gifts"].forEach((sectionName) => {
+    const sectionElement = /** @type {HTMLElement} */ (
+      orgaNode.querySelector(`.${sectionName}`)
+    );
+
+    const key = sectionElement.dataset.key || "";
+
+    const addButtonElement = /** @type{HTMLElement} */ (
+      sectionElement.querySelector(`.${sectionName}__add`)
+    );
+    const confirmButtonElement = /** @type{HTMLElement} */ (
+      sectionElement.querySelector(`.${sectionName}__confirm`)
+    );
+    const inputWrapperElement = /** @type{HTMLElement} */ (
+      sectionElement.querySelector(`.input-text`)
+    );
+
+    const titleElement = /** @type{HTMLInputElement} */ (
+      inputWrapperElement.querySelector(`input[name="title"]`)
+    );
+    const descriptionElement = /** @type{HTMLInputElement} */ (
+      inputWrapperElement.querySelector(`input[name="description"]`)
+    );
+
+    if (!titleElement || !descriptionElement) {
+      throw new Error("missing title or descritpion element");
+    }
+
+    addButtonElement.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      addButtonElement.classList.add("d-none");
+      confirmButtonElement.classList.remove("d-none");
+      inputWrapperElement.classList.remove("d-none");
+      titleElement.value = "";
+      descriptionElement.value = "";
+
+      return false;
+    });
+
+    confirmButtonElement.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      addButtonElement.classList.remove("d-none");
+      confirmButtonElement.classList.add("d-none");
+      inputWrapperElement.classList.add("d-none");
+
+      if (titleElement.value && descriptionElement.value) {
+        formResult[key].push({
+          title: titleElement.value,
+          description: descriptionElement.value,
+        });
+      }
+
+      // @ts-ignore
+      orgaPrint(orgaNode);
+
+      return false;
+    });
+  });
 }
 
 async function personnage() {
