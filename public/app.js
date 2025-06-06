@@ -181,6 +181,7 @@ async function init() {
 /**
  * @typedef{Object} OrgaForm
  * @property {{title: string, description: string}[]} gifts
+ * @property {{title: string, description: string}[]} handicaps
  */
 
 /**
@@ -454,6 +455,7 @@ function attachSelectListeners(elements, formKey, allowMultiple, callback) {
 async function personnageOrga(player, characteristicsLevels, univers, skills) {
   let /** @type{OrgaForm} */ formResult = {
       gifts: [],
+      handicaps: [],
     };
 
   const containerElement = document.querySelector(".container");
@@ -498,6 +500,10 @@ async function personnageOrga(player, characteristicsLevels, univers, skills) {
       el.querySelector(".orga__player-gifts ul")
     );
 
+    const handicapsElement = /** @type {HTMLElement} */ (
+      el.querySelector(".orga__player-handicaps ul")
+    );
+
     titleElement.innerHTML = `<span class="orga__player-title__name">${player.name}</span> | ${univers[player.group]?.label || "Sans monde"} | ${univers[player.worldOrigin]?.label || "Sans status"} | ${univers[player.worldApproach]?.label || "Sans alignement"}`;
     raceVdvElement.textContent = `${univers[player.race]?.label || "Sans race"} | ${univers[player.vdv]?.label || "Sans Voie de Vie"}`;
 
@@ -509,6 +515,14 @@ async function personnageOrga(player, characteristicsLevels, univers, skills) {
       liElement.textContent = `${gift.title}: ${gift.description}`;
 
       giftsElement.prepend(liElement);
+    });
+
+    handicapsElement.innerHTML = "";
+    formResult.handicaps.forEach((handicap) => {
+      const liElement = document.createElement("li");
+      liElement.textContent = `${handicap.title}: ${handicap.description}`;
+
+      handicapsElement.prepend(liElement);
     });
 
     Object.keys(player.characteristics).forEach((characteristic) => {
@@ -552,7 +566,7 @@ async function personnageOrga(player, characteristicsLevels, univers, skills) {
   containerElement?.prepend(orgaClone);
   const node = /** @type {Element} */ (containerElement?.firstElementChild);
 
-  ["orga__player-gifts"].forEach((sectionName) => {
+  ["orga__player-gifts", "orga__player-handicaps"].forEach((sectionName) => {
     const sectionElement = /** @type {HTMLElement} */ (
       node.querySelector(`.${sectionName}`)
     );
