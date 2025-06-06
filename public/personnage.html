@@ -96,7 +96,21 @@
           <ul class="orga__player-inventory"></ul>
 
           <div>Quêtes</div>
-          <ul class="orga__player-quests"></ul>
+          <div class="orga__player-quests" data-key="quests">
+            <ul></ul>
+            <button class="orga__player-quests__add button">
+              Ajouter une Quête
+            </button>
+            <div class="d-none input-text">
+              <label></label>
+              <input type="text" name="title" />
+              <label></label>
+              <input type="text" name="description" />
+            </div>
+            <button class="d-none orga__player-quests__confirm button">
+              Ajouter
+            </button>
+          </div>
 
           <div class="input-text">
             <label for="background">Background</label>
