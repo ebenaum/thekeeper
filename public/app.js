@@ -446,7 +446,7 @@ function attachSelectListeners(elements, formKey, allowMultiple, callback) {
  * @param {Object<string, UniversEntry>} univers
  * @param {Skill[]} skills
  */
-async function personnage_orga(player, characteristicsLevels, univers, skills) {
+async function personnageOrga(player, characteristicsLevels, univers, skills) {
   const containerElement = document.querySelector(".container");
   if (!containerElement) {
     throw new Error("no container element");
@@ -828,7 +828,7 @@ async function personnage() {
       });
 
   if (state?.data.permission === "orga") {
-    await personnage_orga(formResult, characteristics, universMap, skills);
+    await personnageOrga(formResult, characteristics, universMap, skills);
   }
 
   let characteristicBudget =
