@@ -473,7 +473,7 @@ async function personnageOrga(player, characteristicsLevels, univers, skills) {
 
   const orgaClone = orgaTemplate.content.cloneNode(true);
 
-  const orgaPrint = (/** @type {Element} */ el) => {
+  const print = (/** @type {Element} */ el) => {
     const titleElement = /** @type {HTMLElement} */ (
       el.querySelector(".orga__player-title")
     );
@@ -519,6 +519,7 @@ async function personnageOrga(player, characteristicsLevels, univers, skills) {
 
     characteristicsElement.textContent = characteristics.join(" | ");
 
+    skillsElement.innerHTML = "";
     Object.keys(player.skills).forEach((key) => {
       const skill = skills.find((skill) => skill.key === key);
       if (!skill) {
@@ -531,6 +532,7 @@ async function personnageOrga(player, characteristicsLevels, univers, skills) {
       skillsElement.appendChild(liElement);
     });
 
+    inventoryElement.innerHTML = "";
     Object.keys(player.inventory).forEach((key) => {
       const item = univers[key];
       if (!item) {
@@ -545,14 +547,14 @@ async function personnageOrga(player, characteristicsLevels, univers, skills) {
   };
 
   // @ts-ignore
-  orgaPrint(orgaClone);
+  print(orgaClone);
 
   containerElement?.prepend(orgaClone);
-  const orgaNode = /** @type {Element} */ (containerElement?.firstElementChild);
+  const node = /** @type {Element} */ (containerElement?.firstElementChild);
 
   ["orga__player-gifts"].forEach((sectionName) => {
     const sectionElement = /** @type {HTMLElement} */ (
-      orgaNode.querySelector(`.${sectionName}`)
+      node.querySelector(`.${sectionName}`)
     );
 
     const key = sectionElement.dataset.key || "";
@@ -605,7 +607,7 @@ async function personnageOrga(player, characteristicsLevels, univers, skills) {
       }
 
       // @ts-ignore
-      orgaPrint(orgaNode);
+      print(node);
 
       return false;
     });
