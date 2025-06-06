@@ -46,6 +46,12 @@
           <div class="orga__player-race-vdv"></div>
           <div class="orga__player-characteristics"></div>
 
+          <div>Compétences</div>
+          <ul class="orga__player-skills"></ul>
+
+          <div>Inventaire</div>
+          <ul class="orga__player-inventory"></ul>
+
           <div class="input-text">
             <label for="mentalCrisis">Crise mentale</label>
             <textarea
@@ -53,6 +59,23 @@
               class="q-response-text"
               rows="5"
             ></textarea>
+          </div>
+
+          <div>Dons</div>
+          <div class="orga__player-gifts" data-key="gifts">
+            <ul></ul>
+            <button class="orga__player-gifts__add button">
+              Ajouter un Don
+            </button>
+            <div class="d-none input-text">
+              <label></label>
+              <input type="text" name="title" />
+              <label></label>
+              <input type="text" name="description" />
+            </div>
+            <button class="d-none orga__player-gifts__confirm button">
+              Ajouter
+            </button>
           </div>
 
           <div>Handicaps</div>
@@ -72,28 +95,14 @@
             </button>
           </div>
 
-          <div>Compétences</div>
-          <ul class="orga__player-skills"></ul>
-
-          <div>Dons</div>
-          <div class="orga__player-gifts" data-key="gifts">
-            <ul></ul>
-            <button class="orga__player-gifts__add button">
-              Ajouter un Don
-            </button>
-            <div class="d-none input-text">
-              <label></label>
-              <input type="text" name="title" />
-              <label></label>
-              <input type="text" name="description" />
-            </div>
-            <button class="d-none orga__player-gifts__confirm button">
-              Ajouter
-            </button>
+          <div class="input-text">
+            <label for="background">Background</label>
+            <textarea
+              name="background"
+              class="q-response-text"
+              rows="5"
+            ></textarea>
           </div>
-
-          <div>Inventaire</div>
-          <ul class="orga__player-inventory"></ul>
 
           <div>Quêtes</div>
           <div class="orga__player-quests" data-key="quests">
@@ -110,15 +119,6 @@
             <button class="d-none orga__player-quests__confirm button">
               Ajouter
             </button>
-          </div>
-
-          <div class="input-text">
-            <label for="background">Background</label>
-            <textarea
-              name="background"
-              class="q-response-text"
-              rows="5"
-            ></textarea>
           </div>
 
           <div class="input-text">
