@@ -70,6 +70,18 @@ html {
   box-sizing: inherit;
 }
 
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 body {
   height: 100vh;
 }
@@ -323,7 +335,25 @@ input[type="checkbox"]:checked::before {
   display: none;
 }
 
-.characteristic__input {
+.characteristic {
+  display: grid;
+  grid-template-columns: 90px 1fr 8fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.characteristic label {
+  font-size: 1.2rem;
+}
+
+.characteristic__select {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: black;
+}
+
+.characteristic__select__input {
   border: solid 8px black;
   width: fit-content;
   block-size: fit-content;
@@ -334,20 +364,14 @@ input[type="checkbox"]:checked::before {
   border-radius: 60px;
 }
 
+.characteristic svg {
+  display: block;
+  color: white;
+}
+
 textarea:focus,
 input:focus {
   outline: none;
-}
-
-.characteristic {
-  display: grid;
-  grid-template-columns: 1fr 1fr 8fr;
-  gap: 10px;
-  align-items: center;
-}
-
-.characteristic label {
-  font-size: 1.2rem;
 }
 
 label {

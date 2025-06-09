@@ -990,7 +990,7 @@ async function personnage() {
       );
 
       const inputElement = /** @type {HTMLInputElement} */ (
-        el.querySelector(".characteristic__input")
+        el.querySelector(".characteristic__select__input")
       );
 
       inputElement.value = lvl.toString();
@@ -1007,8 +1007,30 @@ async function personnage() {
     );
 
     const nodeInput = /** @type {HTMLInputElement} */ (
-      node.querySelector(".characteristic__input")
+      node.querySelector(".characteristic__select__input")
     );
+
+    const nodeUp = /** @type {HTMLElement} */ (
+      node.querySelector(".characteristic__select__up")
+    );
+
+    const nodeDown = /** @type {HTMLElement} */ (
+      node.querySelector(".characteristic__select__down")
+    );
+
+    nodeUp.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      nodeInput.value = (lvl + 1).toString();
+      nodeInput.dispatchEvent(new Event("input"));
+    });
+
+    nodeDown.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      nodeInput.value = (lvl - 1).toString();
+      nodeInput.dispatchEvent(new Event("input"));
+    });
 
     nodeInput.addEventListener("input", (e) => {
       const target = /** @type{HTMLInputElement}*/ (e.target);
