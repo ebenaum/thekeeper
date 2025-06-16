@@ -1933,6 +1933,7 @@ async function theview() {
     colReorder: true,
     columnControl: [{ extend: "search" }, { extend: "order" }],
     paging: false,
+    fixedHeader: true,
     ordering: {
       indicators: false,
       handler: false,
