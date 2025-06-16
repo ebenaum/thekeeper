@@ -263,14 +263,6 @@ textarea {
   justify-content: center;
 }
 
-.container-full {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
 .input-text {
   display: inline-block;
   margin-bottom: 10px;

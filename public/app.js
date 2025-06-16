@@ -1874,7 +1874,7 @@ async function theview() {
     return;
   }
 
-  const containerElement = document.querySelector(".container-full");
+  const containerElement = document.querySelector("#thetable");
 
   const tableElement = document.createElement("table");
 
