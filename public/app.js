@@ -1858,6 +1858,88 @@ async function personnage() {
   }
 }
 
+async function theview() {
+  const universResponse = await fetch(globalThis.env.univers);
+  const /** @type {UniversEntry[]} */ univers = await universResponse.json();
+
+  const universMap = {};
+  univers.forEach((entry) => {
+    universMap[entry.key] = entry;
+  });
+
+  const state = await getState();
+  if (!state) {
+    window.location.href = "/";
+
+    return;
+  }
+
+  const containerElement = document.querySelector(".container-full");
+
+  const tableElement = document.createElement("table");
+
+  tableElement.id = "theview";
+
+  const tableHeaderElement = document.createElement("thead");
+  const tableBodyElement = document.createElement("tbody");
+
+  const tableHeaderRowElement = document.createElement("tr");
+  tableHeaderElement.appendChild(tableHeaderRowElement);
+
+  ["Nom/Prénom", "Contact", "Personnage", "Monde"].forEach((columnName) => {
+    const thElement = document.createElement("th");
+    thElement.textContent = columnName;
+
+    tableHeaderRowElement.appendChild(thElement);
+  });
+
+  Object.keys(state.data.players).forEach((playerId) => {
+    const player = state.data.players[playerId];
+
+    const characters =
+      player.characters.length === 0 ? ["empty"] : player.characters;
+
+    characters.forEach((characterId) => {
+      const character = state.data.characters[characterId];
+      const rowElement = document.createElement("tr");
+
+      const values = [];
+      values.push(player.personal?.surname);
+      values.push(player.personal?.contact);
+      values.push(character?.name);
+      values.push(character?.group);
+
+      const trElement = document.createElement("tr");
+
+      values.forEach((value) => {
+        const thElement = document.createElement("th");
+        thElement.textContent = value || " ";
+
+        trElement.appendChild(thElement);
+      });
+
+      tableBodyElement.appendChild(trElement);
+    });
+  });
+
+  tableElement.appendChild(tableHeaderElement);
+  tableElement.appendChild(tableBodyElement);
+
+  containerElement?.appendChild(tableElement);
+
+  // @ts-ignore
+  let table = new window.DataTable("#theview", {
+    // responsive: true,
+    colReorder: true,
+    columnControl: [{ extend: "search" }, { extend: "order" }],
+    paging: false,
+    ordering: {
+      indicators: false,
+      handler: false,
+    },
+  });
+}
+
 async function index() {
   const universResponse = await fetch(globalThis.env.univers);
   const /** @type {UniversEntry[]} */ univers = await universResponse.json();
@@ -2357,5 +2439,15 @@ switch (window.location.pathname) {
     console.log("route: index");
 
     index();
+    break;
+  case "/theview.html":
+  case "/theview":
+    console.log("route: theview");
+
+    theview();
+
+    break;
+  default:
+    console.log(`no route for ${window.location.pathname}`);
     break;
 }
