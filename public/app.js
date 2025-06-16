@@ -1907,7 +1907,7 @@ async function theview() {
       values.push(player.personal?.surname);
       values.push(player.personal?.contact);
       values.push(character?.name);
-      values.push(character?.group);
+      values.push(universMap[character?.group]?.label);
 
       const trElement = document.createElement("tr");
 
