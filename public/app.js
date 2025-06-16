@@ -1903,11 +1903,16 @@ async function theview() {
       const character = state.data.characters[characterId];
       const rowElement = document.createElement("tr");
 
-      const characterLinkElement = document.createElement("a");
-      characterLinkElement.href = `/personnage.html?characterId=${characterId}`;
-      characterLinkElement.target = "_blank";
-      characterLinkElement.classList.add("a-underline");
-      characterLinkElement.textContent = character?.name || "Pas de nom";
+      let characterLinkElement;
+      if (character) {
+        characterLinkElement = document.createElement("a");
+        characterLinkElement.href = `/personnage.html?characterId=${characterId}`;
+        characterLinkElement.target = "_blank";
+        characterLinkElement.classList.add("a-underline");
+        characterLinkElement.textContent = character?.name || "Pas de nom";
+      } else {
+        characterLinkElement = "Pas de personnage";
+      }
 
       const /** @type {(string|HTMLElement|undefined)[]} */ values = [];
       values.push(player.personal?.surname);
