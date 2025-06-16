@@ -1903,17 +1903,28 @@ async function theview() {
       const character = state.data.characters[characterId];
       const rowElement = document.createElement("tr");
 
-      const values = [];
+      const characterLinkElement = document.createElement("a");
+      characterLinkElement.href = `/personnage.html?characterId=${characterId}`;
+      characterLinkElement.target = "_blank";
+      characterLinkElement.classList.add("a-underline");
+      characterLinkElement.textContent = character?.name || "Pas de nom";
+
+      const /** @type {(string|HTMLElement|undefined)[]} */ values = [];
       values.push(player.personal?.surname);
       values.push(player.personal?.contact);
-      values.push(character?.name);
+      values.push(characterLinkElement);
       values.push(universMap[character?.group]?.label);
 
       const trElement = document.createElement("tr");
 
       values.forEach((value) => {
         const thElement = document.createElement("th");
-        thElement.textContent = value || " ";
+
+        if (value instanceof HTMLElement) {
+          thElement.appendChild(value);
+        } else {
+          thElement.textContent = value || " ";
+        }
 
         trElement.appendChild(thElement);
       });
