@@ -1904,21 +1904,29 @@ async function theview() {
       const character = state.data.characters[characterId];
       const rowElement = document.createElement("tr");
 
-      let characterLinkElement;
+      let characterElement;
       if (character) {
-        characterLinkElement = document.createElement("a");
+        characterElement = document.createElement("span");
+        const characterNameElement = document.createElement("span");
+        characterNameElement.textContent =
+          character?.name + " " || "Pas de nom ";
+
+        const characterLinkElement = document.createElement("a");
         characterLinkElement.href = `/personnage.html?characterId=${characterId}`;
         characterLinkElement.target = "_blank";
         characterLinkElement.classList.add("a-underline");
-        characterLinkElement.textContent = character?.name || "Pas de nom";
+        characterLinkElement.textContent = "(Voir)";
+
+        characterElement.appendChild(characterNameElement);
+        characterElement.appendChild(characterLinkElement);
       } else {
-        characterLinkElement = "Pas de personnage";
+        characterElement = "Pas de personnage";
       }
 
       const /** @type {(string|HTMLElement|undefined)[]} */ values = [];
       values.push(player.personal?.surname);
       values.push(player.personal?.contact);
-      values.push(characterLinkElement);
+      values.push(characterElement);
       values.push(universMap[character?.group]?.label);
 
       const trElement = document.createElement("tr");
