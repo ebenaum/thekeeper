@@ -1983,7 +1983,21 @@ async function theview() {
   let table = new window.DataTable("#theview", {
     layout: {
       topStart: {
-        buttons: ["colvis", "csv", "print"],
+        buttons: [
+          "colvis",
+          {
+            extend: "csv",
+            exportOptions: {
+              columns: ":visible",
+            },
+          },
+          {
+            extend: "print",
+            exportOptions: {
+              columns: ":visible",
+            },
+          },
+        ],
       },
     },
     colReorder: true,
