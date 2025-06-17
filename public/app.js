@@ -1889,6 +1889,7 @@ async function theview() {
 
   [
     "Nom/Prénom",
+    "Type",
     "Contact",
     "Amis",
     "Santé",
@@ -1948,6 +1949,7 @@ async function theview() {
 
       const /** @type {(string|HTMLElement|undefined)[]} */ values = [];
       values.push(playerElement);
+      values.push(player.personal?.inscriptionType?.toUpperCase());
       values.push(player.personal?.contact);
       values.push(player.personal?.peopleToPlayWith);
       values.push(player.personal?.health);
@@ -2004,7 +2006,7 @@ async function theview() {
     columnControl: [{ extend: "search" }, { extend: "order" }],
     columnDefs: [
       {
-        targets: [5, 6, 7],
+        targets: [6, 7, 8],
         columnControl: ["order", ["searchList"]],
       },
     ],
@@ -2015,11 +2017,6 @@ async function theview() {
       handler: false,
     },
     stateSave: true,
-    /*
-    rowGroup: {
-      dataSrc: "Monde",
-    },
-    */
   });
 }
 
