@@ -1915,7 +1915,7 @@ async function theview() {
         characterLinkElement.href = `/personnage.html?characterId=${characterId}`;
         characterLinkElement.target = "_blank";
         characterLinkElement.classList.add("a-underline");
-        characterLinkElement.textContent = "(Voir)";
+        characterLinkElement.textContent = "(Fiche)";
 
         characterElement.appendChild(characterNameElement);
         characterElement.appendChild(characterLinkElement);
@@ -1932,7 +1932,7 @@ async function theview() {
       playerLinkElement.href = `/informations.html?playerId=${playerId}`;
       playerLinkElement.target = "_blank";
       playerLinkElement.classList.add("a-underline");
-      playerLinkElement.textContent = "(Voir)";
+      playerLinkElement.textContent = "(Fiche)";
 
       playerElement.appendChild(playerNameElement);
       playerElement.appendChild(playerLinkElement);
