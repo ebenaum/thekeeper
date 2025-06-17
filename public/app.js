@@ -1887,7 +1887,14 @@ async function theview() {
   const tableHeaderRowElement = document.createElement("tr");
   tableHeaderElement.appendChild(tableHeaderRowElement);
 
-  ["Nom/Prénom", "Contact", "Personnage", "Monde"].forEach((columnName) => {
+  [
+    "Nom/Prénom",
+    "Contact",
+    "Personnage",
+    "Monde",
+    "Origine",
+    "Approche",
+  ].forEach((columnName) => {
     const thElement = document.createElement("th");
     thElement.textContent = columnName;
 
@@ -1942,6 +1949,8 @@ async function theview() {
       values.push(player.personal?.contact);
       values.push(characterElement);
       values.push(universMap[character?.group]?.label);
+      values.push(universMap[character?.worldOrigin]?.label);
+      values.push(universMap[character?.worldApproach]?.label);
 
       const trElement = document.createElement("tr");
 
