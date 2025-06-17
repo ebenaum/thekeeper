@@ -1979,6 +1979,12 @@ async function theview() {
   let table = new window.DataTable("#theview", {
     colReorder: true,
     columnControl: [{ extend: "search" }, { extend: "order" }],
+    columnDefs: [
+      {
+        targets: [3, 4, 5],
+        columnControl: ["order", ["searchList"]],
+      },
+    ],
     paging: false,
     fixedHeader: true,
     ordering: {
