@@ -1879,6 +1879,7 @@ async function theview() {
   const tableElement = document.createElement("table");
 
   tableElement.id = "theview";
+  tableElement.classList.add("display", "cell-border");
 
   const tableHeaderElement = document.createElement("thead");
   const tableBodyElement = document.createElement("tbody");
@@ -1945,7 +1946,6 @@ async function theview() {
 
   // @ts-ignore
   let table = new window.DataTable("#theview", {
-    // responsive: true,
     colReorder: true,
     columnControl: [{ extend: "search" }, { extend: "order" }],
     paging: false,
@@ -1954,6 +1954,12 @@ async function theview() {
       indicators: false,
       handler: false,
     },
+    stateSave: true,
+    /*
+    rowGroup: {
+      dataSrc: "Monde",
+    },
+    */
   });
 }
 
