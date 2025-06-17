@@ -1890,6 +1890,8 @@ async function theview() {
   [
     "Nom/Prénom",
     "Contact",
+    "Amis",
+    "Santé",
     "Personnage",
     "Monde",
     "Origine",
@@ -1947,6 +1949,8 @@ async function theview() {
       const /** @type {(string|HTMLElement|undefined)[]} */ values = [];
       values.push(playerElement);
       values.push(player.personal?.contact);
+      values.push(player.personal?.peopleToPlayWith);
+      values.push(player.personal?.health);
       values.push(characterElement);
       values.push(universMap[character?.group]?.label);
       values.push(universMap[character?.worldOrigin]?.label);
@@ -1977,11 +1981,16 @@ async function theview() {
 
   // @ts-ignore
   let table = new window.DataTable("#theview", {
+    layout: {
+      topStart: {
+        buttons: ["colvis", "csv", "print"],
+      },
+    },
     colReorder: true,
     columnControl: [{ extend: "search" }, { extend: "order" }],
     columnDefs: [
       {
-        targets: [3, 4, 5],
+        targets: [5, 6, 7],
         columnControl: ["order", ["searchList"]],
       },
     ],
