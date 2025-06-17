@@ -1923,8 +1923,22 @@ async function theview() {
         characterElement = "Pas de personnage";
       }
 
+      const playerElement = document.createElement("span");
+      const playerNameElement = document.createElement("span");
+      playerNameElement.textContent =
+        player.personal?.surname + " " || "Pas de nom ";
+
+      const playerLinkElement = document.createElement("a");
+      playerLinkElement.href = `/informations.html?playerId=${playerId}`;
+      playerLinkElement.target = "_blank";
+      playerLinkElement.classList.add("a-underline");
+      playerLinkElement.textContent = "(Voir)";
+
+      playerElement.appendChild(playerNameElement);
+      playerElement.appendChild(playerLinkElement);
+
       const /** @type {(string|HTMLElement|undefined)[]} */ values = [];
-      values.push(player.personal?.surname);
+      values.push(playerElement);
       values.push(player.personal?.contact);
       values.push(characterElement);
       values.push(universMap[character?.group]?.label);
