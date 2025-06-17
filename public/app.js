@@ -2006,7 +2006,7 @@ async function theview() {
     columnControl: [{ extend: "search" }, { extend: "order" }],
     columnDefs: [
       {
-        targets: [6, 7, 8],
+        targets: [1, 6, 7, 8],
         columnControl: ["order", ["searchList"]],
       },
     ],
