@@ -9,6 +9,8 @@ import { file_seed_actor } from "./seed_actor_pb.js";
 import { file_player_person } from "./player_person_pb.js";
 import { file_player_character } from "./player_character_pb.js";
 import { file_player_character_orga_edit } from "./player_character_orga_edit_pb.js";
+import { file_delete_player } from "./delete_player_pb.js";
+import { file_delete_character } from "./delete_character_pb.js";
 
 /**
  * Describes the file event.proto.
@@ -16,7 +18,7 @@ import { file_player_character_orga_edit } from "./player_character_orga_edit_pb
 export const file_event =
   /*@__PURE__*/
   fileDesc(
-    "CgtldmVudC5wcm90bxIJdGhla2VlcGVyIv0CCgVFdmVudBIKCgJ0cxgBIAEoAxIwCgpQZXJtaXNzaW9uGAIgASgLMhoudGhla2VlcGVyLkV2ZW50UGVybWlzc2lvbkgAEjAKClNlZWRQbGF5ZXIYAyABKAsyGi50aGVrZWVwZXIuRXZlbnRTZWVkUGxheWVySAASLgoJU2VlZEFjdG9yGAQgASgLMhkudGhla2VlcGVyLkV2ZW50U2VlZEFjdG9ySAASNAoMUGxheWVyUGVyc29uGAUgASgLMhwudGhla2VlcGVyLkV2ZW50UGxheWVyUGVyc29uSAASOgoPUGxheWVyQ2hhcmFjdGVyGAYgASgLMh8udGhla2VlcGVyLkV2ZW50UGxheWVyQ2hhcmFjdGVySAASDwoFUmVzZXQYByABKAhIABJKChdQbGF5ZXJDaGFyYWN0ZXJPcmdhRWRpdBgIIAEoCzInLnRoZWtlZXBlci5FdmVudFBsYXllckNoYXJhY3Rlck9yZ2FFZGl0SABCBQoDbXNnIioKBkV2ZW50cxIgCgZldmVudHMYASADKAsyEC50aGVrZWVwZXIuRXZlbnRCKlooZ2l0aHViLmNvbS9lYmVuYXVtL3RoZWtlZXBlci9wcm90bztwcm90b2IGcHJvdG8z",
+    "CgtldmVudC5wcm90bxIJdGhla2VlcGVyIu8DCgVFdmVudBIKCgJ0cxgBIAEoAxIwCgpQZXJtaXNzaW9uGAIgASgLMhoudGhla2VlcGVyLkV2ZW50UGVybWlzc2lvbkgAEjAKClNlZWRQbGF5ZXIYAyABKAsyGi50aGVrZWVwZXIuRXZlbnRTZWVkUGxheWVySAASLgoJU2VlZEFjdG9yGAQgASgLMhkudGhla2VlcGVyLkV2ZW50U2VlZEFjdG9ySAASNAoMUGxheWVyUGVyc29uGAUgASgLMhwudGhla2VlcGVyLkV2ZW50UGxheWVyUGVyc29uSAASOgoPUGxheWVyQ2hhcmFjdGVyGAYgASgLMh8udGhla2VlcGVyLkV2ZW50UGxheWVyQ2hhcmFjdGVySAASDwoFUmVzZXQYByABKAhIABJKChdQbGF5ZXJDaGFyYWN0ZXJPcmdhRWRpdBgIIAEoCzInLnRoZWtlZXBlci5FdmVudFBsYXllckNoYXJhY3Rlck9yZ2FFZGl0SAASNAoMRGVsZXRlUGxheWVyGAkgASgLMhwudGhla2VlcGVyLkV2ZW50RGVsZXRlUGxheWVySAASOgoPRGVsZXRlQ2hhcmFjdGVyGAogASgLMh8udGhla2VlcGVyLkV2ZW50RGVsZXRlQ2hhcmFjdGVySABCBQoDbXNnIioKBkV2ZW50cxIgCgZldmVudHMYASADKAsyEC50aGVrZWVwZXIuRXZlbnRCKlooZ2l0aHViLmNvbS9lYmVuYXVtL3RoZWtlZXBlci9wcm90bztwcm90b2IGcHJvdG8z",
     [
       file_permission,
       file_seed_player,
@@ -24,6 +26,8 @@ export const file_event =
       file_player_person,
       file_player_character,
       file_player_character_orga_edit,
+      file_delete_player,
+      file_delete_character,
     ],
   );
 

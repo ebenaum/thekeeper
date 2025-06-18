@@ -7,6 +7,8 @@ import "seed_actor.proto";
 import "player_person.proto";
 import "player_character.proto";
 import "player_character_orga_edit.proto";
+import "delete_player.proto";
+import "delete_character.proto";
 
 option go_package = "github.com/ebenaum/thekeeper/proto;proto";
 
@@ -20,6 +22,8 @@ message Event {
     EventPlayerCharacter         PlayerCharacter         = 6;
     bool                         Reset                   = 7;
     EventPlayerCharacterOrgaEdit PlayerCharacterOrgaEdit = 8;
+    EventDeletePlayer            DeletePlayer            = 9;
+    EventDeleteCharacter         DeleteCharacter         = 10;
   }
 }
 
