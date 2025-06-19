@@ -13,7 +13,7 @@ import (
 )
 
 func usage() string {
-	return fmt.Sprintf("./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle>|link-orga <db-path> <handle>")
+	return "./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle>|link-orga <db-path> <handle>|delete-player <db-path> <player id>|delete-character <db-path> <character id>"
 }
 
 //go:embed schema.sql
@@ -61,6 +61,19 @@ func main() {
 			os.Exit(1)
 		}
 		err = linkorga(db, os.Args[3])
+
+	case "delete-player":
+		if len(os.Args) < 4 {
+			fmt.Println(usage())
+			os.Exit(1)
+		}
+		err = deleteplayer(db, os.Args[3])
+	case "delete-character":
+		if len(os.Args) < 4 {
+			fmt.Println(usage())
+			os.Exit(1)
+		}
+		err = deletecharacter(db, os.Args[3])
 	default:
 		fmt.Println(usage())
 		os.Exit(1)
@@ -145,9 +158,7 @@ func createorga(db *sqlx.DB, orgaHandle string) error {
 }
 
 func insertreset(db *sqlx.DB) error {
-	var id int64
-
-	result, err := InsertAndCheckEvents(db, -1, id, []*proto.Event{
+	result, err := InsertAndCheckEvents(db, -1, 0, []*proto.Event{
 		{
 			Msg: &proto.Event_Reset_{},
 		},
@@ -175,6 +186,48 @@ func linkorga(db *sqlx.DB, orgaHandle string) error {
 	}
 
 	fmt.Printf("http://localhost:8080?code=%s\n", authKey)
+
+	return nil
+}
+
+func deleteplayer(db *sqlx.DB, playerID string) error {
+	result, err := InsertAndCheckEvents(db, -1, 0, []*proto.Event{
+		{
+			Msg: &proto.Event_DeletePlayer{
+				DeletePlayer: &proto.EventDeletePlayer{
+					PlayerId: playerID,
+				},
+			},
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("delete player event: %w", err)
+	}
+
+	if result[0].Status != EventRecordStatusAccepted {
+		return fmt.Errorf("delete player event was not accepted: %v", result[0])
+	}
+
+	return nil
+}
+
+func deletecharacter(db *sqlx.DB, characterID string) error {
+	result, err := InsertAndCheckEvents(db, -1, 0, []*proto.Event{
+		{
+			Msg: &proto.Event_DeleteCharacter{
+				DeleteCharacter: &proto.EventDeleteCharacter{
+					CharacterId: characterID,
+				},
+			},
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("delete character event: %w", err)
+	}
+
+	if result[0].Status != EventRecordStatusAccepted {
+		return fmt.Errorf("delete characyer event was not accepted: %v", result[0])
+	}
 
 	return nil
 }

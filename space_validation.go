@@ -153,6 +153,10 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 
 		return nil
 	case *proto.Event_Reset_:
+		if s.Permission.Actors[sourceActorID] != PermissionRoot {
+			return fmt.Errorf("not authorized to perform that action")
+		}
+
 		return nil
 	default:
 		return fmt.Errorf("event %v not handled", v)
