@@ -175,8 +175,9 @@ type SpacePlayer struct {
 
 func NewSpacePlayer(actorID int64) *SpacePlayer {
 	return &SpacePlayer{
-		ActorID:   actorID,
-		PlayerIDs: map[string]struct{}{},
+		ActorID:      actorID,
+		PlayerIDs:    map[string]struct{}{},
+		CharacterIDs: map[string]struct{ PlayerID string }{},
 	}
 }
 

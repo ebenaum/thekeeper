@@ -372,6 +372,8 @@ function processEvent(data, eventType, eventValue, reset) {
         data.players[playerId].characters.splice(index, 1); // 2nd parameter means remove one item only
       }
 
+      break;
+
     case "DeletePlayer":
       data.players[eventValue.playerId].characters.forEach((characterId) => {
         delete data.characters[eventValue.characterId];
@@ -379,6 +381,7 @@ function processEvent(data, eventType, eventValue, reset) {
 
       delete data.players[eventValue.playerId];
 
+      break;
     default:
       console.log(`unknown event ${eventType} ${eventValue}`);
   }
