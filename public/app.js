@@ -358,6 +358,27 @@ function processEvent(data, eventType, eventValue, reset) {
       }
 
       break;
+
+    case "DeleteCharacter":
+      const playerId = data.characters[eventValue.characterId].playerId;
+
+      delete data.characters[eventValue.characterId];
+
+      const index = data.players[playerId].characters.indexOf(
+        eventValue.characterId,
+      );
+      if (index > -1) {
+        // only splice array when item is found
+        data.players[playerId].characters.splice(index, 1); // 2nd parameter means remove one item only
+      }
+
+    case "DeletePlayer":
+      data.players[eventValue.playerId].characters.forEach((characterId) => {
+        delete data.characters[eventValue.characterId];
+      });
+
+      delete data.players[eventValue.playerId];
+
     default:
       console.log(`unknown event ${eventType} ${eventValue}`);
   }

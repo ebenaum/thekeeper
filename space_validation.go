@@ -119,6 +119,39 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 		s.CharacterIDs[v.PlayerCharacter.CharacterId] = struct{ PlayerID string }{v.PlayerCharacter.PlayerId}
 
 		return nil
+	case *proto.Event_DeleteCharacter:
+		if s.Permission.Actors[sourceActorID] != PermissionRoot {
+			return fmt.Errorf("not authorized to perform that action")
+		}
+
+		_, exists := s.CharacterIDs[v.DeleteCharacter.CharacterId]
+		if !exists {
+			return fmt.Errorf("character does not exist")
+		}
+
+		delete(s.CharacterIDs, v.DeleteCharacter.CharacterId)
+
+		return nil
+
+	case *proto.Event_DeletePlayer:
+		if s.Permission.Actors[sourceActorID] != PermissionRoot {
+			return fmt.Errorf("not authorized to perform that action")
+		}
+
+		_, exists := s.PlayersIDs[v.DeletePlayer.PlayerId]
+		if !exists {
+			return fmt.Errorf("player does not exist")
+		}
+
+		delete(s.PlayersIDs, v.DeletePlayer.PlayerId)
+
+		for characterID, character := range s.CharacterIDs {
+			if character.PlayerID == v.DeletePlayer.PlayerId {
+				delete(s.CharacterIDs, characterID)
+			}
+		}
+
+		return nil
 	case *proto.Event_Reset_:
 		return nil
 	default:
@@ -127,10 +160,13 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 }
 
 type SpacePlayer struct {
-	Handle    string
-	ActorID   int64
-	Events    []*proto.Event
-	PlayerIDs map[string]struct{}
+	Handle       string
+	ActorID      int64
+	Events       []*proto.Event
+	PlayerIDs    map[string]struct{}
+	CharacterIDs map[string]struct {
+		PlayerID string
+	}
 }
 
 func NewSpacePlayer(actorID int64) *SpacePlayer {
@@ -170,6 +206,10 @@ func (s *SpacePlayer) Process(sourceActorID int64, event *proto.Event) error {
 	case *proto.Event_PlayerCharacter:
 		if _, exists := s.PlayerIDs[v.PlayerCharacter.PlayerId]; exists {
 			s.Events = append(s.Events, event)
+			s.CharacterIDs[v.PlayerCharacter.CharacterId] = struct{ PlayerID string }{
+				v.PlayerCharacter.PlayerId,
+			}
+
 		}
 
 		return nil
@@ -177,6 +217,29 @@ func (s *SpacePlayer) Process(sourceActorID int64, event *proto.Event) error {
 		return nil
 	case *proto.Event_Reset_:
 		s.Events = append(s.Events, event)
+
+		return nil
+
+	case *proto.Event_DeleteCharacter:
+		if _, exists := s.CharacterIDs[v.DeleteCharacter.CharacterId]; exists {
+			s.Events = append(s.Events, event)
+
+			delete(s.CharacterIDs, v.DeleteCharacter.CharacterId)
+		}
+
+		return nil
+	case *proto.Event_DeletePlayer:
+		if _, exists := s.PlayerIDs[v.DeletePlayer.PlayerId]; exists {
+			s.Events = append(s.Events, event)
+
+			delete(s.PlayerIDs, v.DeletePlayer.PlayerId)
+
+			for characterID, character := range s.CharacterIDs {
+				if character.PlayerID == v.DeletePlayer.PlayerId {
+					delete(s.CharacterIDs, characterID)
+				}
+			}
+		}
 
 		return nil
 	default:
@@ -207,23 +270,10 @@ func (s *SpaceOrga) GetEvents() []*proto.Event {
 
 func (s *SpaceOrga) Process(sourceActorID int64, event *proto.Event) error {
 	switch v := event.Msg.(type) {
-	case *proto.Event_SeedPlayer:
-		s.Events = append(s.Events, event)
-
-		return nil
-	case *proto.Event_PlayerPerson:
-		s.Events = append(s.Events, event)
-
-		return nil
-	case *proto.Event_PlayerCharacter:
-		s.Events = append(s.Events, event)
-
-		return nil
-	case *proto.Event_SeedActor, *proto.Event_Permission:
-		s.Events = append(s.Events, event)
-
-		return nil
-	case *proto.Event_Reset_:
+	case *proto.Event_SeedPlayer, *proto.Event_PlayerPerson,
+		*proto.Event_PlayerCharacter, *proto.Event_SeedActor,
+		*proto.Event_Permission, *proto.Event_Reset_,
+		*proto.Event_DeleteCharacter, *proto.Event_DeletePlayer:
 		s.Events = append(s.Events, event)
 
 		return nil
