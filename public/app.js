@@ -137,6 +137,7 @@ async function init() {
 
 /**
  * @typedef {Object} InformationsForm
+ * @property {Date}     createdAt
  * @property {string}   surname
  * @property {string}   age
  * @property {string}   cityOfOrigin
@@ -165,6 +166,7 @@ async function init() {
 
 /**
  * @typedef {Object} CharacterForm
+ * @property {Date}                   createdAt
  * @property {string}                 playerId
  * @property {string}                 name
  * @property {string}                 group
@@ -221,7 +223,14 @@ async function getState() {
   const keys = JSON.parse(/** @type {string} */ (localStorage.getItem("keys")));
   const cursor = Number(/** @type {string} */ (localStorage.getItem("cursor")));
 
-  const data = JSON.parse(/** @type {string} */ (localStorage.getItem("data")));
+  const data = JSON.parse(
+    /** @type {string} */ (localStorage.getItem("data")),
+    (key, value) => {
+      if (key === "createdAt") return new Date(Date.parse(value));
+
+      return value;
+    },
+  );
 
   if (!keys) {
     return null;
@@ -288,7 +297,13 @@ async function sync(state, reset) {
     function (
       /** @type {{ msg: { case: any; value: any; }; ts: number; }} */ event,
     ) {
-      processEvent(state.data, event.msg.case, event.msg.value, reset);
+      processEvent(
+        state.data,
+        event.ts,
+        event.msg.case,
+        event.msg.value,
+        reset,
+      );
       state.cursor = event.ts;
     },
   );
@@ -303,7 +318,9 @@ async function sync(state, reset) {
  * @param {any} eventValue
  * @params {boolean} reset
  */
-function processEvent(data, eventType, eventValue, reset) {
+function processEvent(data, ts, eventType, eventValue, reset) {
+  const eventDate = new Date(Number(ts) / 1000);
+
   switch (eventType) {
     case "SeedPlayer":
       data.players[eventValue.playerId] = {
@@ -331,21 +348,23 @@ function processEvent(data, eventType, eventValue, reset) {
 
       break;
     case "PlayerPerson":
-      data.players[eventValue.playerId].personal = toJson(
-        EventPlayerPersonSchema,
-        eventValue,
-        { alwaysEmitImplicit: true },
-      );
+      const info = toJson(EventPlayerPersonSchema, eventValue, {
+        alwaysEmitImplicit: true,
+      });
+
+      info.createdAt = eventDate;
+
+      data.players[eventValue.playerId].personal = info;
 
       break;
     case "PlayerCharacter":
-      data.characters[eventValue.characterId] = toJson(
-        EventPlayerCharacterSchema,
-        eventValue,
-        {
-          alwaysEmitImplicit: true,
-        },
-      );
+      const character = toJson(EventPlayerCharacterSchema, eventValue, {
+        alwaysEmitImplicit: true,
+      });
+
+      character.createdAt = eventDate;
+
+      data.characters[eventValue.characterId] = character;
 
       if (
         data.players[eventValue.playerId].characters.indexOf(
@@ -678,6 +697,7 @@ async function personnage() {
   let playerId = url.searchParams.get("playerId");
 
   let /** @type{CharacterForm} */ formResult = {
+      createdAt: new Date(),
       playerId: "",
       name: "",
       group: "",
@@ -1912,6 +1932,7 @@ async function theview() {
   tableHeaderElement.appendChild(tableHeaderRowElement);
 
   [
+    "Date",
     "Nom/Prénom",
     "Type",
     "Contact",
@@ -1972,6 +1993,9 @@ async function theview() {
       playerElement.appendChild(playerLinkElement);
 
       const /** @type {(string|HTMLElement|undefined)[]} */ values = [];
+      values.push(
+        (character?.createdAt || player.personal?.createdAt).toLocaleString(),
+      );
       values.push(playerElement);
       values.push(player.personal?.inscriptionType?.toUpperCase());
       values.push(player.personal?.contact);
@@ -2274,6 +2298,7 @@ async function informations() {
   let state = await getState();
 
   let /** @type{InformationsForm} */ formResult = {
+      createdAt: new Date(),
       surname: "",
       age: "",
       cityOfOrigin: "",
