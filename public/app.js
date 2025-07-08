@@ -1942,7 +1942,7 @@ async function theview() {
   tableHeaderElement.appendChild(tableHeaderRowElement);
 
   [
-    "Date",
+    "Création",
     "Nom/Prénom",
     "Type",
     "Contact",
