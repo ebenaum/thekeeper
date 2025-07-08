@@ -352,7 +352,12 @@ function processEvent(data, ts, eventType, eventValue, reset) {
         alwaysEmitImplicit: true,
       });
 
-      info.createdAt = eventDate;
+      // Only set creation timestamp.
+      if (!data.players[eventValue.playerId].personal) {
+        info.createdAt = eventDate;
+      } else {
+        info.createdAt = data.players[eventValue.playerId].personal?.createdAt;
+      }
 
       data.players[eventValue.playerId].personal = info;
 
@@ -362,7 +367,12 @@ function processEvent(data, ts, eventType, eventValue, reset) {
         alwaysEmitImplicit: true,
       });
 
-      character.createdAt = eventDate;
+      // Only set creation timestamp.
+      if (!data.characters[eventValue.characterId]) {
+        character.createdAt = eventDate;
+      } else {
+        character.createdAt = data.characters[eventValue.characterId].createdAt;
+      }
 
       data.characters[eventValue.characterId] = character;
 
