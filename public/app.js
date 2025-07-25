@@ -1949,6 +1949,7 @@ async function theview() {
     "Amis",
     "Santé",
     "Personnage",
+    "Description joueur",
     "Monde",
     "Origine",
     "Approche",
@@ -2012,6 +2013,7 @@ async function theview() {
       values.push(player.personal?.peopleToPlayWith);
       values.push(player.personal?.health);
       values.push(characterElement);
+      values.push(character?.description);
       values.push(universMap[character?.group]?.label);
       values.push(universMap[character?.worldOrigin]?.label);
       values.push(universMap[character?.worldApproach]?.label);
@@ -2064,7 +2066,7 @@ async function theview() {
     columnControl: [{ extend: "search" }, { extend: "order" }],
     columnDefs: [
       {
-        targets: [2, 7, 8, 9],
+        targets: [2, 8, 9, 10],
         columnControl: ["order", ["searchList"]],
       },
     ],
@@ -2169,6 +2171,11 @@ async function index() {
   if (state) {
     Object.keys(state.data.players).forEach((playerId) => {
       const player = state.data.players[playerId];
+
+      // Hide PNJ for orgas
+      if (player.personal?.inscriptionType === "pnj") {
+        return;
+      }
 
       const clone = /** @type {HTMLElement} */ (
         playerTemplate.content.cloneNode(true)
