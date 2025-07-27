@@ -2126,6 +2126,7 @@ async function theview() {
     "Amis",
     "Santé",
     "Personnage",
+    "Groupe",
     "BG",
     "Monde",
     "Origine",
@@ -2199,6 +2200,7 @@ async function theview() {
       values.push(player.personal?.peopleToPlayWith);
       values.push(player.personal?.health);
       values.push(characterElement);
+      values.push(character?.orga?.playerGroup);
       values.push(character?.orga?.background);
       values.push(universMap[character?.group]?.label);
       values.push(universMap[character?.worldOrigin]?.label);
@@ -2254,7 +2256,7 @@ async function theview() {
     columnControl: [{ extend: "search" }, { extend: "order" }],
     columnDefs: [
       {
-        targets: [1, 3, 9, 10, 11],
+        targets: [1, 3, 8, 10, 11, 12],
         columnControl: ["order", ["searchList"]],
       },
     ],
