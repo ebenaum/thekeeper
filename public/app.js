@@ -1967,10 +1967,12 @@ async function theview() {
     "Amis",
     "Santé",
     "Personnage",
-    "Description joueur",
+    "BG",
     "Monde",
     "Origine",
     "Approche",
+    "Race",
+    "Métier",
   ].forEach((columnName) => {
     const thElement = document.createElement("th");
     thElement.textContent = columnName;
@@ -2035,6 +2037,8 @@ async function theview() {
       values.push(universMap[character?.group]?.label);
       values.push(universMap[character?.worldOrigin]?.label);
       values.push(universMap[character?.worldApproach]?.label);
+      values.push(universMap[character?.race]?.label);
+      values.push(universMap[character?.vdv]?.label);
 
       const trElement = document.createElement("tr");
 
