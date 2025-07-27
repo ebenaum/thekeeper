@@ -178,13 +178,18 @@ async function init() {
  * @property {Object.<string,number>} inventory
  * @property {Characteristics}        characteristics
  * @property {string}                 description
+ * @property {OrgaForm?}              orga
  */
 
 /**
  * @typedef{Object} OrgaForm
  * @property {{title: string, description: string}[]} gifts
  * @property {{title: string, description: string}[]} handicaps
- *  @property {{title: string, description: string}[]} quests
+ * @property {{title: string, description: string}[]} quests
+ * @property {string} mentalCrisis
+ * @property {string} publicResume
+ * @property {string} background
+ * @property {string[]} tags
  */
 
 /**
@@ -507,11 +512,15 @@ function attachSelectListeners(elements, formKey, allowMultiple, callback) {
  * @param {Skill[]} skills
  */
 async function personnageOrga(player, characteristicsLevels, univers, skills) {
-  let /** @type{OrgaForm} */ formResult = {
-      gifts: [],
-      handicaps: [],
-      quests: [],
-    };
+  const formResult = player.orga || {
+    gifts: [],
+    handicaps: [],
+    quests: [],
+    mentalCrisis: "",
+    background: "",
+    publicResume: "",
+    tags: [],
+  };
 
   const containerElement = document.querySelector(".container");
   if (!containerElement) {
@@ -723,6 +732,15 @@ async function personnage() {
         dexterite: 0,
         influence: 0,
         savoir: 0,
+      },
+      orga: {
+        gifts: [],
+        handicaps: [],
+        quests: [],
+        mentalCrisis: "",
+        background: "",
+        publicResume: "",
+        tags: [],
       },
     };
 
