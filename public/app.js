@@ -987,12 +987,15 @@ async function personnage() {
   }
 
   let characteristicBudget =
-    parseInt(
-      univers
-        .find((entry) => entry.key === "characteristics-default-points")
-        ?.tags.find((tag) => tag.startsWith("n:"))
-        ?.split(":")[1] || "0",
-    ) -
+    /* allow orga to give whatever characteristics he wants */
+    (state?.data.permission === "orga"
+      ? 99
+      : parseInt(
+          univers
+            .find((entry) => entry.key === "characteristics-default-points")
+            ?.tags.find((tag) => tag.startsWith("n:"))
+            ?.split(":")[1] || "0",
+        )) -
     Object.values(formResult.characteristics).reduce(
       (acc, cur) => acc + cur,
       0,
