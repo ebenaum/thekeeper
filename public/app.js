@@ -2199,7 +2199,7 @@ async function theview() {
       values.push(player.personal?.peopleToPlayWith);
       values.push(player.personal?.health);
       values.push(characterElement);
-      values.push(character?.description);
+      values.push(character?.orga?.background);
       values.push(universMap[character?.group]?.label);
       values.push(universMap[character?.worldOrigin]?.label);
       values.push(universMap[character?.worldApproach]?.label);
@@ -2361,17 +2361,7 @@ async function index() {
       const player = state.data.players[playerId];
 
       // Hide PNJ for orgas.
-      // Hide players with characters already checked by orgas.
-      if (
-        player.personal?.inscriptionType === "pnj" ||
-        !player.characters.find((character) => {
-          if (!state.data.characters[character].orga?.playerGroup) {
-            return true;
-          }
-
-          return false;
-        })
-      ) {
+      if (player.personal?.inscriptionType === "pnj") {
         return;
       }
 
@@ -2444,6 +2434,14 @@ async function index() {
           "href",
           `/personnage.html?characterId=${characterId}`,
         );
+
+        const characterReviewedBadgeElement = /** @type {HTMLElement} */ (
+          characterClone.querySelector(".character-reviewed-badge")
+        );
+
+        if (character.orga?.playerGroup) {
+          characterReviewedBadgeElement.classList.remove("d-none");
+        }
 
         const characterName = character.name || "Sans nom";
         characterNameElement.textContent = characterName;

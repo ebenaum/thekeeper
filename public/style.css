@@ -332,10 +332,6 @@ input[type="checkbox"]:checked::before {
   display: block;
 }
 
-.d-none {
-  display: none;
-}
-
 .p-zero {
   padding: 0;
 }
@@ -884,4 +880,23 @@ b {
 .orga__player-title input {
   font-size: 1.5rem;
   font-weight: bold;
+}
+
+/* VDV badge inside skill */
+.character-reviewed-badge {
+  display: inline-block;
+  font-size: 0.8em;
+  padding: 2px 6px;
+  margin-right: 8px; /* Keep margin consistent */
+  border: 1px solid #000;
+  border-radius: 3px;
+  background-color: #f0f0f0; /* Default background */
+  opacity: 0.8;
+  vertical-align: middle;
+  font-weight: normal; /* Reset font weight */
+  background-color: rgb(212, 184, 0);
+}
+
+.d-none {
+  display: none;
 }
