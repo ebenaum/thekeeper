@@ -191,6 +191,7 @@ async function init() {
  * @property {string} publicResume
  * @property {string} background
  * @property {string[]} tags
+ * @property {string} playerGroup
  */
 
 /**
@@ -543,6 +544,7 @@ async function personnageOrga(
     background: "",
     publicResume: "",
     tags: [],
+    playerGroup: "",
   };
 
   const formResult = player.orga;
@@ -618,13 +620,15 @@ async function personnageOrga(
 
     const characteristics = [];
 
-    ["background", "mentalCrisis", "publicResume"].forEach((inputName) => {
-      const inputElement = /** @type {HTMLInputElement} */ (
-        el.querySelector(`.character-${inputName}__input`)
-      );
+    ["background", "mentalCrisis", "publicResume", "playerGroup"].forEach(
+      (inputName) => {
+        const inputElement = /** @type {HTMLInputElement} */ (
+          el.querySelector(`.character-${inputName}__input`)
+        );
 
-      inputElement.value = formResult[inputName];
-    });
+        inputElement.value = formResult[inputName];
+      },
+    );
 
     [
       { element: giftsElement, values: formResult.gifts, key: "gifts" },
@@ -705,18 +709,20 @@ async function personnageOrga(
     containerElement?.firstElementChild
   );
 
-  ["background", "mentalCrisis", "publicResume"].forEach((inputName) => {
-    const inputElement = /** @type {HTMLInputElement} */ (
-      node.querySelector(`.character-${inputName}__input`)
-    );
+  ["background", "mentalCrisis", "publicResume", "playerGroup"].forEach(
+    (inputName) => {
+      const inputElement = /** @type {HTMLInputElement} */ (
+        node.querySelector(`.character-${inputName}__input`)
+      );
 
-    inputElement.addEventListener("input", (e) => {
-      formResult[inputName] = /** @type{HTMLInputElement}*/ (e.target)?.value;
+      inputElement.addEventListener("input", (e) => {
+        formResult[inputName] = /** @type{HTMLInputElement}*/ (e.target)?.value;
 
-      // @ts-ignore
-      print(node);
-    });
-  });
+        // @ts-ignore
+        print(node);
+      });
+    },
+  );
 
   [
     "orga__player-gifts",
@@ -842,6 +848,7 @@ async function personnage() {
         background: "",
         publicResume: "",
         tags: [],
+        playerGroup: "",
       },
     };
 
@@ -2049,6 +2056,7 @@ async function personnage() {
             background: formResult.orga?.background || "",
             publicResume: formResult.orga?.publicResume || "",
             tags: formResult.orga?.tags || [],
+            playerGroup: formResult.orga?.playerGroup || [],
           },
         },
       });

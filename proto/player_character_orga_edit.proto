@@ -27,4 +27,5 @@ message EventPlayerCharacterOrgaEdit {
   repeated Handicap handicaps    = 6;
   repeated Quest    quests       = 7;
   repeated string   tags         = 8;
+  string            playerGroup  = 9;
 }
