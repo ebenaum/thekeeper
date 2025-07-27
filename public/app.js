@@ -2068,6 +2068,8 @@ async function personnage() {
 
     if (state.data.permission !== "orga" || !existingPlayerId) {
       window.location.href = "/";
+    } else {
+      window.location.reload();
     }
   }
 }
