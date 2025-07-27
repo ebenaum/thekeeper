@@ -158,6 +158,18 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 		}
 
 		return nil
+
+	case *proto.Event_PlayerCharacterOrgaEdit:
+		if s.Permission.Actors[sourceActorID] != PermissionOrga {
+			return fmt.Errorf("not authorized to perform that action")
+		}
+
+		_, exists := s.CharacterIDs[v.PlayerCharacterOrgaEdit.CharacterId]
+		if !exists {
+			return fmt.Errorf("character does not exist")
+		}
+
+		return nil
 	default:
 		return fmt.Errorf("event %v not handled", v)
 	}
@@ -247,6 +259,14 @@ func (s *SpacePlayer) Process(sourceActorID int64, event *proto.Event) error {
 		}
 
 		return nil
+
+	case *proto.Event_PlayerCharacterOrgaEdit:
+		if _, exists := s.CharacterIDs[v.PlayerCharacterOrgaEdit.CharacterId]; exists {
+			s.Events = append(s.Events, event)
+		}
+
+		return nil
+
 	default:
 		return fmt.Errorf("event %v not handled", v)
 	}
@@ -278,7 +298,7 @@ func (s *SpaceOrga) Process(sourceActorID int64, event *proto.Event) error {
 	case *proto.Event_SeedPlayer, *proto.Event_PlayerPerson,
 		*proto.Event_PlayerCharacter, *proto.Event_SeedActor,
 		*proto.Event_Permission, *proto.Event_Reset_,
-		*proto.Event_DeleteCharacter, *proto.Event_DeletePlayer:
+		*proto.Event_DeleteCharacter, *proto.Event_DeletePlayer, *proto.Event_PlayerCharacterOrgaEdit:
 		s.Events = append(s.Events, event)
 
 		return nil

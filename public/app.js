@@ -7,6 +7,7 @@ import { create, toJson, toBinary, fromBinary } from "@bufbuild/protobuf";
 import { EventsSchema } from "./event_pb.js";
 import { EventPlayerPersonSchema } from "./player_person_pb.js";
 import { EventPlayerCharacterSchema } from "./player_character_pb.js";
+import { EventPlayerCharacterOrgaEditSchema } from "./player_character_orga_edit_pb.js";
 
 /**
  *
@@ -377,6 +378,7 @@ function processEvent(data, ts, eventType, eventValue, reset) {
         character.createdAt = eventDate;
       } else {
         character.createdAt = data.characters[eventValue.characterId].createdAt;
+        character.orga = data.characters[eventValue.characterId].orga;
       }
 
       data.characters[eventValue.characterId] = character;
@@ -390,6 +392,15 @@ function processEvent(data, ts, eventType, eventValue, reset) {
           eventValue.characterId,
         );
       }
+
+      break;
+
+    case "PlayerCharacterOrgaEdit":
+      const orgaEdit = toJson(EventPlayerCharacterOrgaEditSchema, eventValue, {
+        alwaysEmitImplicit: true,
+      });
+
+      data.characters[eventValue.characterId].orga = orgaEdit;
 
       break;
 
