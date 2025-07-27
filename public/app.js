@@ -547,8 +547,6 @@ async function personnageOrga(
 
   const formResult = player.orga;
 
-  console.log(formResult);
-
   const containerElement = document.querySelector(".container");
   if (!containerElement) {
     throw new Error("no container element");
@@ -558,6 +556,16 @@ async function personnageOrga(
   const orgaTemplate = document.querySelector("#template__orga");
   if (!orgaTemplate) {
     throw new Error("cannot retrieve orga template");
+  }
+
+  /** @type {HTMLTemplateElement | null} */
+  const titleDescriptionTemplate = document.querySelector(
+    "#template__orga__titledescription_element",
+  );
+  if (!titleDescriptionTemplate) {
+    throw new Error(
+      "cannot retrieve template__orga__titledescription_element template",
+    );
   }
 
   containerElement.querySelectorAll("details").forEach((el) => {
@@ -599,6 +607,8 @@ async function personnageOrga(
       el.querySelector(".orga__player-quests ul")
     );
 
+    console.log(el, titleElement);
+
     titleElement.innerHTML = `<span class="orga__player-title__name">${player.name}</span> | ${univers[player.group]?.label || "Sans monde"} | ${univers[player.worldOrigin]?.label || "Sans status"} | ${univers[player.worldApproach]?.label || "Sans alignement"}`;
     raceVdvElement.textContent = `${univers[player.race]?.label || "Sans race"} | ${univers[player.vdv]?.label || "Sans Voie de Vie"}`;
 
@@ -612,28 +622,40 @@ async function personnageOrga(
       inputElement.value = formResult[inputName];
     });
 
-    giftsElement.innerHTML = "";
-    formResult.gifts.forEach((gift) => {
-      const liElement = document.createElement("li");
-      liElement.textContent = `${gift.title}: ${gift.description}`;
+    [
+      { element: giftsElement, values: formResult.gifts, key: "gifts" },
+      {
+        element: handicapsElement,
+        values: formResult.handicaps,
+        key: "handicaps",
+      },
+      { element: questsElement, values: formResult.quests, key: "quests" },
+    ].forEach((tuple) => {
+      tuple.element.innerHTML = "";
+      tuple.values.forEach((value, index) => {
+        const clone = /** @type {HTMLElement} */ (
+          titleDescriptionTemplate.content.cloneNode(true)
+        );
 
-      giftsElement.prepend(liElement);
-    });
+        const titleElement = /** @type {HTMLElement} */ (
+          clone.querySelector(".titledescription__head__title")
+        );
+        const descriptionElement = /** @type {HTMLElement} */ (
+          clone.querySelector(".titledescription__description")
+        );
 
-    handicapsElement.innerHTML = "";
-    formResult.handicaps.forEach((handicap) => {
-      const liElement = document.createElement("li");
-      liElement.textContent = `${handicap.title}: ${handicap.description}`;
+        const deleteButtonElement = /** @type {HTMLElement} */ (
+          clone.querySelector(".titledescription__head__delete")
+        );
 
-      handicapsElement.prepend(liElement);
-    });
+        titleElement.textContent = value.title;
+        descriptionElement.textContent = value.description;
 
-    questsElement.innerHTML = "";
-    formResult.quests.forEach((quest) => {
-      const liElement = document.createElement("li");
-      liElement.textContent = `${quest.title}: ${quest.description}`;
+        deleteButtonElement.dataset.key = tuple.key;
+        deleteButtonElement.dataset.index = index.toString();
 
-      questsElement.prepend(liElement);
+        tuple.element.append(clone);
+      });
     });
 
     Object.keys(player.characteristics).forEach((characteristic) => {
@@ -717,7 +739,7 @@ async function personnageOrga(
       inputWrapperElement.querySelector(`input[name="title"]`)
     );
     const descriptionElement = /** @type{HTMLInputElement} */ (
-      inputWrapperElement.querySelector(`input[name="description"]`)
+      inputWrapperElement.querySelector(`textarea[name="description"]`)
     );
 
     if (!titleElement || !descriptionElement) {
@@ -755,6 +777,29 @@ async function personnageOrga(
 
       return false;
     });
+  });
+
+  node.addEventListener("click", (e) => {
+    if (
+      /** @type{HTMLInputElement|null}*/ (e.target)?.classList.contains(
+        "titledescription__head__delete",
+      )
+    ) {
+      e.preventDefault();
+
+      const element = /** @type{HTMLInputElement}*/ (e.target);
+
+      const key = element.dataset.key;
+      const index = parseInt(element.dataset.index || "");
+
+      if (key) {
+        formResult[key].splice(index, 1);
+
+        print(node);
+      }
+
+      return false;
+    }
   });
 
   node.onsubmit = onsubmit;

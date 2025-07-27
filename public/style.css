@@ -335,6 +335,10 @@ input[type="checkbox"]:checked::before {
   display: none;
 }
 
+.p-zero {
+  padding: 0;
+}
+
 .characteristic {
   display: grid;
   grid-template-columns: 90px 1fr 8fr;
@@ -860,4 +864,10 @@ b {
 
 .character-list {
   width: 100%;
+}
+
+.titledescription__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 }

@@ -19,15 +19,16 @@
   </head>
 
   <body>
-    <template id="template__orga__add_element">
-      <div>
-        <button class="add button"></button>
-        <div class="d-none input-text">
-          <label for="placeholder"></label>
-          <input type="text" name="placeholder" />
+    <template id="template__orga__titledescription_element">
+      <li class="titledescription double-border">
+        <div class="titledescription__head">
+          <div class="titledescription__head__title d-inline"></div>
+          <button class="titledescription__head__delete button d-inline">
+            Supprimer
+          </button>
         </div>
-        <button class="d-none confirm">Ajouter</button>
-      </div>
+        <div class="titledescription__description"></div>
+      </li>
     </template>
 
     <template id="template__orga">
@@ -56,15 +57,19 @@
 
           <div>Dons</div>
           <div class="orga__player-gifts" data-key="gifts">
-            <ul></ul>
+            <ul class="p-zero"></ul>
             <button class="orga__player-gifts__add button">
               Ajouter un Don
             </button>
             <div class="d-none input-text">
-              <label></label>
+              <label>Titre</label>
               <input type="text" name="title" />
-              <label></label>
-              <input type="text" name="description" />
+              <label>Description</label>
+              <textarea
+                name="description"
+                class="q-response-text"
+                rows="5"
+              ></textarea>
             </div>
             <button class="d-none orga__player-gifts__confirm button">
               Ajouter
@@ -73,15 +78,19 @@
 
           <div>Handicaps</div>
           <div class="orga__player-handicaps" data-key="handicaps">
-            <ul></ul>
+            <ul class="p-zero"></ul>
             <button class="orga__player-handicaps__add button">
               Ajouter un Handicap
             </button>
             <div class="d-none input-text">
-              <label></label>
+              <label>Titre</label>
               <input type="text" name="title" />
-              <label></label>
-              <input type="text" name="description" />
+              <label>Description</label>
+              <textarea
+                name="description"
+                class="q-response-text"
+                rows="5"
+              ></textarea>
             </div>
             <button class="d-none orga__player-handicaps__confirm button">
               Ajouter
@@ -99,15 +108,19 @@
 
           <div>Quêtes</div>
           <div class="orga__player-quests" data-key="quests">
-            <ul></ul>
+            <ul class="p-zero"></ul>
             <button class="orga__player-quests__add button">
               Ajouter une Quête
             </button>
             <div class="d-none input-text">
-              <label></label>
+              <label>Titre</label>
               <input type="text" name="title" />
-              <label></label>
-              <input type="text" name="description" />
+              <label>Description</label>
+              <textarea
+                name="description"
+                class="q-response-text"
+                rows="5"
+              ></textarea>
             </div>
             <button class="d-none orga__player-quests__confirm button">
               Ajouter
