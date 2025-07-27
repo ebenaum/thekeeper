@@ -607,8 +607,6 @@ async function personnageOrga(
       el.querySelector(".orga__player-quests ul")
     );
 
-    console.log(el, titleElement);
-
     titleElement.innerHTML = `<span class="orga__player-title__name">${player.name}</span> | ${univers[player.group]?.label || "Sans monde"} | ${univers[player.worldOrigin]?.label || "Sans status"} | ${univers[player.worldApproach]?.label || "Sans alignement"}`;
     raceVdvElement.textContent = `${univers[player.race]?.label || "Sans race"} | ${univers[player.vdv]?.label || "Sans Voie de Vie"}`;
 
@@ -1086,16 +1084,6 @@ async function personnage() {
         }
         return 0;
       });
-
-  if (state?.data.permission === "orga") {
-    await personnageOrga(
-      formResult,
-      characteristics,
-      universMap,
-      skills,
-      onsubmit,
-    );
-  }
 
   let characteristicBudget =
     /* allow orga to give whatever characteristics he wants */
@@ -1972,6 +1960,22 @@ async function personnage() {
       updateSkillList();
     });
   });
+
+  if (state?.data.permission === "orga") {
+    Array.from(document.getElementsByClassName("description-edition")).forEach(
+      (element) => {
+        element.removeAttribute("open");
+      },
+    );
+
+    await personnageOrga(
+      formResult,
+      characteristics,
+      universMap,
+      skills,
+      onsubmit,
+    );
+  }
 
   /**
    *

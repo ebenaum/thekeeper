@@ -871,3 +871,11 @@ b {
   justify-content: space-between;
   align-items: flex-start;
 }
+
+.orga {
+  width: 100%;
+}
+
+.form-section {
+  margin-bottom: 20px;
+}

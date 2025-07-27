@@ -36,103 +36,115 @@
         <fieldset class="form-element active">
           <legend><h1>Orga</h1></legend>
 
-          <div class="orga__player-title"></div>
-          <div class="orga__player-race-vdv"></div>
-          <div class="orga__player-characteristics"></div>
+          <h1 class="orga__player-title"></h1>
+          <div class="form-section">
+            <div class="orga__player-race-vdv"></div>
+            <div class="orga__player-characteristics"></div>
+          </div>
 
-          <div>Compétences</div>
-          <ul class="orga__player-skills"></ul>
+          <div class="form-section">
+            <h2>Compétences</h2>
+            <ul class="orga__player-skills"></ul>
+          </div>
 
-          <div>Inventaire</div>
-          <ul class="orga__player-inventory"></ul>
+          <div class="form-section">
+            <h2>Inventaire</h2>
+            <ul class="orga__player-inventory"></ul>
+          </div>
 
-          <div class="input-text character-mentalCrisis">
-            <label for="mentalCrisis">Crise mentale</label>
+          <div class="form-section input-text character-mentalCrisis">
+            <label class="group__title" for="mentalCrisis">Crise mentale</label>
             <textarea
               name="mentalCrisis"
               class="character-mentalCrisis__input q-response-text"
-              rows="5"
+              rows="2"
             ></textarea>
           </div>
 
-          <div>Dons</div>
-          <div class="orga__player-gifts" data-key="gifts">
-            <ul class="p-zero"></ul>
-            <button class="orga__player-gifts__add button">
-              Ajouter un Don
-            </button>
-            <div class="d-none input-text">
-              <label>Titre</label>
-              <input type="text" name="title" />
-              <label>Description</label>
-              <textarea
-                name="description"
-                class="q-response-text"
-                rows="5"
-              ></textarea>
+          <div class="form-section">
+            <h2>Dons & Compétences</h2>
+            <div class="orga__player-gifts" data-key="gifts">
+              <ul class="p-zero"></ul>
+              <button class="orga__player-gifts__add button">
+                Ajouter un Don
+              </button>
+              <div class="d-none input-text">
+                <label>Titre</label>
+                <input type="text" name="title" />
+                <label>Description</label>
+                <textarea
+                  name="description"
+                  class="q-response-text"
+                  rows="5"
+                ></textarea>
+              </div>
+              <button class="d-none orga__player-gifts__confirm button">
+                Ajouter
+              </button>
             </div>
-            <button class="d-none orga__player-gifts__confirm button">
-              Ajouter
-            </button>
           </div>
 
-          <div>Handicaps</div>
-          <div class="orga__player-handicaps" data-key="handicaps">
-            <ul class="p-zero"></ul>
-            <button class="orga__player-handicaps__add button">
-              Ajouter un Handicap
-            </button>
-            <div class="d-none input-text">
-              <label>Titre</label>
-              <input type="text" name="title" />
-              <label>Description</label>
-              <textarea
-                name="description"
-                class="q-response-text"
-                rows="5"
-              ></textarea>
+          <div class="form-section">
+            <h2>Handicaps</h2>
+            <div class="orga__player-handicaps" data-key="handicaps">
+              <ul class="p-zero"></ul>
+              <button class="orga__player-handicaps__add button">
+                Ajouter un Handicap
+              </button>
+              <div class="d-none input-text">
+                <label>Titre</label>
+                <input type="text" name="title" />
+                <label>Description</label>
+                <textarea
+                  name="description"
+                  class="q-response-text"
+                  rows="5"
+                ></textarea>
+              </div>
+              <button class="d-none orga__player-handicaps__confirm button">
+                Ajouter
+              </button>
             </div>
-            <button class="d-none orga__player-handicaps__confirm button">
-              Ajouter
-            </button>
           </div>
 
-          <div class="input-text character-background">
-            <label for="background">Background</label>
-            <textarea
-              name="background"
-              class="character-background__input q-response-text"
-              rows="5"
-            ></textarea>
-          </div>
-
-          <div>Quêtes</div>
-          <div class="orga__player-quests" data-key="quests">
-            <ul class="p-zero"></ul>
-            <button class="orga__player-quests__add button">
-              Ajouter une Quête
-            </button>
-            <div class="d-none input-text">
-              <label>Titre</label>
-              <input type="text" name="title" />
-              <label>Description</label>
-              <textarea
-                name="description"
-                class="q-response-text"
-                rows="5"
-              ></textarea>
+          <div class="form-section">
+            <h2>Quêtes</h2>
+            <div class="orga__player-quests" data-key="quests">
+              <ul class="p-zero"></ul>
+              <button class="orga__player-quests__add button">
+                Ajouter une Quête
+              </button>
+              <div class="d-none input-text">
+                <label>Titre</label>
+                <input type="text" name="title" />
+                <label>Description</label>
+                <textarea
+                  name="description"
+                  class="q-response-text"
+                  rows="5"
+                ></textarea>
+              </div>
+              <button class="d-none orga__player-quests__confirm button">
+                Ajouter
+              </button>
             </div>
-            <button class="d-none orga__player-quests__confirm button">
-              Ajouter
-            </button>
           </div>
 
-          <div class="character-publicResume input-text">
-            <label for="publicResume">Profil public</label>
+          <div class="form-section character-publicResume input-text">
+            <label class="group__title" for="publicResume">Profil public</label>
             <textarea
               name="publicResume"
               class="character-publicResume__input q-response-text"
               rows="5"
+            ></textarea>
+          </div>
+
+          <div class="form-section input-text character-background">
+            <label class="group__title" for="background">Background</label>
+            <textarea
+              name="background"
+              class="character-background__input q-response-text"
+              rows="30"
             ></textarea>
           </div>
         </fieldset>
