@@ -2066,7 +2066,9 @@ async function personnage() {
       throw jsonResponse[0].error;
     }
 
-    window.location.href = "/";
+    if (state.data.permission !== "orga" || !existingPlayerId) {
+      window.location.href = "/";
+    }
   }
 }
 
