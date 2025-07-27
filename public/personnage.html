@@ -34,10 +34,22 @@
     <template id="template__orga">
       <form class="orga">
         <fieldset class="form-element active">
-          <legend><h1>Orga</h1></legend>
+          <button type="submit" class="button save-button primary">
+            Sauvegarder
+          </button>
 
-          <h1 class="orga__player-title"></h1>
+          <legend><h1>Orga</h1></legend>
+          <div class="orga__player-title input-text">
+            <label for="name" class="d-none"></label>
+            <input
+              class="character-name__input"
+              type="text"
+              name="name"
+              required
+            />
+          </div>
           <div class="form-section">
+            <div class="orga__player-info"></div>
             <div class="orga__player-race-vdv"></div>
             <div class="orga__player-characteristics"></div>
           </div>
@@ -147,11 +159,10 @@
               rows="30"
             ></textarea>
           </div>
+          <button type="submit" class="button save-button primary">
+            Sauvegarder
+          </button>
         </fieldset>
-
-        <button type="submit" class="button save-button primary">
-          Sauvegarder
-        </button>
       </form>
     </template>
 

@@ -575,8 +575,12 @@ async function personnageOrga(
   const orgaClone = orgaTemplate.content.cloneNode(true);
 
   const print = (/** @type {Element} */ el) => {
-    const titleElement = /** @type {HTMLElement} */ (
-      el.querySelector(".orga__player-title")
+    const titleElement = /** @type {HTMLInputElement} */ (
+      el.querySelector(".orga__player-title input")
+    );
+
+    const infoElement = /** @type {HTMLElement} */ (
+      el.querySelector(".orga__player-info")
     );
 
     const raceVdvElement = /** @type {HTMLElement} */ (
@@ -607,7 +611,9 @@ async function personnageOrga(
       el.querySelector(".orga__player-quests ul")
     );
 
-    titleElement.innerHTML = `<span class="orga__player-title__name">${player.name}</span> | ${univers[player.group]?.label || "Sans monde"} | ${univers[player.worldOrigin]?.label || "Sans status"} | ${univers[player.worldApproach]?.label || "Sans alignement"}`;
+    titleElement.value = player.name || "Sans nom";
+
+    infoElement.innerHTML = `${univers[player.group]?.label || "Sans monde"} | ${univers[player.worldOrigin]?.label || "Sans status"} | ${univers[player.worldApproach]?.label || "Sans alignement"}`;
     raceVdvElement.textContent = `${univers[player.race]?.label || "Sans race"} | ${univers[player.vdv]?.label || "Sans Voie de Vie"}`;
 
     const characteristics = [];
@@ -1900,6 +1906,14 @@ async function personnage() {
 
   updateSkillList();
 
+  await personnageOrga(
+    formResult,
+    characteristics,
+    universMap,
+    skills,
+    onsubmit,
+  );
+
   document.querySelectorAll(".input-text").forEach(function (match) {
     const label = match.querySelector("label");
     const input =
@@ -1966,14 +1980,6 @@ async function personnage() {
       (element) => {
         element.removeAttribute("open");
       },
-    );
-
-    await personnageOrga(
-      formResult,
-      characteristics,
-      universMap,
-      skills,
-      onsubmit,
     );
   }
 

@@ -880,3 +880,8 @@ b {
 .form-section {
   margin-bottom: 20px;
 }
+
+.orga__player-title input {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
