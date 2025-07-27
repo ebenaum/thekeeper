@@ -2132,6 +2132,7 @@ async function theview() {
     "Approche",
     "Race",
     "Métier",
+    "JLJL",
   ].forEach((columnName) => {
     const thElement = document.createElement("th");
     thElement.textContent = columnName;
@@ -2205,6 +2206,7 @@ async function theview() {
       values.push(universMap[character?.worldApproach]?.label);
       values.push(universMap[character?.race]?.label);
       values.push(universMap[character?.vdv]?.label);
+      values.push(character.description);
 
       const trElement = document.createElement("tr");
 
