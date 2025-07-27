@@ -19,10 +19,6 @@
   </head>
 
   <body>
-    <template id="template__orga__tag">
-      <div></div>
-    </template>
-
     <template id="template__orga__add_element">
       <div>
         <button class="add button"></button>
@@ -40,9 +36,6 @@
           <legend><h1>Orga</h1></legend>
 
           <div class="orga__player-title"></div>
-          <div class="orga__player-tags">
-            <button class="button">Ajouter tag</button>
-          </div>
           <div class="orga__player-race-vdv"></div>
           <div class="orga__player-characteristics"></div>
 
@@ -52,11 +45,11 @@
           <div>Inventaire</div>
           <ul class="orga__player-inventory"></ul>
 
-          <div class="input-text">
+          <div class="input-text character-mentalCrisis">
             <label for="mentalCrisis">Crise mentale</label>
             <textarea
               name="mentalCrisis"
-              class="q-response-text"
+              class="character-mentalCrisis__input q-response-text"
               rows="5"
             ></textarea>
           </div>
@@ -95,11 +88,11 @@
             </button>
           </div>
 
-          <div class="input-text">
+          <div class="input-text character-background">
             <label for="background">Background</label>
             <textarea
               name="background"
-              class="q-response-text"
+              class="character-background__input q-response-text"
               rows="5"
             ></textarea>
           </div>
@@ -121,15 +114,19 @@
             </button>
           </div>
 
-          <div class="input-text">
+          <div class="character-publicResume input-text">
             <label for="publicResume">Profil public</label>
             <textarea
               name="publicResume"
-              class="q-response-text"
+              class="character-publicResume__input q-response-text"
               rows="5"
             ></textarea>
           </div>
         </fieldset>
+
+        <button type="submit" class="button save-button primary">
+          Sauvegarder
+        </button>
       </form>
     </template>
 

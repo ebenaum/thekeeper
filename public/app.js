@@ -517,13 +517,24 @@ function attachSelectListeners(elements, formKey, allowMultiple, callback) {
 }
 
 /**
- *
- * @params {State} state
- * @param {CharacterForm} player
- * @param {Object<string, UniversEntry>} univers
- * @param {Skill[]} skills
+ * @typedef {function(SubmitEvent): any} OnSubmitCallback
  */
-async function personnageOrga(player, characteristicsLevels, univers, skills) {
+
+/**
+ * @param {CharacterForm} player - The player object containing character data.
+ * @param {Array} characteristicsLevels - Array of characteristic level definitions.
+ * @param {Object<string, UniversEntry>} univers - The universe definitions, keyed by identifier.
+ * @param {Skill[]} skills - Array of skill definitions.
+ * @param {OnSubmitCallback} onsubmit - Callback function to handle form submission.
+ * @returns {Promise<void>} Resolves when the form is rendered and event listeners are attached.
+ */
+async function personnageOrga(
+  player,
+  characteristicsLevels,
+  univers,
+  skills,
+  onsubmit,
+) {
   player.orga = player.orga || {
     gifts: [],
     handicaps: [],
@@ -593,6 +604,14 @@ async function personnageOrga(player, characteristicsLevels, univers, skills) {
 
     const characteristics = [];
 
+    ["background", "mentalCrisis", "publicResume"].forEach((inputName) => {
+      const inputElement = /** @type {HTMLInputElement} */ (
+        el.querySelector(`.character-${inputName}__input`)
+      );
+
+      inputElement.value = formResult[inputName];
+    });
+
     giftsElement.innerHTML = "";
     formResult.gifts.forEach((gift) => {
       const liElement = document.createElement("li");
@@ -656,7 +675,22 @@ async function personnageOrga(player, characteristicsLevels, univers, skills) {
   print(orgaClone);
 
   containerElement?.prepend(orgaClone);
-  const node = /** @type {Element} */ (containerElement?.firstElementChild);
+  const node = /** @type {HTMLFormElement} */ (
+    containerElement?.firstElementChild
+  );
+
+  ["background", "mentalCrisis", "publicResume"].forEach((inputName) => {
+    const inputElement = /** @type {HTMLInputElement} */ (
+      node.querySelector(`.character-${inputName}__input`)
+    );
+
+    inputElement.addEventListener("input", (e) => {
+      formResult[inputName] = /** @type{HTMLInputElement}*/ (e.target)?.value;
+
+      // @ts-ignore
+      print(node);
+    });
+  });
 
   [
     "orga__player-gifts",
@@ -722,6 +756,8 @@ async function personnageOrga(player, characteristicsLevels, univers, skills) {
       return false;
     });
   });
+
+  node.onsubmit = onsubmit;
 }
 
 async function personnage() {
@@ -773,6 +809,25 @@ async function personnage() {
       window.location.href = "/personnage.html";
       return;
     }
+  }
+
+  const formElement = document.getElementById("form");
+
+  let submitted = false;
+
+  const onsubmit = () => {
+    if (submitted) {
+      return false;
+    }
+
+    submitted = true;
+    submitForm(characterId, playerId);
+
+    return false;
+  };
+
+  if (formElement) {
+    formElement.onsubmit = onsubmit;
   }
 
   /* TEMPLATES */
@@ -988,7 +1043,13 @@ async function personnage() {
       });
 
   if (state?.data.permission === "orga") {
-    await personnageOrga(formResult, characteristics, universMap, skills);
+    await personnageOrga(
+      formResult,
+      characteristics,
+      universMap,
+      skills,
+      onsubmit,
+    );
   }
 
   let characteristicBudget =
@@ -1812,7 +1873,14 @@ async function personnage() {
       match.querySelector("input") || match.querySelector("textarea");
 
     const forAttribute = label?.getAttribute("for");
-    if (!forAttribute || !input || formResult[forAttribute] === null) {
+    if (
+      !forAttribute ||
+      !input ||
+      formResult[forAttribute] === null ||
+      formResult[forAttribute] === undefined
+    ) {
+      console.warn("no match", label, match, forAttribute);
+
       return;
     }
 
@@ -1859,8 +1927,6 @@ async function personnage() {
       updateSkillList();
     });
   });
-
-  const formElement = document.getElementById("form");
 
   /**
    *
@@ -1952,21 +2018,6 @@ async function personnage() {
     }
 
     window.location.href = "/";
-  }
-
-  let submitted = false;
-
-  if (formElement) {
-    formElement.onsubmit = function () {
-      if (submitted) {
-        return false;
-      }
-
-      submitted = true;
-      submitForm(characterId, playerId);
-
-      return false;
-    };
   }
 }
 
