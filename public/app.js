@@ -2119,6 +2119,7 @@ async function theview() {
 
   [
     "Création",
+    "Terminée ?",
     "Nom/Prénom",
     "Type",
     "Contact",
@@ -2185,7 +2186,14 @@ async function theview() {
       values.push(
         (character?.createdAt || player.personal?.createdAt).toLocaleString(),
       );
-      values.push(playerElement);
+      values.push(
+        character?.orga?.playerGroup === "" ||
+          character?.orga?.playerGroup === null ||
+          character?.orga?.playerGroup === undefined
+          ? "Non"
+          : "Oui",
+      ),
+        values.push(playerElement);
       values.push(player.personal?.inscriptionType?.toUpperCase());
       values.push(player.personal?.contact);
       values.push(player.personal?.peopleToPlayWith);
@@ -2246,7 +2254,7 @@ async function theview() {
     columnControl: [{ extend: "search" }, { extend: "order" }],
     columnDefs: [
       {
-        targets: [2, 8, 9, 10],
+        targets: [3, 9, 10, 11],
         columnControl: ["order", ["searchList"]],
       },
     ],
@@ -2352,8 +2360,18 @@ async function index() {
     Object.keys(state.data.players).forEach((playerId) => {
       const player = state.data.players[playerId];
 
-      // Hide PNJ for orgas
-      if (player.personal?.inscriptionType === "pnj") {
+      // Hide PNJ for orgas.
+      // Hide players with characters already checked by orgas.
+      if (
+        player.personal?.inscriptionType === "pnj" ||
+        !player.characters.find((character) => {
+          if (!state.data.characters[character].orga?.playerGroup) {
+            return true;
+          }
+
+          return false;
+        })
+      ) {
         return;
       }
 
