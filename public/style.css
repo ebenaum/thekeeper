@@ -212,7 +212,8 @@ body.hasHover .q-response-select .selected:hover {
 textarea {
   resize: none;
   box-sizing: border-box;
-  overflow: hidden;
+  cursor: pointer;
+  overflow-y: auto;
   padding: 5px;
 }
 
