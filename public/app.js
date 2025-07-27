@@ -518,12 +518,13 @@ function attachSelectListeners(elements, formKey, allowMultiple, callback) {
 
 /**
  *
+ * @params {State} state
  * @param {CharacterForm} player
  * @param {Object<string, UniversEntry>} univers
  * @param {Skill[]} skills
  */
 async function personnageOrga(player, characteristicsLevels, univers, skills) {
-  const formResult = player.orga || {
+  player.orga = player.orga || {
     gifts: [],
     handicaps: [],
     quests: [],
@@ -532,6 +533,10 @@ async function personnageOrga(player, characteristicsLevels, univers, skills) {
     publicResume: "",
     tags: [],
   };
+
+  const formResult = player.orga;
+
+  console.log(formResult);
 
   const containerElement = document.querySelector(".container");
   if (!containerElement) {
@@ -1906,6 +1911,24 @@ async function personnage() {
         },
       },
     });
+
+    if (state.data.permission === "orga") {
+      events.push({
+        msg: {
+          case: "PlayerCharacterOrgaEdit",
+          value: {
+            characterId: characterId,
+            gifts: formResult.orga?.gifts || [],
+            handicaps: formResult.orga?.handicaps || [],
+            quests: formResult.orga?.quests || [],
+            mentalCrisis: formResult.orga?.mentalCrisis || "",
+            background: formResult.orga?.background || "",
+            publicResume: formResult.orga?.publicResume || "",
+            tags: formResult.orga?.tags || [],
+          },
+        },
+      });
+    }
 
     const payload = create(EventsSchema, {
       events: events,

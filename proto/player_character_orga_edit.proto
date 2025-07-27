@@ -23,7 +23,7 @@ message EventPlayerCharacterOrgaEdit {
   string            publicResume = 2;
   string            background   = 3;
   string            mentalCrisis = 4;
-  repeated Gift     gitfs        = 5;
+  repeated Gift     gifts        = 5;
   repeated Handicap handicaps    = 6;
   repeated Quest    quests       = 7;
   repeated string   tags         = 8;
