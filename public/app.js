@@ -1017,12 +1017,15 @@ async function personnage() {
   const defaultSavoirPcValue = defaultSavoirLevel?.pcValue || 0; // Fallback to 1 if not found
 
   let skillBudget =
-    parseInt(
-      univers
-        .find((entry) => entry.key === "skills-default-points")
-        ?.tags.find((tag) => tag.startsWith("n:"))
-        ?.split(":")[1] || "0",
-    ) -
+    /* allow orga to give whatever skills he wants */
+    (state?.data.permission === "orga"
+      ? 99
+      : parseInt(
+          univers
+            .find((entry) => entry.key === "skills-default-points")
+            ?.tags.find((tag) => tag.startsWith("n:"))
+            ?.split(":")[1] || "0",
+        )) -
     Object.keys(formResult.skills).reduce((acc, cur) => {
       const lvls = skills.find((skill) => skill.key === cur)?.levels;
 
