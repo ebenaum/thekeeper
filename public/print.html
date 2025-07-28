@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ebenaum - Personnage</title>
+    <link href="print.css" rel="stylesheet" />
+    <script type="importmap">
+      {
+        "imports": {
+          "jose": "https://cdnjs.cloudflare.com/ajax/libs/jose/5.9.6/index.js",
+          "@bufbuild/protobuf": "https://cdn.skypack.dev/@bufbuild/protobuf",
+          "@bufbuild/protobuf/": "https://cdn.skypack.dev/@bufbuild/protobuf/"
+        }
+      }
+    </script>
+    <script type="module" src="env.js"></script>
+    <script type="module" src="app.js"></script>
+  </head>
+
+  <body>
+    <page>
+      <h1 class="title"></h1>
+      <h2 class="subtitle">
+        <span class="subtitle__race"></span>,
+        <span class="subtitle__vdv"></span> ; Groupe :
+        <span class="subtitle__group"></span>
+      </h2>
+
+      <div class="trombi"></div>
+
+      <div class="section1">
+        <div class="characteristics">
+          <div class="characteristic corps">
+            <div class="characteristic__level">
+              <span class="characteristic__level__value"></span>
+            </div>
+            <div class="characteristic__label"></div>
+            <div class="characteristic__description d-inline"></div>
+          </div>
+
+          <div class="characteristic savoir">
+            <div class="characteristic__level">
+              <span class="characteristic__level__value"></span>
+            </div>
+            <div class="characteristic__label"></div>
+            <div class="characteristic__description d-inline"></div>
+          </div>
+
+          <div class="characteristic dexterite">
+            <div class="characteristic__level">
+              <span class="characteristic__level__value"></span>
+            </div>
+            <div class="characteristic__label"></div>
+            <div class="characteristic__description d-inline"></div>
+          </div>
+
+          <div class="characteristic influence">
+            <div class="characteristic__level">
+              <span class="characteristic__level__value"></span>
+            </div>
+            <div class="characteristic__label"></div>
+            <div class="characteristic__description d-inline"></div>
+          </div>
+        </div>
+
+        <div class="vll"></div>
+        <div class="vl"></div>
+
+        <div>
+          <div class="mentalCrisis"></div>
+        </div>
+      </div>
+    </page>
+
+    <div class="pagebreak"></div>
+
+    <page>
+      <div class="bg">
+        <h3>Background</h3>
+        <span></span>
+      </div>
+    </page>
+  </body>
+</html>

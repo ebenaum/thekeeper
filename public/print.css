@@ -1,0 +1,127 @@
+@layer base {
+  @font-face {
+    font-family: "IM Fell";
+    src:
+      url("/fonts/IM_FELL_English_Roman.woff2") format("woff2"),
+      /* Super Modern Browsers */ url("/fonts/IM_FELL_English_Roman.woff")
+        format("woff"),
+      /* Modern Browsers */ url("/fonts/IMFellEnglish-Regular.ttf")
+        format("truetype"); /* Safari, Android, iOS */
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: "IM Fell";
+    src:
+      url("/fonts/IM_FELL_English_Italic.woff2") format("woff2"),
+      /* Super Modern Browsers */ url("/fonts/IM_FELL_English_Italic.woff")
+        format("woff"),
+      /* Modern Browsers */ url("/fonts/IMFellEnglish-Italic.ttf")
+        format("truetype"); /* Safari, Android, iOS */
+    font-weight: normal;
+    font-style: italic;
+  }
+}
+
+@layer base {
+  html * {
+    font-family: "IM Fell", system-ui, sans-serif;
+  }
+}
+
+@media not print {
+  body {
+    background: #e2e2e2;
+  }
+
+  page {
+    background: #fefefe;
+    width: 21cm;
+    height: 29.7cm;
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 0.5cm;
+    border: 1.25cm solid #fefefe;
+    font-family: "Mallory", Arial, Verdana, Sans-serif;
+  }
+}
+
+@media print {
+  /* Dimension et marges de page */
+  @page {
+    size: A4 portrait;
+    margin: 2cm 1.5cm;
+  }
+
+  .pagebreak {
+    page-break-before: always;
+  }
+}
+
+.bg {
+    text-align: justify;
+}
+
+.trombi {
+  text-align: justify;
+}
+
+.characteristics {
+  width: 400px;
+}
+
+.characteristic {
+  display: grid;
+  grid-template-columns: 90px 1fr 8fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.characteristic__label {
+  font-size: 1.2rem;
+}
+
+.characteristic__level {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: black;
+}
+
+.characteristic__level__value {
+  border: solid 8px black;
+  background-color: white;
+  width: fit-content;
+  block-size: fit-content;
+  text-align: center;
+  width: 50px;
+  height: 50px;
+  font-size: 1.5rem;
+  border-radius: 50px;
+}
+
+.section1 {
+  display: flex;
+  flex-direction: row;
+  height: 264px;
+}
+
+.section1 .vl {
+  border-left: 2px solid black;
+  height: 100%;
+}
+
+.section1 .vll {
+  border-left: 3px solid black;
+  height: 100%;
+  margin-right: 2px;
+}
+
+.d-inline {
+  display: inline-block;
+}
+
+.d-block {
+  display: block;
+}

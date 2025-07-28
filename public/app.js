@@ -815,6 +815,38 @@ async function personnageOrga(
   node.onsubmit = onsubmit;
 }
 
+/**
+ *
+ * @param {UniversEntry[]} univers
+ */
+function extractCharacteristics(univers) {
+  return univers
+    .filter((entry) => entry.tags.includes("characteristic"))
+    .map((characteristic) => {
+      const levels = univers
+        .filter((entry) =>
+          entry.tags.includes("characteristic:" + characteristic.key),
+        )
+        .map((level) => {
+          const rank = level.tags
+            .find((tag) => tag.startsWith("level:"))
+            ?.split(":")[1];
+
+          if (!rank) {
+            throw new Error("missing rank on " + level.toString());
+          }
+
+          // Extract pc tag if it exists
+          const pcTag = level.tags.find((tag) => tag.startsWith("pc:"));
+          const pcValue = pcTag ? parseInt(pcTag.split(":")[1]) : null;
+
+          return { rank: parseInt(rank), pcValue, ...level };
+        });
+
+      return { levels, ...characteristic };
+    });
+}
+
 async function personnage() {
   let state = await getState();
 
@@ -968,31 +1000,7 @@ async function personnage() {
     universMap[entry.key] = entry;
   });
 
-  const characteristics = univers
-    .filter((entry) => entry.tags.includes("characteristic"))
-    .map((characteristic) => {
-      const levels = univers
-        .filter((entry) =>
-          entry.tags.includes("characteristic:" + characteristic.key),
-        )
-        .map((level) => {
-          const rank = level.tags
-            .find((tag) => tag.startsWith("level:"))
-            ?.split(":")[1];
-
-          if (!rank) {
-            throw new Error("missing rank on " + level.toString());
-          }
-
-          // Extract pc tag if it exists
-          const pcTag = level.tags.find((tag) => tag.startsWith("pc:"));
-          const pcValue = pcTag ? parseInt(pcTag.split(":")[1]) : null;
-
-          return { rank: parseInt(rank), pcValue, ...level };
-        });
-
-      return { levels, ...characteristic };
-    });
+  const characteristics = extractCharacteristics(univers);
 
   /**
    * Calculates the inventory budget based on the dexterity characteristic level.
@@ -2734,6 +2742,89 @@ async function informations() {
   }
 }
 
+async function print() {
+  let state = await getState();
+
+  const url = new URL(window.location.href);
+  const characterId = url.searchParams.get("characterId");
+
+  if (!state || !characterId || !state.data.characters[characterId]) {
+    window.location.href = "/";
+    return;
+  }
+
+  const universResponse = await fetch(globalThis.env.univers);
+  const /** @type {UniversEntry[]} */ univers = await universResponse.json();
+  const /** @type{Object<string, UniversEntry>} */ universMap = {};
+  univers.forEach((entry) => {
+    universMap[entry.key] = entry;
+  });
+
+  const characteristics = extractCharacteristics(univers);
+
+  const character = state.data.characters[characterId];
+
+  const titleElement = /** @type {HTMLElement} */ (
+    document.querySelector(".title")
+  );
+  const trombiElement = /** @type {HTMLElement} */ (
+    document.querySelector(".trombi")
+  );
+  const subtitleRaceElement = /** @type {HTMLElement} */ (
+    document.querySelector(".subtitle__race")
+  );
+  const subtitleVdvElement = /** @type {HTMLElement} */ (
+    document.querySelector(".subtitle__vdv")
+  );
+  const subtitleGroupElement = /** @type {HTMLElement} */ (
+    document.querySelector(".subtitle__group")
+  );
+  const mentalCrisisElement = /** @type {HTMLElement} */ (
+    document.querySelector(".mentalCrisis")
+  );
+
+  const bgElement = /** @type {HTMLElement} */ (
+    document.querySelector(".bg span")
+  );
+
+  subtitleRaceElement.textContent = universMap[character.race].label;
+  subtitleVdvElement.textContent = universMap[character.vdv].label;
+  subtitleGroupElement.textContent = character.orga?.playerGroup || "";
+  titleElement.textContent = character.name;
+  trombiElement.textContent = character.orga?.publicResume || "";
+  mentalCrisisElement.textContent =
+    `Crise Mentale : ${character.orga?.mentalCrisis}` ||
+    "Crise Mentale : Aucune";
+  bgElement.textContent = character.orga?.background || "";
+
+  ["corps", "savoir", "dexterite", "influence"].forEach((characteristic) => {
+    const levelElement = /** @type {HTMLElement} */ (
+      document.querySelector(`.${characteristic} .characteristic__level__value`)
+    );
+
+    const labelElement = /** @type {HTMLElement} */ (
+      document.querySelector(`.${characteristic} .characteristic__label`)
+    );
+
+    const descriptionElement = /** @type {HTMLElement} */ (
+      document.querySelector(`.${characteristic} .characteristic__description`)
+    );
+
+    levelElement.textContent = character.characteristics[characteristic];
+
+    labelElement.textContent =
+      characteristics.find((entry) => entry.key === characteristic)?.label ||
+      "";
+
+    descriptionElement.textContent =
+      characteristics
+        .find((entry) => entry.key === characteristic)
+        ?.levels.find(
+          (lvl) => lvl.rank === character.characteristics[characteristic],
+        )?.description || "";
+  });
+}
+
 function watchForHover() {
   // lastTouchTime is used for ignoring emulated mousemove events
   // that are fired after touchstart events. Since they're indistinguishable from real events, we use the fact that they're
@@ -2789,6 +2880,14 @@ switch (window.location.pathname) {
     console.log("route: theview");
 
     theview();
+
+    break;
+
+  case "/print.html":
+  case "/print":
+    console.log("route: print");
+
+    print();
 
     break;
   default:
