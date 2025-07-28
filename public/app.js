@@ -2795,7 +2795,10 @@ async function print() {
   mentalCrisisElement.textContent =
     `Crise Mentale : ${character.orga?.mentalCrisis}` ||
     "Crise Mentale : Aucune";
-  bgElement.textContent = character.orga?.background || "";
+  bgElement.textContent = (character.orga?.background || "").replaceAll(
+    "\n",
+    "\r\n",
+  );
 
   ["corps", "savoir", "dexterite", "influence"].forEach((characteristic) => {
     const levelElement = /** @type {HTMLElement} */ (
