@@ -2445,12 +2445,29 @@ async function index() {
           `/personnage.html?characterId=${characterId}`,
         );
 
+        const characterFinalLinkElement = /** @type {HTMLElement} */ (
+          characterClone.querySelector(
+            ".index__player__characters__character__final__link",
+          )
+        );
+        characterFinalLinkElement.setAttribute(
+          "href",
+          `/print.html?characterId=${characterId}`,
+        );
+
         const characterReviewedBadgeElement = /** @type {HTMLElement} */ (
           characterClone.querySelector(".character-reviewed-badge")
         );
 
         if (character.orga?.playerGroup) {
           characterReviewedBadgeElement.classList.remove("d-none");
+          characterFinalLinkElement.classList.remove("d-none");
+        } else {
+          characterLinkElement.classList.remove("d-none");
+        }
+
+        if (state.data.permission === "orga") {
+          characterLinkElement.classList.remove("d-none");
         }
 
         const characterName = character.name || "Sans nom";
