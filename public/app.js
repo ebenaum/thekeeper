@@ -2107,6 +2107,70 @@ async function personnage() {
   }
 }
 
+async function theview2() {
+  const universResponse = await fetch(globalThis.env.univers);
+  const /** @type {UniversEntry[]} */ univers = await universResponse.json();
+
+  const universMap = {};
+  univers.forEach((entry) => {
+    universMap[entry.key] = entry;
+  });
+
+  const skills = extractSkills(univers);
+
+  const state = await getState();
+  if (!state) {
+    window.location.href = "/";
+
+    return;
+  }
+
+  const inventoryElement = /** @type{HTMLElement} */ (
+    document.querySelector(".inventory-global")
+  );
+  const skillsElement = /** @type{HTMLElement} */ (
+    document.querySelector(".skills-global")
+  );
+
+  const agg = {
+    inventory: {},
+    skills: {},
+  };
+
+  Object.values(state.data.characters).forEach((character) => {
+    Object.keys(character.inventory).forEach((key) => {
+      agg.inventory[key] = (agg.inventory[key] || 0) + 1;
+    });
+
+    Object.keys(character.skills).forEach((key) => {
+      agg.skills[key + ":" + character.skills[key]] =
+        (agg.skills[key + ":" + character.skills[key]] || 0) + 1;
+    });
+  });
+
+  Object.keys(agg.inventory).forEach((key) => {
+    const count = agg.inventory[key];
+
+    const liElement = document.createElement("li");
+
+    liElement.textContent = `${count}x ${universMap[key].label}`;
+
+    inventoryElement.appendChild(liElement);
+  });
+
+  Object.keys(agg.skills).forEach((key) => {
+    const count = agg.skills[key];
+
+    const parts = key.split(":");
+
+    const liElement = document.createElement("li");
+
+    liElement.textContent = `${count}x ${skills.find((skill) => skill.key === parts[0])?.levels[parseInt(parts[1]) - 1].label}`;
+
+    skillsElement.appendChild(liElement);
+  });
+}
+
 async function theview() {
   const universResponse = await fetch(globalThis.env.univers);
   const /** @type {UniversEntry[]} */ univers = await universResponse.json();
@@ -3088,6 +3152,13 @@ switch (window.location.pathname) {
 
     break;
 
+  case "/theview2.html":
+  case "/theview2":
+    console.log("route: theview2");
+
+    theview2();
+
+    break;
   case "/print.html":
   case "/print":
     console.log("route: print");

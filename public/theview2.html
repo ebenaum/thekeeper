@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ebenaum</title>
+    <link href="style.css" rel="stylesheet" />
+
+    <script type="importmap">
+      {
+        "imports": {
+          "jose": "https://cdnjs.cloudflare.com/ajax/libs/jose/5.9.6/index.js",
+          "@bufbuild/protobuf": "https://cdn.skypack.dev/@bufbuild/protobuf",
+          "@bufbuild/protobuf/": "https://cdn.skypack.dev/@bufbuild/protobuf/"
+        }
+      }
+    </script>
+    <script type="module" src="env.js"></script>
+    <script type="module" src="app.js"></script>
+  </head>
+
+  <body>
+    <div>
+      <h1>Inventaire global</h1>
+      <ul class="inventory-global"></ul>
+      <h1>Compétence global</h1>
+      <ul class="skills-global"></ul>
+    </div>
+  </body>
+</html>
