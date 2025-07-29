@@ -848,6 +848,82 @@ function extractCharacteristics(univers) {
 }
 
 /**
+ * @param {UniversEntry[]} univers
+ *
+ * @returns {Skill[]}
+ */
+function extractSkills(univers) {
+  const races = univers.filter((entry) => entry.tags.includes("race"));
+  const vdvs = univers.filter((entry) => entry.tags.includes("vdv"));
+
+  return univers
+    .filter((entry) => entry.tags.includes("skill"))
+    .map((skill) => {
+      const levels = univers
+        .filter((entry) => entry.tags.includes("skill:" + skill.key))
+        .map((level) => {
+          const cost = level.tags
+            .find((tag) => tag.startsWith("cost:"))
+            ?.split(":")[1];
+          const rank = level.tags
+            .find((tag) => tag.startsWith("level:"))
+            ?.split(":")[1];
+
+          if (!cost || !rank) {
+            throw new Error("missing cost or rank on " + level.toString());
+          }
+
+          return { cost: parseInt(cost), rank: parseInt(rank), ...level };
+        });
+
+      const requirementTag = skill.tags.find((/** @type {string} */ tag) =>
+        tag.startsWith("require:"),
+      );
+
+      let /** @type {string | null} */ requirementType = null;
+      let /** @type {UniversEntry | null} */ requirementEntry = null;
+
+      if (requirementTag) {
+        const requirementParts = requirementTag.split(":");
+        requirementType = requirementParts[1];
+
+        switch (requirementType) {
+          case "vdv":
+            requirementEntry =
+              vdvs.find((vdv) => vdv.key === requirementParts[2]) || null;
+            break;
+          case "race":
+            requirementEntry =
+              races.find((race) => race.key === requirementParts[2]) || null;
+            break;
+          default:
+            throw new Error("unknown requirement " + requirementParts);
+        }
+      }
+
+      return {
+        levels,
+        rankMax: levels.length,
+        requirementType: requirementType,
+        requirementEntry: requirementEntry,
+        availableToSorcerer:
+          skill.tags.findIndex((tag) => tag === "available-to-sorcerer") !== -1,
+        ...skill,
+      };
+    })
+    .sort((a, b) => {
+      if (a.key < b.key) {
+        return -1;
+      }
+
+      if (b.key < a.key) {
+        return 1;
+      }
+      return 0;
+    });
+}
+
+/**
  * Calculates the inventory budget based on the dexterity characteristic level.
  * @param {number} dexterite - The dexterity level (from -2 to 4).
  * @returns {number} The corresponding inventory budget.
@@ -1039,72 +1115,7 @@ async function personnage() {
 
   characterNameInputElement.value = formResult.name;
 
-  const /** @type {Skill[]} */ skills = univers
-      .filter((entry) => entry.tags.includes("skill"))
-      .map((skill) => {
-        const levels = univers
-          .filter((entry) => entry.tags.includes("skill:" + skill.key))
-          .map((level) => {
-            const cost = level.tags
-              .find((tag) => tag.startsWith("cost:"))
-              ?.split(":")[1];
-            const rank = level.tags
-              .find((tag) => tag.startsWith("level:"))
-              ?.split(":")[1];
-
-            if (!cost || !rank) {
-              throw new Error("missing cost or rank on " + level.toString());
-            }
-
-            return { cost: parseInt(cost), rank: parseInt(rank), ...level };
-          });
-
-        const requirementTag = skill.tags.find((/** @type {string} */ tag) =>
-          tag.startsWith("require:"),
-        );
-
-        let /** @type {string | null} */ requirementType = null;
-        let /** @type {UniversEntry | null} */ requirementEntry = null;
-
-        if (requirementTag) {
-          const requirementParts = requirementTag.split(":");
-          requirementType = requirementParts[1];
-
-          switch (requirementType) {
-            case "vdv":
-              requirementEntry =
-                vdvs.find((vdv) => vdv.key === requirementParts[2]) || null;
-              break;
-            case "race":
-              requirementEntry =
-                races.find((race) => race.key === requirementParts[2]) || null;
-              break;
-            default:
-              throw new Error("unknown requirement " + requirementParts);
-          }
-        }
-
-        return {
-          levels,
-          rankMax: levels.length,
-          requirementType: requirementType,
-          requirementEntry: requirementEntry,
-          availableToSorcerer:
-            skill.tags.findIndex((tag) => tag === "available-to-sorcerer") !==
-            -1,
-          ...skill,
-        };
-      })
-      .sort((a, b) => {
-        if (a.key < b.key) {
-          return -1;
-        }
-
-        if (b.key < a.key) {
-          return 1;
-        }
-        return 0;
-      });
+  const skills = extractSkills(univers);
 
   let characteristicBudget =
     /* allow orga to give whatever characteristics he wants */
@@ -2779,6 +2790,7 @@ async function print() {
     universMap[entry.key] = entry;
   });
   const inventory = univers.filter((entry) => entry.tags.includes("inventory"));
+  const skills = extractSkills(univers);
 
   const characteristics = extractCharacteristics(univers);
 
@@ -2801,6 +2813,10 @@ async function print() {
   );
   const mentalCrisisElement = /** @type {HTMLElement} */ (
     document.querySelector(".mentalCrisis")
+  );
+
+  const skillsElement = /** @type {HTMLElement} */ (
+    document.querySelector(".skills")
   );
 
   const handicapsElement = /** @type {HTMLElement} */ (
@@ -2913,6 +2929,7 @@ async function print() {
     questsElement.appendChild(li);
   });
 
+  /****** CHARACTERISTICS ******/
   ["corps", "savoir", "dexterite", "influence"].forEach((characteristic) => {
     const levelElement = /** @type {HTMLElement} */ (
       document.querySelector(`.${characteristic} .characteristic__level__value`)
@@ -2950,6 +2967,42 @@ async function print() {
         descriptionElement.textContent += `, dont ${gemSpent} gemme dépensée en inventaire`;
       }
     }
+  });
+
+  /****** SKILLS ******/
+  Object.keys(character.skills).forEach((key) => {
+    const skill = skills.find((skill) => skill.key === key);
+    const skillElement = document.createElement("div");
+    const skillTitleElement = document.createElement("div");
+    const skillDescriptionElement = document.createElement("div");
+
+    skillElement.classList.add("skill");
+    skillTitleElement.classList.add("skill__title");
+
+    skillTitleElement.textContent = `${skill?.label}`;
+    skillDescriptionElement.textContent = `${skill?.description}`;
+
+    skillElement.appendChild(skillTitleElement);
+    skillElement.appendChild(skillDescriptionElement);
+
+    skillsElement.appendChild(skillElement);
+  });
+
+  character.orga?.gifts.forEach((gift) => {
+    const skillElement = document.createElement("div");
+    const skillTitleElement = document.createElement("div");
+    const skillDescriptionElement = document.createElement("div");
+
+    skillElement.classList.add("skill");
+    skillTitleElement.classList.add("skill__title");
+
+    skillTitleElement.textContent = `${gift?.title}`;
+    skillDescriptionElement.textContent = `${gift?.description}`;
+
+    skillElement.appendChild(skillTitleElement);
+    skillElement.appendChild(skillDescriptionElement);
+
+    skillsElement.appendChild(skillElement);
   });
 
   document.querySelector("body")?.classList.remove("d-none");

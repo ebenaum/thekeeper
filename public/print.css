@@ -81,6 +81,8 @@ input::-webkit-inner-spin-button {
 
 .trombi {
   text-align: justify;
+  font-style: italic;
+  font-size: 1.1rem;
 }
 
 .characteristic {
@@ -187,6 +189,40 @@ input::-webkit-inner-spin-button {
   bottom: 2px;
   border: 2px solid #000000;
   z-index: 1;
+}
+
+.skills {
+  display: flex;
+  align-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  flex-direction: row;
+  gap: 5px;
+  font-size: 0.9rem;
+}
+
+.skill {
+  position: relative;
+  border: solid 2px black;
+  padding: 10px 10px 10px 10px;
+  text-align: left;
+  break-inside: avoid;
+}
+
+.skill:before {
+  content: " ";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border: 1px solid #000000;
+  z-index: 1;
+}
+
+.skill__title {
+    font-weight: bold;
 }
 
 .d-inline {
