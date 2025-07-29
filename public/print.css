@@ -60,6 +60,10 @@ input::-webkit-inner-spin-button {
     border: 1.25cm solid #fefefe;
     font-family: "IM Fell", system-ui, sans-serif;
   }
+
+  .skill {
+    max-width: 6.1cm;
+  }
 }
 
 @media print {
@@ -71,6 +75,10 @@ input::-webkit-inner-spin-button {
 
   .pagebreak {
     page-break-before: always;
+  }
+
+  .skill {
+    max-width: 5.1cm;
   }
 }
 
@@ -207,7 +215,6 @@ input::-webkit-inner-spin-button {
   padding: 10px 10px 10px 10px;
   text-align: left;
   break-inside: avoid;
-  max-width: 6.2cm;
   word-break: break-word;
 }
 
