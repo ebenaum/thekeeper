@@ -2183,8 +2183,17 @@ async function theview() {
         characterLinkElement.classList.add("a-underline");
         characterLinkElement.textContent = "(Fiche)";
 
+        const characterFinalLinkElement = document.createElement("a");
+        characterFinalLinkElement.href = `/print.html?characterId=${characterId}`;
+        characterFinalLinkElement.target = "_blank";
+        characterFinalLinkElement.classList.add("a-underline");
+        characterFinalLinkElement.textContent = "(Print)";
+
         characterElement.appendChild(characterNameElement);
         characterElement.appendChild(characterLinkElement);
+        if (character.orga?.playerGroup) {
+          characterElement.appendChild(characterFinalLinkElement);
+        }
       } else {
         characterElement = "Pas de personnage";
       }
