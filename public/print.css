@@ -70,7 +70,7 @@ input::-webkit-inner-spin-button {
   /* Dimension et marges de page */
   @page {
     size: A4 portrait;
-    margin: 2cm 1.5cm;
+    margin: 1.25cm 1.25cm;
   }
 
   .pagebreak {
@@ -78,7 +78,7 @@ input::-webkit-inner-spin-button {
   }
 
   .skill {
-    max-width: 5.1cm;
+    max-width: 6.1cm;
   }
 }
 
