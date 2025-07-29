@@ -2809,7 +2809,7 @@ async function print() {
   subtitleRaceElement.textContent =
     universMap[character.race]?.label || "Sans Race";
   subtitleVdvElement.textContent =
-    universMap[character.vdv].label || "Sans Occupation";
+    universMap[character.vdv]?.label || "Sans Occupation";
   subtitleGroupElement.textContent = character.orga?.playerGroup || "";
   titleElement.textContent = character.name;
   trombiElement.textContent = character.orga?.publicResume || "";
