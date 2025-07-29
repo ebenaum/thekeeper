@@ -70,7 +70,7 @@
 
 .characteristic {
   display: grid;
-  grid-template-columns: 70px 100px 160px;
+  grid-template-columns: 70px 80px 160px;
   gap: 5px;
   align-items: center;
 }
@@ -126,6 +126,16 @@
   height: 100%;
 }
 
+.handicaps ul,
+.inventory ul {
+  padding: 0;
+}
+
+.handicaps li,
+.inventory li {
+  list-style: none;
+}
+
 .d-inline {
   display: inline-block;
 }
@@ -136,4 +146,25 @@
 
 .d-none {
   display: none;
+}
+
+.spacer-xs {
+  height: 10px;
+  width: 100%;
+}
+
+.spacer-s {
+  height: 15px;
+  width: 100%;
+}
+
+.spacer-m {
+  height: 20px;
+  width: 100%;
+}
+
+.spacer-xl {
+  display: block;
+  height: 40px;
+  width: 100%;
 }

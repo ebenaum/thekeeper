@@ -2802,6 +2802,14 @@ async function print() {
     document.querySelector(".mentalCrisis")
   );
 
+  const handicapsElement = /** @type {HTMLElement} */ (
+    document.querySelector(".handicaps ul")
+  );
+
+  const inventoryElement = /** @type {HTMLElement} */ (
+    document.querySelector(".inventory ul")
+  );
+
   const bgElement = /** @type {HTMLElement} */ (
     document.querySelector(".bg span")
   );
@@ -2820,6 +2828,26 @@ async function print() {
     "\n",
     "\r\n",
   );
+
+  character.orga?.handicaps.forEach((handicap) => {
+    const li = document.createElement("li");
+
+    li.textContent = `${handicap.title}: ${handicap.description}`;
+
+    handicapsElement.appendChild(li);
+  });
+
+  Object.keys(character.inventory).forEach((key) => {
+    const count = character.inventory[key];
+    const label = universMap[key].label;
+    const description = universMap[key].description;
+
+    const li = document.createElement("li");
+
+    li.textContent = `${count}x ${label}: ${description}`;
+
+    inventoryElement.appendChild(li);
+  });
 
   ["corps", "savoir", "dexterite", "influence"].forEach((characteristic) => {
     const levelElement = /** @type {HTMLElement} */ (
