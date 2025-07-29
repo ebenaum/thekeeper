@@ -68,10 +68,6 @@
   text-align: justify;
 }
 
-.characteristics {
-  width: 400px;
-}
-
 .characteristic {
   display: grid;
   grid-template-columns: 90px 1fr 8fr;
@@ -100,11 +96,23 @@
   height: 50px;
   font-size: 1.5rem;
   border-radius: 50px;
+
+  line-height: 50px;
+  text-align: center;
+}
+
+.characteristic__description {
+  font-size: 0.8rem;
+}
+
+.section1 div {
+  grid-row: 1;
 }
 
 .section1 {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 400px auto;
+  grid-column-gap: 10px;
   height: 264px;
 }
 
@@ -116,7 +124,6 @@
 .section1 .vll {
   border-left: 3px solid black;
   height: 100%;
-  margin-right: 2px;
 }
 
 .d-inline {
