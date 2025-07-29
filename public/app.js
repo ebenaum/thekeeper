@@ -2971,6 +2971,7 @@ async function print() {
 
   /****** SKILLS ******/
   Object.keys(character.skills).forEach((key) => {
+    const skillLevel = character.skills[key];
     const skill = skills.find((skill) => skill.key === key);
     const skillElement = document.createElement("div");
     const skillTitleElement = document.createElement("div");
@@ -2979,8 +2980,8 @@ async function print() {
     skillElement.classList.add("skill");
     skillTitleElement.classList.add("skill__title");
 
-    skillTitleElement.textContent = `${skill?.label}`;
-    skillDescriptionElement.textContent = `${skill?.description}`;
+    skillTitleElement.textContent = `${skill?.levels[skillLevel - 1].label}`;
+    skillDescriptionElement.textContent = `${skill?.levels[skillLevel - 1].description}`;
 
     skillElement.appendChild(skillTitleElement);
     skillElement.appendChild(skillDescriptionElement);
