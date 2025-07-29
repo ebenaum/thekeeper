@@ -2840,6 +2840,10 @@ async function print() {
     document.querySelector(".bg span")
   );
 
+  const bgGroupElement = /** @type {HTMLElement} */ (
+    document.querySelector(".bggroup span")
+  );
+
   const questsElement = /** @type {HTMLElement} */ (
     document.querySelector(".quests ul")
   );
@@ -2858,6 +2862,14 @@ async function print() {
     "\n",
     "\r\n",
   );
+
+  if (universMap["2025:" + character.orga?.playerGroup]) {
+    bgGroupElement.textContent = (
+      universMap["2025:" + character.orga?.playerGroup].description || ""
+    ).replaceAll("\n", "\r\n");
+
+    bgGroupElement.parentElement?.classList.remove("d-none");
+  }
 
   const gemSpent = Object.keys(character.inventory).reduce((acc, cur) => {
     const cost = parseInt(

@@ -87,6 +87,11 @@ input::-webkit-inner-spin-button {
   white-space: pre-line;
 }
 
+.bggroup {
+  text-align: justify;
+  white-space: pre-line;
+}
+
 .trombi {
   text-align: justify;
   font-style: italic;
