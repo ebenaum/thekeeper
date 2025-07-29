@@ -207,7 +207,7 @@ input::-webkit-inner-spin-button {
   padding: 10px 10px 10px 10px;
   text-align: left;
   break-inside: avoid;
-  max-width: 7cm;
+  max-width: 6.2cm;
   word-break: break-word;
 }
 
