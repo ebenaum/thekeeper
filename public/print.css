@@ -70,8 +70,8 @@
 
 .characteristic {
   display: grid;
-  grid-template-columns: 90px 1fr 8fr;
-  gap: 10px;
+  grid-template-columns: 70px 100px 160px;
+  gap: 5px;
   align-items: center;
 }
 
@@ -111,7 +111,7 @@
 
 .section1 {
   display: grid;
-  grid-template-columns: 400px auto;
+  grid-template-columns: 350px auto;
   grid-column-gap: 10px;
   height: 264px;
 }
