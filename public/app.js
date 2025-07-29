@@ -2862,7 +2862,7 @@ async function print() {
   });
 
   /****** INVENTORY ******/
-  if ((Object.keys(character.inventory).length || 0) > 0 ||gemLeft > 0) {
+  if ((Object.keys(character.inventory).length || 0) > 0 || gemLeft > 0) {
     inventoryElement.parentElement?.classList.remove("d-none");
   }
 
@@ -2941,7 +2941,7 @@ async function print() {
 
     if (
       characteristic === "dexterite" &&
-      character.characteristics[characteristic] >= 2 &&
+      character.characteristics[characteristic] >= 0 &&
       gemSpent > 0
     ) {
       if (gemSpent > 1) {
