@@ -2153,7 +2153,7 @@ async function theview2() {
 
     const liElement = document.createElement("li");
 
-    liElement.textContent = `${count}x ${universMap[key].label}: ${universMap[key].description}}`;
+    liElement.textContent = `${count}x ${universMap[key].label}: ${universMap[key].description}`;
 
     inventoryElement.appendChild(liElement);
   });
