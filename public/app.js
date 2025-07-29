@@ -2814,6 +2814,10 @@ async function print() {
     document.querySelector(".bg span")
   );
 
+  const questsElement = /** @type {HTMLElement} */ (
+    document.querySelector(".quests ul")
+  );
+
   subtitleRaceElement.textContent =
     universMap[character.race]?.label || "Sans Race";
   subtitleVdvElement.textContent =
@@ -2829,6 +2833,7 @@ async function print() {
     "\r\n",
   );
 
+  /****** HANDICAPS ******/
   if ((character.orga?.handicaps.length || 0) > 0) {
     handicapsElement.parentElement?.classList.remove("d-none");
   }
@@ -2841,6 +2846,11 @@ async function print() {
     handicapsElement.appendChild(li);
   });
 
+  /****** INVENTORY ******/
+  if ((Object.keys(character.inventory).length || 0) > 0) {
+    inventoryElement.parentElement?.classList.remove("d-none");
+  }
+
   Object.keys(character.inventory).forEach((key) => {
     const count = character.inventory[key];
     const label = universMap[key].label;
@@ -2851,6 +2861,30 @@ async function print() {
     li.textContent = `${count}x ${label}: ${description}`;
 
     inventoryElement.appendChild(li);
+  });
+
+  /****** QUESTS ******/
+  if ((character.orga?.quests.length || 0) > 0) {
+    questsElement.parentElement?.classList.remove("d-none");
+  }
+
+  character.orga?.quests.forEach((quest) => {
+    const li = document.createElement("li");
+    const title = document.createElement("h3");
+    const description = document.createElement("div");
+
+    li.classList.add("quest");
+
+    title.classList.add("quests__title");
+    description.classList.add("description__title");
+
+    title.textContent = quest.title;
+    description.textContent = quest.description;
+
+    li.appendChild(title);
+    li.appendChild(description);
+
+    questsElement.appendChild(li);
   });
 
   ["corps", "savoir", "dexterite", "influence"].forEach((characteristic) => {

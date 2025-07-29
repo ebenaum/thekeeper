@@ -30,6 +30,21 @@
   }
 }
 
+*,
+*:before,
+*:after {
+  -webkit-box-sizing: inherit;
+  -moz-box-sizing: inherit;
+  box-sizing: inherit;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 @media not print {
   body {
     background: #e2e2e2;
@@ -43,7 +58,7 @@
     margin: 0 auto;
     margin-bottom: 0.5cm;
     border: 1.25cm solid #fefefe;
-    font-family: "Mallory", Arial, Verdana, Sans-serif;
+    font-family: "IM Fell", system-ui, sans-serif;
   }
 }
 
@@ -143,6 +158,35 @@
 .inventory h4 {
   margin-top: 10px;
   margin-bottom: 0;
+}
+
+.quests ul {
+  padding: 0;
+}
+
+.quest {
+  list-style: none;
+  position: relative;
+  border: solid 3px black;
+  padding: 10px 10px 10px 10px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.quest h3 {
+  margin-top: 0;
+}
+
+.quest:before {
+  content: " ";
+  position: absolute;
+  z-index: -1;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border: 2px solid #000000;
+  z-index: 1;
 }
 
 .d-inline {
