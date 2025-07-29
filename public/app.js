@@ -2806,8 +2806,10 @@ async function print() {
     document.querySelector(".bg span")
   );
 
-  subtitleRaceElement.textContent = universMap[character.race].label;
-  subtitleVdvElement.textContent = universMap[character.vdv].label;
+  subtitleRaceElement.textContent =
+    universMap[character.race]?.label || "Sans Race";
+  subtitleVdvElement.textContent =
+    universMap[character.vdv].label || "Sans Occupation";
   subtitleGroupElement.textContent = character.orga?.playerGroup || "";
   titleElement.textContent = character.name;
   trombiElement.textContent = character.orga?.publicResume || "";
@@ -2845,6 +2847,8 @@ async function print() {
           (lvl) => lvl.rank === character.characteristics[characteristic],
         )?.description || "";
   });
+
+  document.querySelector("body")?.classList.remove("d-none");
 }
 
 function watchForHover() {
