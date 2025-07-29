@@ -2829,6 +2829,10 @@ async function print() {
     "\r\n",
   );
 
+  if ((character.orga?.handicaps.length || 0) > 0) {
+    handicapsElement.parentElement?.classList.remove("d-none");
+  }
+
   character.orga?.handicaps.forEach((handicap) => {
     const li = document.createElement("li");
 

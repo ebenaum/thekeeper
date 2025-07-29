@@ -126,14 +126,23 @@
   height: 100%;
 }
 
-.handicaps ul,
-.inventory ul {
+.handicaps ul {
   padding: 0;
+}
+
+.inventory ul {
+  padding: 10px;
+  margin-top: 0;
 }
 
 .handicaps li,
 .inventory li {
   list-style: none;
+}
+
+.inventory h4 {
+  margin-top: 10px;
+  margin-bottom: 0;
 }
 
 .d-inline {
