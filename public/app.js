@@ -2136,6 +2136,7 @@ async function theview() {
     "Personnage",
     "Groupe",
     "BG",
+    "Trombi",
     "Monde",
     "Origine",
     "Approche",
@@ -2201,8 +2202,8 @@ async function theview() {
           character?.orga?.playerGroup === undefined
           ? "Non"
           : "Oui",
-      ),
-        values.push(playerElement);
+      );
+      values.push(playerElement);
       values.push(player.personal?.inscriptionType?.toUpperCase());
       values.push(player.personal?.contact);
       values.push(player.personal?.peopleToPlayWith);
@@ -2210,6 +2211,7 @@ async function theview() {
       values.push(characterElement);
       values.push(character?.orga?.playerGroup);
       values.push(character?.orga?.background);
+      values.push(character?.orga?.publicResume);
       values.push(universMap[character?.group]?.label);
       values.push(universMap[character?.worldOrigin]?.label);
       values.push(universMap[character?.worldApproach]?.label);
@@ -2264,7 +2266,7 @@ async function theview() {
     columnControl: [{ extend: "search" }, { extend: "order" }],
     columnDefs: [
       {
-        targets: [1, 3, 8, 10, 11, 12],
+        targets: [1, 3, 8, 11, 12, 13],
         columnControl: ["order", ["searchList"]],
       },
     ],
