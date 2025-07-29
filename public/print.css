@@ -126,7 +126,7 @@ input::-webkit-inner-spin-button {
 
 .section1 {
   display: grid;
-  grid-template-columns: 350px auto;
+  grid-template-columns: 315px auto;
   grid-column-gap: 10px;
   height: 264px;
 }
