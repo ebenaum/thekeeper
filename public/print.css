@@ -206,7 +206,6 @@ input::-webkit-inner-spin-button {
   justify-content: flex-start;
   flex-direction: row;
   gap: 5px;
-  font-size: 0.9rem;
 }
 
 .skill {
@@ -230,6 +229,7 @@ input::-webkit-inner-spin-button {
 }
 
 .skill__title {
+  font-size: 1.1rem;
   font-weight: bold;
 }
 
