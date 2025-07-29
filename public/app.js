@@ -847,6 +847,33 @@ function extractCharacteristics(univers) {
     });
 }
 
+/**
+ * Calculates the inventory budget based on the dexterity characteristic level.
+ * @param {number} dexterite - The dexterity level (from -2 to 4).
+ * @returns {number} The corresponding inventory budget.
+ * @throws {Error} If the dexterity level is outside the handled range.
+ */
+function dexteriteToInventoryBudget(dexterite) {
+  switch (dexterite) {
+    case -2:
+      return 0;
+    case -1:
+      return 0;
+    case 0:
+      return 1;
+    case 1:
+      return 2;
+    case 2:
+      return 3;
+    case 3:
+      return 4;
+    case 4:
+      return 5;
+    default:
+      throw new Error("dexterite " + dexterite + "not handled");
+  }
+}
+
 async function personnage() {
   let state = await getState();
 
@@ -1001,33 +1028,6 @@ async function personnage() {
   });
 
   const characteristics = extractCharacteristics(univers);
-
-  /**
-   * Calculates the inventory budget based on the dexterity characteristic level.
-   * @param {number} dexterite - The dexterity level (from -2 to 4).
-   * @returns {number} The corresponding inventory budget.
-   * @throws {Error} If the dexterity level is outside the handled range.
-   */
-  function dexteriteToInventoryBudget(dexterite) {
-    switch (dexterite) {
-      case -2:
-        return 0;
-      case -1:
-        return 0;
-      case 0:
-        return 1;
-      case 1:
-        return 2;
-      case 2:
-        return 3;
-      case 3:
-        return 4;
-      case 4:
-        return 5;
-      default:
-        throw new Error("dexterite " + dexterite + "not handled");
-    }
-  }
 
   const characterNameInputElement = /** @type {HTMLInputElement} */ (
     document.querySelector(".character-name__input")
@@ -2778,6 +2778,7 @@ async function print() {
   univers.forEach((entry) => {
     universMap[entry.key] = entry;
   });
+  const inventory = univers.filter((entry) => entry.tags.includes("inventory"));
 
   const characteristics = extractCharacteristics(univers);
 
@@ -2833,6 +2834,20 @@ async function print() {
     "\r\n",
   );
 
+  const gemSpent = Object.keys(character.inventory).reduce((acc, cur) => {
+    const cost = parseInt(
+      inventory
+        .find((item) => item.key === cur)
+        ?.tags.find((tag) => tag.startsWith("cost:"))
+        ?.split(":")[1] || "0",
+    );
+
+    return acc + character.inventory[cur] * cost;
+  }, 0);
+
+  let gemLeft =
+    dexteriteToInventoryBudget(character.characteristics.dexterite) - gemSpent;
+
   /****** HANDICAPS ******/
   if ((character.orga?.handicaps.length || 0) > 0) {
     handicapsElement.parentElement?.classList.remove("d-none");
@@ -2847,7 +2862,7 @@ async function print() {
   });
 
   /****** INVENTORY ******/
-  if ((Object.keys(character.inventory).length || 0) > 0) {
+  if ((Object.keys(character.inventory).length || 0) > 0 ||gemLeft > 0) {
     inventoryElement.parentElement?.classList.remove("d-none");
   }
 
@@ -2862,6 +2877,17 @@ async function print() {
 
     inventoryElement.appendChild(li);
   });
+
+  // display how gem are left at the beginning of the game
+  if (gemLeft > 0) {
+    const li = document.createElement("li");
+    if (gemLeft > 1) {
+      li.textContent = `${gemLeft}x Gemmes`;
+    } else {
+      li.textContent = `${gemLeft}x Gemme`;
+    }
+    inventoryElement.appendChild(li);
+  }
 
   /****** QUESTS ******/
   if ((character.orga?.quests.length || 0) > 0) {
@@ -2912,6 +2938,18 @@ async function print() {
         ?.levels.find(
           (lvl) => lvl.rank === character.characteristics[characteristic],
         )?.description || "";
+
+    if (
+      characteristic === "dexterite" &&
+      character.characteristics[characteristic] >= 2 &&
+      gemSpent > 0
+    ) {
+      if (gemSpent > 1) {
+        descriptionElement.textContent += `, dont ${gemSpent} gemmes dépensées en inventaire`;
+      } else {
+        descriptionElement.textContent += `, dont ${gemSpent} gemme dépensée en inventaire`;
+      }
+    }
   });
 
   document.querySelector("body")?.classList.remove("d-none");
