@@ -195,7 +195,6 @@ input::-webkit-inner-spin-button {
   display: flex;
   align-content: center;
   flex-wrap: wrap;
-  align-items: center;
   justify-content: flex-start;
   flex-direction: row;
   gap: 5px;
@@ -208,6 +207,8 @@ input::-webkit-inner-spin-button {
   padding: 10px 10px 10px 10px;
   text-align: left;
   break-inside: avoid;
+  max-width: 7cm;
+  word-break: break-word;
 }
 
 .skill:before {
@@ -222,7 +223,7 @@ input::-webkit-inner-spin-button {
 }
 
 .skill__title {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .d-inline {
