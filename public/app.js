@@ -422,7 +422,7 @@ function processEvent(data, ts, eventType, eventValue, reset) {
 
     case "DeletePlayer":
       data.players[eventValue.playerId].characters.forEach((characterId) => {
-        delete data.characters[eventValue.characterId];
+        delete data.characters[characterId];
       });
 
       delete data.players[eventValue.playerId];
