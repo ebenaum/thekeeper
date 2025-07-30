@@ -244,6 +244,12 @@ input::-webkit-inner-spin-button {
   page-break-inside: avoid;
 }
 
+.magic-rules {
+  text-align: justify;
+  white-space: pre-line;
+  page-break-inside: avoid;
+}
+
 .d-inline {
   display: inline-block;
 }

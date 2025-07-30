@@ -2966,6 +2966,10 @@ async function print() {
     document.querySelector(".death-rules")
   );
 
+  const magicRulesElement = /** @type {HTMLElement} */ (
+    document.querySelector(".magic-rules")
+  );
+
   subtitleRaceElement.textContent =
     universMap[character.race]?.label || "Sans Race";
   subtitleVdvElement.textContent =
@@ -3001,6 +3005,17 @@ async function print() {
 
   deathRulesElement.appendChild(deathRulesTitleElement);
   deathRulesElement.appendChild(deathRulesBodyElement);
+
+  const magicRulesTitleElement = document.createElement("h2");
+  const magicRulesBodyElement = document.createElement("p");
+
+  magicRulesTitleElement.textContent = universMap["2025:magie"].label;
+  magicRulesBodyElement.textContent = universMap[
+    "2025:magie"
+  ].description.replaceAll("\n", "\r\n");
+
+  magicRulesElement.appendChild(magicRulesTitleElement);
+  magicRulesElement.appendChild(magicRulesBodyElement);
 
   const gemSpent = Object.keys(character.inventory).reduce((acc, cur) => {
     const cost = parseInt(
