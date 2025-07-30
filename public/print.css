@@ -238,6 +238,11 @@ input::-webkit-inner-spin-button {
   font-weight: bold;
 }
 
+.death-rules {
+  text-align: justify;
+  white-space: pre-line;
+}
+
 .d-inline {
   display: inline-block;
 }

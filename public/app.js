@@ -2958,6 +2958,10 @@ async function print() {
     document.querySelector(".quests ul")
   );
 
+  const deathRulesElement = /** @type {HTMLElement} */ (
+    document.querySelector(".death-rules")
+  );
+
   subtitleRaceElement.textContent =
     universMap[character.race]?.label || "Sans Race";
   subtitleVdvElement.textContent =
@@ -2980,6 +2984,17 @@ async function print() {
 
     bgGroupElement.parentElement?.classList.remove("d-none");
   }
+
+  const deathRulesTitleElement = document.createElement("h2");
+  const deathRulesBodyElement = document.createElement("p");
+
+  deathRulesTitleElement.textContent = universMap["2025:mort"].label;
+  deathRulesBodyElement.textContent = universMap[
+    "2025:mort"
+  ].description.replaceAll("\n", "\r\n");
+
+  deathRulesElement.appendChild(deathRulesTitleElement);
+  deathRulesElement.appendChild(deathRulesBodyElement);
 
   const gemSpent = Object.keys(character.inventory).reduce((acc, cur) => {
     const cost = parseInt(
