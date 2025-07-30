@@ -2132,40 +2132,77 @@ async function theview2() {
     document.querySelector(".skills-global")
   );
 
+  /** @type{{inventory: Object<string, {count: number, characters: string[]}>, skills: Object<string, {count: number, characters: string[]}>}} */
   const agg = {
     inventory: {},
     skills: {},
   };
 
-  Object.values(state.data.characters).forEach((character) => {
+  Object.keys(state.data.characters).forEach((characterId) => {
+    const character = state.data.characters[characterId];
     Object.keys(character.inventory).forEach((key) => {
-      agg.inventory[key] = (agg.inventory[key] || 0) + 1;
+      agg.inventory[key] = agg.inventory[key] || { count: 0, characters: [] };
+      agg.inventory[key].characters.push(characterId);
+      agg.inventory[key].count += character.inventory[key];
     });
 
     Object.keys(character.skills).forEach((key) => {
-      agg.skills[key + ":" + character.skills[key]] =
-        (agg.skills[key + ":" + character.skills[key]] || 0) + 1;
+      agg.skills[key + ":" + character.skills[key]] = agg.skills[
+        key + ":" + character.skills[key]
+      ] || { count: 0, characters: [] };
+
+      agg.skills[key + ":" + character.skills[key]].characters.push(
+        characterId,
+      );
+      agg.skills[key + ":" + character.skills[key]].count +=
+        character.skills[key];
     });
   });
 
   Object.keys(agg.inventory).forEach((key) => {
-    const count = agg.inventory[key];
+    const count = agg.inventory[key].count;
 
     const liElement = document.createElement("li");
+    const pElement = document.createElement("p");
+    const ulElement = document.createElement("ul");
+    agg.inventory[key].characters.forEach((characterId) => {
+      const character = state.data.characters[characterId];
 
-    liElement.textContent = `${count}x ${universMap[key].label}: ${universMap[key].description}`;
+      const characterLiElement = document.createElement("li");
+      characterLiElement.innerHTML = `<a class="a-underline" href="/personnage.html?characterId=${characterId}" target="blank_">${character.name}</a>`;
+
+      ulElement.appendChild(characterLiElement);
+    });
+
+    pElement.textContent = `${count}x ${universMap[key].label}: ${universMap[key].description}`;
+
+    liElement.appendChild(pElement);
+    liElement.appendChild(ulElement);
 
     inventoryElement.appendChild(liElement);
   });
 
   Object.keys(agg.skills).forEach((key) => {
-    const count = agg.skills[key];
+    const count = agg.skills[key].count;
 
     const parts = key.split(":");
 
     const liElement = document.createElement("li");
+    const pElement = document.createElement("p");
+    const ulElement = document.createElement("ul");
+    agg.skills[key].characters.forEach((characterId) => {
+      const character = state.data.characters[characterId];
 
-    liElement.textContent = `${count}x ${skills.find((skill) => skill.key === parts[0])?.levels[parseInt(parts[1]) - 1].label}`;
+      const characterLiElement = document.createElement("li");
+      characterLiElement.innerHTML = `<a class="a-underline" href="/personnage.html?characterId=${characterId}" target="blank_">${character.name}</a>`;
+
+      ulElement.appendChild(characterLiElement);
+    });
+
+    pElement.textContent = `${count}x ${skills.find((skill) => skill.key === parts[0])?.levels[parseInt(parts[1]) - 1].label}`;
+
+    liElement.appendChild(pElement);
+    liElement.appendChild(ulElement);
 
     skillsElement.appendChild(liElement);
   });
