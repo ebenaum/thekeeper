@@ -2247,6 +2247,8 @@ async function theview() {
     "Création",
     "Terminée ?",
     "Nom/Prénom",
+    "Ville d'origine",
+    "Contact d'urgence",
     "Type",
     "Contact",
     "Amis",
@@ -2331,6 +2333,8 @@ async function theview() {
           : "Oui",
       );
       values.push(playerElement);
+      values.push(player.personal?.cityOfOrigin);
+      values.push(player.personal?.emergencyContact);
       values.push(player.personal?.inscriptionType?.toUpperCase());
       values.push(player.personal?.contact);
       values.push(player.personal?.peopleToPlayWith);
@@ -2393,7 +2397,7 @@ async function theview() {
     columnControl: [{ extend: "search" }, { extend: "order" }],
     columnDefs: [
       {
-        targets: [1, 3, 8, 11, 12, 13],
+        targets: [1, 4, 9, 12, 13, 14],
         columnControl: ["order", ["searchList"]],
       },
     ],
