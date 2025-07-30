@@ -241,6 +241,7 @@ input::-webkit-inner-spin-button {
 .death-rules {
   text-align: justify;
   white-space: pre-line;
+  page-break-inside: avoid;
 }
 
 .d-inline {
