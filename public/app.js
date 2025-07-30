@@ -2154,8 +2154,7 @@ async function theview2() {
       agg.skills[key + ":" + character.skills[key]].characters.push(
         characterId,
       );
-      agg.skills[key + ":" + character.skills[key]].count +=
-        character.skills[key];
+      agg.skills[key + ":" + character.skills[key]].count += 1;
     });
   });
 
