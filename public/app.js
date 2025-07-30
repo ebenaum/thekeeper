@@ -2163,7 +2163,8 @@ async function theview2() {
     const count = agg.inventory[key].count;
 
     const liElement = document.createElement("li");
-    const pElement = document.createElement("p");
+    const detailsElement = document.createElement("details");
+    const summaryElement = document.createElement("summary");
     const ulElement = document.createElement("ul");
     agg.inventory[key].characters.forEach((characterId) => {
       const character = state.data.characters[characterId];
@@ -2174,10 +2175,12 @@ async function theview2() {
       ulElement.appendChild(characterLiElement);
     });
 
-    pElement.textContent = `${count}x ${universMap[key].label}: ${universMap[key].description}`;
+    summaryElement.textContent = `${count}x ${universMap[key].label}: ${universMap[key].description}`;
 
-    liElement.appendChild(pElement);
-    liElement.appendChild(ulElement);
+    detailsElement.appendChild(summaryElement);
+    detailsElement.appendChild(ulElement);
+
+    liElement.appendChild(detailsElement);
 
     inventoryElement.appendChild(liElement);
   });
@@ -2188,7 +2191,8 @@ async function theview2() {
     const parts = key.split(":");
 
     const liElement = document.createElement("li");
-    const pElement = document.createElement("p");
+    const detailsElement = document.createElement("details");
+    const summaryElement = document.createElement("summary");
     const ulElement = document.createElement("ul");
     agg.skills[key].characters.forEach((characterId) => {
       const character = state.data.characters[characterId];
@@ -2199,10 +2203,12 @@ async function theview2() {
       ulElement.appendChild(characterLiElement);
     });
 
-    pElement.textContent = `${count}x ${skills.find((skill) => skill.key === parts[0])?.levels[parseInt(parts[1]) - 1].label}`;
+    summaryElement.textContent = `${count}x ${skills.find((skill) => skill.key === parts[0])?.levels[parseInt(parts[1]) - 1].label}`;
 
-    liElement.appendChild(pElement);
-    liElement.appendChild(ulElement);
+    detailsElement.appendChild(summaryElement);
+    detailsElement.appendChild(ulElement);
+
+    liElement.appendChild(detailsElement);
 
     skillsElement.appendChild(liElement);
   });
