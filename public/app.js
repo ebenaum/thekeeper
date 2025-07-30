@@ -2954,6 +2954,10 @@ async function print() {
     document.querySelector(".bggroup span")
   );
 
+  const bgGroupTitleElement = /** @type {HTMLElement} */ (
+    document.querySelector(".bggroup h2")
+  );
+
   const questsElement = /** @type {HTMLElement} */ (
     document.querySelector(".quests ul")
   );
@@ -2983,6 +2987,8 @@ async function print() {
     ).replaceAll("\n", "\r\n");
 
     bgGroupElement.parentElement?.classList.remove("d-none");
+
+    bgGroupTitleElement.textContent = `Backroung de groupe : ${universMap["2025:" + character.orga?.playerGroup].label}`;
   }
 
   const deathRulesTitleElement = document.createElement("h2");
