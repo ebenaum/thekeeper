@@ -2170,7 +2170,7 @@ async function theview2() {
       const character = state.data.characters[characterId];
 
       const characterLiElement = document.createElement("li");
-      characterLiElement.innerHTML = `<a class="a-underline" href="/personnage.html?characterId=${characterId}" target="blank_">${character.name}</a>`;
+      characterLiElement.innerHTML = `<a class="a-underline" href="/personnage.html?characterId=${characterId}" target="blank_">${character.name}  x${character.inventory[key]}</a>`;
 
       ulElement.appendChild(characterLiElement);
     });
@@ -2198,7 +2198,7 @@ async function theview2() {
       const character = state.data.characters[characterId];
 
       const characterLiElement = document.createElement("li");
-      characterLiElement.innerHTML = `<a class="a-underline" href="/personnage.html?characterId=${characterId}" target="blank_">${character.name}</a>`;
+      characterLiElement.innerHTML = `<a class="a-underline" href="/personnage.html?characterId=${characterId}" target="blank_">${character.name} x${character.skills[key]}</a>`;
 
       ulElement.appendChild(characterLiElement);
     });
