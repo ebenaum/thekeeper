@@ -1932,13 +1932,15 @@ async function personnage() {
 
   updateSkillList();
 
-  await personnageOrga(
-    formResult,
-    characteristics,
-    universMap,
-    skills,
-    onsubmit,
-  );
+  if (state && state.data.permission === "orga") {
+    await personnageOrga(
+      formResult,
+      characteristics,
+      universMap,
+      skills,
+      onsubmit,
+    );
+  }
 
   document.querySelectorAll(".input-text").forEach(function (match) {
     const label = match.querySelector("label");
