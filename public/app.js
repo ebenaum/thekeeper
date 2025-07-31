@@ -3004,7 +3004,7 @@ async function print() {
 
     bgGroupElement.parentElement?.classList.remove("d-none");
 
-    bgGroupTitleElement.textContent = `Backroung de groupe : ${universMap["2025:" + character.orga?.playerGroup].label}`;
+    bgGroupTitleElement.textContent = `Backround de groupe : ${universMap["2025:" + character.orga?.playerGroup].label}`;
   }
 
   const deathRulesTitleElement = document.createElement("h2");
