@@ -113,13 +113,13 @@ input::-webkit-inner-spin-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: black;
+  background-color: black !important;
   print-color-adjust: exact;
 }
 
 .characteristic__level__value {
   border: solid 8px black;
-  background-color: white;
+  background-color: white !important;;
   print-color-adjust: exact;
   width: fit-content;
   block-size: fit-content;
