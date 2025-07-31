@@ -2917,6 +2917,8 @@ async function print() {
 
   const character = state.data.characters[characterId];
 
+  document.title = character.name;
+
   const titleElement = /** @type {HTMLElement} */ (
     document.querySelector(".title")
   );

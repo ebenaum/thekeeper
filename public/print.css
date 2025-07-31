@@ -119,7 +119,7 @@ input::-webkit-inner-spin-button {
 
 .characteristic__level__value {
   border: solid 8px black;
-  background-color: white !important;;
+  background-color: white !important;
   print-color-adjust: exact;
   width: fit-content;
   block-size: fit-content;
