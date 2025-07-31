@@ -3041,7 +3041,10 @@ async function print() {
     localKnowledgTitleElement.parentElement?.classList.remove("d-none");
 
     Object.values(state.data.characters).forEach((otherCharacter) => {
-      if (!otherCharacter.orga?.publicResume) {
+      if (
+        !otherCharacter.orga?.publicResume ||
+        otherCharacter.group != character.group
+      ) {
         return;
       }
 
