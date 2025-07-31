@@ -2972,6 +2972,14 @@ async function print() {
     document.querySelector(".magic-rules")
   );
 
+  const localKnowledgTitleElement = /** @type {HTMLElement} */ (
+    document.querySelector(".local-knowledge h2")
+  );
+
+  const localKnowledgListElement = /** @type {HTMLElement} */ (
+    document.querySelector(".local-knowledge ul")
+  );
+
   subtitleRaceElement.textContent =
     universMap[character.race]?.label || "Sans Race";
   subtitleVdvElement.textContent =
@@ -3018,6 +3026,32 @@ async function print() {
 
   magicRulesElement.appendChild(magicRulesTitleElement);
   magicRulesElement.appendChild(magicRulesBodyElement);
+
+  // BUG : will not work as not orga as normal user does not have access to the full list of characters
+  if (
+    character.skills["connaissances-locales"] > 0 &&
+    (character.group === "ebenaum" || character.group === "erenthyrm")
+  ) {
+    if (character.group === "ebenaum") {
+      localKnowledgTitleElement.textContent = `Connaissances locales en Ebenaum`;
+    } else if (character.group === "erenthyrm") {
+      localKnowledgTitleElement.textContent = `Connaissances locales en Erenthyrm`;
+    }
+
+    localKnowledgTitleElement.parentElement?.classList.remove("d-none");
+
+    Object.values(state.data.characters).forEach((otherCharacter) => {
+      if (!otherCharacter.orga?.publicResume) {
+        return;
+      }
+
+      const liElement = document.createElement("li");
+
+      liElement.innerHTML = `<span style="font-weight: bold; font-size: 1.1rem">${otherCharacter.name}</span>: ${otherCharacter.orga?.publicResume}`;
+
+      localKnowledgListElement.appendChild(liElement);
+    });
+  }
 
   const gemSpent = Object.keys(character.inventory).reduce((acc, cur) => {
     const cost = parseInt(

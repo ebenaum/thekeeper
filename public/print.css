@@ -250,6 +250,16 @@ input::-webkit-inner-spin-button {
   page-break-inside: avoid;
 }
 
+.local-knowledge {
+  text-align: justify;
+  list-style: none;
+}
+
+.local-knowledge ul {
+  padding: 0;
+  list-style: none;
+}
+
 .d-inline {
   display: inline-block;
 }
@@ -281,4 +291,8 @@ input::-webkit-inner-spin-button {
   display: block;
   height: 40px;
   width: 100%;
+}
+
+.font-bold {
+  font-weight: bold;
 }
