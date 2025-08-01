@@ -2974,6 +2974,10 @@ async function print() {
     document.querySelector(".magic-rules")
   );
 
+  const reputationRulesElement = /** @type {HTMLElement} */ (
+    document.querySelector(".reputation-rules")
+  );
+
   const localKnowledgTitleElement = /** @type {HTMLElement} */ (
     document.querySelector(".local-knowledge h2")
   );
@@ -3028,6 +3032,17 @@ async function print() {
 
   magicRulesElement.appendChild(magicRulesTitleElement);
   magicRulesElement.appendChild(magicRulesBodyElement);
+
+  const reputationRulesTitleElement = document.createElement("h2");
+  const reputationRulesBodyElement = document.createElement("p");
+
+  reputationRulesTitleElement.textContent = universMap["2025:reputation"].label;
+  reputationRulesBodyElement.textContent = universMap[
+    "2025:reputation"
+  ].description.replaceAll("\n", "\r\n");
+
+  reputationRulesElement.appendChild(reputationRulesTitleElement);
+  reputationRulesElement.appendChild(reputationRulesBodyElement);
 
   // BUG : will not work as not orga as normal user does not have access to the full list of characters
   if (
