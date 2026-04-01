@@ -37,6 +37,9 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Migration: add email column if not present (idempotent for existing DBs)
+	_, _ = db.Exec(`ALTER TABLE actors ADD COLUMN email TEXT`)
+
 	switch os.Args[1] {
 	case "http":
 		err = httpserver(db)
