@@ -1,10 +1,12 @@
 package main
 
 import (
+	cryptorand "crypto/rand"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	_ "embed"
 
@@ -13,7 +15,7 @@ import (
 )
 
 func usage() string {
-	return "./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle>|link-orga <db-path> <handle>|delete-player <db-path> <player id>|delete-character <db-path> <character id>"
+	return "./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle>|link-orga <db-path> <handle>|delete-player <db-path> <player id>|delete-character <db-path> <character id>|invite <db-path> <email> [handle]"
 }
 
 //go:embed schema.sql
@@ -77,6 +79,18 @@ func main() {
 			os.Exit(1)
 		}
 		err = deletecharacter(db, os.Args[3])
+	case "invite":
+		if len(os.Args) < 4 {
+			fmt.Println(usage())
+			os.Exit(1)
+		}
+
+		explicitHandle := ""
+		if len(os.Args) >= 5 {
+			explicitHandle = os.Args[4]
+		}
+
+		err = invite(db, os.Args[3], explicitHandle)
 	default:
 		fmt.Println(usage())
 		os.Exit(1)
@@ -231,6 +245,107 @@ func deletecharacter(db *sqlx.DB, characterID string) error {
 	if result[0].Status != EventRecordStatusAccepted {
 		return fmt.Errorf("delete characyer event was not accepted: %v", result[0])
 	}
+
+	return nil
+}
+
+func generateHandle(email string) string {
+	local := email
+	if idx := strings.Index(email, "@"); idx != -1 {
+		local = email[:idx]
+	}
+
+	handle := strings.ToLower(local)
+	// Replace non-alphanumeric with -
+	var buf strings.Builder
+	for _, r := range handle {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+			buf.WriteRune(r)
+		} else {
+			buf.WriteRune('-')
+		}
+	}
+	handle = buf.String()
+
+	// Trim leading/trailing dashes
+	handle = strings.Trim(handle, "-")
+
+	if handle == "" {
+		handle = "player"
+	}
+
+	return handle
+}
+
+func generateUniqueHandle(db *sqlx.DB, email string, explicitHandle string) (string, error) {
+	handle := explicitHandle
+	if handle == "" {
+		handle = generateHandle(email)
+	}
+
+	// Check if handle already taken
+	_, err := FindActorIDByHandle(db, handle)
+	if err != nil {
+		// Not found — handle is available
+		return handle, nil
+	}
+
+	// Collision — append random suffix
+	suffix := cryptorand.Text()[:6]
+	handle = handle + "-" + suffix
+
+	return handle, nil
+}
+
+func invite(db *sqlx.DB, email string, explicitHandle string) error {
+	smtpCfg, err := LoadSMTPConfig()
+	if err != nil {
+		return fmt.Errorf("SMTP config: %w", err)
+	}
+
+	appURL := os.Getenv("APP_URL")
+	if appURL == "" {
+		return fmt.Errorf("APP_URL environment variable is required")
+	}
+
+	handle, err := generateUniqueHandle(db, email, explicitHandle)
+	if err != nil {
+		return fmt.Errorf("generate handle: %w", err)
+	}
+
+	actorID, err := CreatePlayerActor(db, email)
+	if err != nil {
+		return fmt.Errorf("create actor: %w", err)
+	}
+
+	result, err := InsertAndCheckEvents(db, -1, actorID, []*proto.Event{
+		{
+			Msg: &proto.Event_SeedActor{
+				SeedActor: &proto.EventSeedActor{
+					Handle: handle,
+				},
+			},
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("seed actor event: %w", err)
+	}
+
+	if result[0].Status != EventRecordStatusAccepted {
+		return fmt.Errorf("seed actor event not accepted: %v", result[0])
+	}
+
+	code, err := InsertAuthKey(db, actorID)
+	if err != nil {
+		return fmt.Errorf("insert auth key: %w", err)
+	}
+
+	err = SendInviteEmail(smtpCfg, email, appURL, code)
+	if err != nil {
+		return fmt.Errorf("send email: %w", err)
+	}
+
+	fmt.Printf("Invited %s as %q (actor %d)\n", email, handle, actorID)
 
 	return nil
 }
