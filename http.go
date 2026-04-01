@@ -29,6 +29,14 @@ func (e Error) Error() string {
 	return e.Private.Error()
 }
 
+type jsonMessage struct {
+	Message string `json:"message"`
+}
+
+func writeJSON(w http.ResponseWriter, msg string) {
+	json.NewEncoder(w).Encode(jsonMessage{Message: msg})
+}
+
 func validatePublicKey(tokenString string) (ecdsa.PublicKey, error) {
 	var publicKey ecdsa.PublicKey
 
@@ -115,13 +123,13 @@ func HandleState(db *sqlx.DB) http.HandlerFunc {
 
 			if errors.As(err, &errplus) {
 				log.Println(errplus.Private)
-				fmt.Fprintf(w, `{"message": "%s"}`, errplus.Public.Error())
+				writeJSON(w, errplus.Public.Error())
 
 				return
 			}
 
 			log.Println(err)
-			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+			writeJSON(w, err.Error())
 
 			return
 		}
@@ -134,7 +142,7 @@ func HandleState(db *sqlx.DB) http.HandlerFunc {
 		from, err := strconv.ParseInt(r.URL.Query().Get("from"), 10, 64)
 		if err != nil {
 			log.Println(err)
-			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+			writeJSON(w, err.Error())
 
 			return
 		}
@@ -202,13 +210,13 @@ func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
 
 			if errors.As(err, &errplus) {
 				log.Println(errplus.Private)
-				fmt.Fprintf(w, `{"message": "%s"}`, errplus.Public.Error())
+				writeJSON(w, errplus.Public.Error())
 
 				return
 			}
 
 			log.Println(err)
-			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+			writeJSON(w, err.Error())
 
 			return
 		}
@@ -217,7 +225,7 @@ func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 
 			log.Printf("actor %d space:%s not authorized to create auth link", actorID, actorSpace)
-			fmt.Fprintf(w, `{"message": "not authorized"}`)
+			writeJSON(w, "not authorized")
 
 			return
 		}
@@ -226,7 +234,7 @@ func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 
 			log.Printf("actor %d space:%s not authorized to create auth link", actorID, actorSpace)
-			fmt.Fprintf(w, `{"message": "not authorized"}`)
+			writeJSON(w, "not authorized")
 
 			return
 		}
@@ -244,7 +252,7 @@ func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println(err)
-			fmt.Fprintf(w, `{"message": "internal error"}`)
+			writeJSON(w, "internal error")
 
 			return
 		}
@@ -253,7 +261,7 @@ func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 
 			log.Printf("actor %d not authorized to create auth link for actor %d of space %q", actorID, actorIDToLink, actorSpaceToLink)
-			fmt.Fprintf(w, `{"message": "not authorized"}`)
+			writeJSON(w, "not authorized")
 
 			return
 		}
@@ -267,7 +275,7 @@ func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		fmt.Fprintf(w, `{"message": "%s"}`, authKey)
+		writeJSON(w, authKey)
 	}
 }
 
@@ -296,13 +304,13 @@ func HandleRedeemAuthKey(db *sqlx.DB) http.HandlerFunc {
 
 			if errors.As(err, &errplus) {
 				log.Println(errplus.Private)
-				fmt.Fprintf(w, `{"message": "%s"}`, errplus.Public.Error())
+				writeJSON(w, errplus.Public.Error())
 
 				return
 			}
 
 			log.Println(err)
-			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+			writeJSON(w, err.Error())
 
 			return
 		}
@@ -348,13 +356,13 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 
 			if errors.As(err, &errplus) {
 				log.Println(errplus.Private)
-				fmt.Fprintf(w, `{"message": "%s"}`, errplus.Public.Error())
+				writeJSON(w, errplus.Public.Error())
 
 				return
 			}
 
 			log.Println(err)
-			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+			writeJSON(w, err.Error())
 
 			return
 		}
@@ -371,7 +379,7 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 
 			log.Println(err)
-			fmt.Fprint(w, `{"message": "bad input"}`)
+			writeJSON(w, "bad input")
 
 			return
 		}
@@ -381,7 +389,7 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 
 			log.Println(err)
-			fmt.Fprint(w, `{"message": "bad input"}`)
+			writeJSON(w, "bad input")
 
 			return
 		}
@@ -389,7 +397,7 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 		if len(eventsRequests.Events) == 0 {
 			w.WriteHeader(http.StatusBadRequest)
 
-			fmt.Fprint(w, `{"message": "bad input"}`)
+			writeJSON(w, "bad input")
 
 			return
 		}
@@ -399,7 +407,7 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 
 			log.Println(err)
-			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+			writeJSON(w, err.Error())
 
 			return
 		}
