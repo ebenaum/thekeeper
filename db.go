@@ -61,6 +61,7 @@ func LinkState(db *sqlx.DB, actorID int64, publicKey []byte) (ActorSpace, error)
 	if err != nil {
 		return "", fmt.Errorf("begin: %w", err)
 	}
+	defer tx.Rollback()
 
 	var publicKeyID int64
 	err = tx.QueryRowx(`INSERT INTO public_keys (public_key) VALUES (?) RETURNING id`, publicKey).Scan(&publicKeyID)
@@ -168,6 +169,7 @@ func GetState(db *sqlx.DB, publicKey []byte) (int64, ActorSpace, error) {
 	if err != nil {
 		return -1, "", fmt.Errorf("begin: %w", err)
 	}
+	defer tx.Rollback()
 
 	var publicKeyID int64
 	err = tx.QueryRowx(`INSERT INTO public_keys (public_key) VALUES (?) RETURNING id`, publicKey).Scan(&publicKeyID)
@@ -198,6 +200,7 @@ func InsertEvents(db *sqlx.DB, sourceActorID int64, events []*proto.Event) ([]in
 	if err != nil {
 		return nil, fmt.Errorf("begin: %w", err)
 	}
+	defer tx.Rollback()
 
 	ids := make([]int64, len(events))
 
