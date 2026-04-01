@@ -2571,6 +2571,38 @@ async function index() {
     return;
   } else {
     state = await getState();
+
+    if (!state) {
+      // No stored session and no auth code — enter demo mode
+      // Character form is usable but nothing is saved to the server
+      const demoMessage = document.createElement("div");
+      demoMessage.className = "demo-banner";
+      demoMessage.innerHTML = `
+        <p>Tu peux explorer la création de personnage librement.
+        Pour sauvegarder ton personnage, demande une invitation à l'organisation.</p>
+        <p>Tu as déjà reçu un lien ? <a href="#" id="request-link-btn">Demande un nouveau lien de connexion</a></p>
+      `;
+      containerElement.prepend(demoMessage);
+
+      // Set up request-link form
+      const requestLinkBtn = document.getElementById("request-link-btn");
+      if (requestLinkBtn) {
+        requestLinkBtn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          const email = prompt("Entre ton adresse email :");
+          if (email) {
+            await fetch(`${globalThis.env.thekeeperURL}/auth/request-link`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email }),
+            });
+            alert("Si cette adresse est enregistrée, un lien t'a été envoyé par email.");
+          }
+        });
+      }
+
+      return;
+    }
   }
 
   if (state) {
