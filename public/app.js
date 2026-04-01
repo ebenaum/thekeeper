@@ -1004,9 +1004,20 @@ async function personnage() {
 
   const formElement = document.getElementById("form");
 
+  if (!state) {
+    // Demo mode: hide all save buttons
+    document.querySelectorAll(".save-button").forEach((btn) => {
+      btn.style.display = "none";
+    });
+  }
+
   let submitted = false;
 
   const onsubmit = () => {
+    if (!state) {
+      return false;
+    }
+
     if (submitted) {
       return false;
     }
@@ -2580,26 +2591,32 @@ async function index() {
       demoMessage.innerHTML = `
         <p>Tu peux explorer la création de personnage librement.
         Pour sauvegarder ton personnage, demande une invitation à l'organisation.</p>
-        <p>Tu as déjà reçu un lien ? <a href="#" id="request-link-btn">Demande un nouveau lien de connexion</a></p>
+        <p><a href="/personnage.html" class="a-underline">Explorer le formulaire de personnage</a></p>
+        <hr style="border:none;border-top:1px solid #000;margin:15px 0">
+        <p>Tu as déjà reçu un lien ? Demande un nouveau lien de connexion :</p>
+        <form id="request-link-form" style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap">
+          <input type="email" id="request-link-email" placeholder="ton@email.com" required
+            style="font-family:inherit;font-size:1rem;padding:5px 10px;border:2px solid #000">
+          <button type="submit" style="font-family:inherit;font-size:1rem;padding:5px 15px;border:2px solid #000;background:#fff;cursor:pointer">Envoyer</button>
+        </form>
+        <p id="request-link-msg" style="display:none;font-style:italic;margin-top:10px"></p>
       `;
-      containerElement.prepend(demoMessage);
+      containerElement.appendChild(demoMessage);
 
-      // Set up request-link form
-      const requestLinkBtn = document.getElementById("request-link-btn");
-      if (requestLinkBtn) {
-        requestLinkBtn.addEventListener("click", async (e) => {
-          e.preventDefault();
-          const email = prompt("Entre ton adresse email :");
-          if (email) {
-            await fetch(`${globalThis.env.thekeeperURL}/auth/request-link`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email }),
-            });
-            alert("Si cette adresse est enregistrée, un lien t'a été envoyé par email.");
-          }
+      const requestLinkForm = document.getElementById("request-link-form");
+      requestLinkForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("request-link-email").value;
+        const msg = document.getElementById("request-link-msg");
+        await fetch(`${globalThis.env.thekeeperURL}/auth/request-link`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
         });
-      }
+        msg.textContent = "Si cette adresse est enregistrée, un lien t'a été envoyé par email.";
+        msg.style.display = "block";
+        requestLinkForm.style.display = "none";
+      });
 
       return;
     }
