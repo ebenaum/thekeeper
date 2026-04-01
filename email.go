@@ -47,6 +47,7 @@ func RenderInviteEmail(appURL string, code string) string {
 <p><a href="%s">Clique ici pour commencer</a></p>
 <p>Ou copie ce lien dans ton navigateur :</p>
 <p>%s</p>
+<p><em>Ce lien est à usage unique.</em></p>
 </body>
 </html>`, link, link)
 }

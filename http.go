@@ -10,7 +10,10 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
+
+	"golang.org/x/time/rate"
 
 	"github.com/ebenaum/thekeeper/proto"
 	"github.com/golang-jwt/jwt/v5"
@@ -510,6 +513,9 @@ func HandleInvite(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.HandlerFu
 }
 
 func HandleRequestLink(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.HandlerFunc {
+	var mu sync.Mutex
+	limiters := map[string]*rate.Limiter{}
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost && r.Method != http.MethodOptions {
 			w.WriteHeader(http.StatusNotFound)
@@ -545,6 +551,20 @@ func HandleRequestLink(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.Hand
 		actorID, err := FindActorIDByEmail(db, req.Email)
 		if err != nil {
 			// Email not found — do nothing, same response
+			return
+		}
+
+		mu.Lock()
+		lim, ok := limiters[req.Email]
+		if !ok {
+			// 2 requests per 5 minutes, burst of 2
+			lim = rate.NewLimiter(rate.Every(5*time.Minute/2), 2)
+			limiters[req.Email] = lim
+		}
+		mu.Unlock()
+
+		if !lim.Allow() {
+			log.Printf("request-link: rate limited %s", req.Email)
 			return
 		}
 

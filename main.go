@@ -94,7 +94,8 @@ func main() {
 
 		err = invite(db, os.Args[3], explicitHandle)
 	case "migrate-emails":
-		err = migrateEmails(db)
+		dryRun := len(os.Args) >= 4 && os.Args[3] == "--dry-run"
+		err = migrateEmails(db, dryRun)
 	default:
 		fmt.Println(usage())
 		os.Exit(1)
@@ -310,7 +311,7 @@ func invite(db *sqlx.DB, email string, explicitHandle string) error {
 	return nil
 }
 
-func migrateEmails(db *sqlx.DB) error {
+func migrateEmails(db *sqlx.DB, dryRun bool) error {
 	// Replay events to build player→actor mapping
 	sv := NewSpaceValidation()
 
@@ -330,8 +331,16 @@ func migrateEmails(db *sqlx.DB) error {
 		}
 	}
 
-	migrated := 0
-	skipped := 0
+	// Resolve emails and detect duplicates
+	type resolved struct {
+		playerID string
+		actorID  int64
+		email    string
+	}
+
+	var withEmail []resolved
+	var noEmail []resolved
+	emailCount := map[string][]resolved{}
 
 	for playerID, contact := range playerContacts {
 		player, exists := sv.PlayersIDs[playerID]
@@ -341,20 +350,71 @@ func migrateEmails(db *sqlx.DB) error {
 
 		addr, err := mail.ParseAddress(contact)
 		if err != nil {
-			fmt.Printf("SKIP player %s (actor %d): could not parse %q\n", playerID, player.ActorID, contact)
-			skipped++
+			noEmail = append(noEmail, resolved{playerID: playerID, actorID: player.ActorID, email: contact})
 			continue
 		}
 
-		err = SetActorEmail(db, player.ActorID, addr.Address)
+		r := resolved{playerID: playerID, actorID: player.ActorID, email: addr.Address}
+		withEmail = append(withEmail, r)
+		emailCount[addr.Address] = append(emailCount[addr.Address], r)
+	}
+
+	if dryRun {
+		fmt.Println("=== DRY RUN ===")
+		fmt.Println()
+
+		fmt.Printf("--- With valid email (%d) ---\n", len(withEmail))
+		for _, r := range withEmail {
+			handle := sv.Handles.IDToHandle[r.actorID]
+			fmt.Printf("  actor %d (%s) player %s → %s\n", r.actorID, handle, r.playerID, r.email)
+		}
+
+		fmt.Printf("\n--- Without valid email (%d) ---\n", len(noEmail))
+		for _, r := range noEmail {
+			handle := sv.Handles.IDToHandle[r.actorID]
+			fmt.Printf("  actor %d (%s) player %s — contact: %q\n", r.actorID, handle, r.playerID, r.email)
+		}
+
+		hasDuplicates := false
+		for email, entries := range emailCount {
+			if len(entries) > 1 {
+				if !hasDuplicates {
+					fmt.Printf("\n--- Duplicate emails ---\n")
+					hasDuplicates = true
+				}
+				fmt.Printf("  %s:\n", email)
+				for _, r := range entries {
+					handle := sv.Handles.IDToHandle[r.actorID]
+					fmt.Printf("    actor %d (%s) player %s\n", r.actorID, handle, r.playerID)
+				}
+			}
+		}
+		if !hasDuplicates {
+			fmt.Println("\nNo duplicate emails found.")
+		}
+
+		fmt.Printf("\nSummary: %d would migrate, %d would skip\n", len(withEmail), len(noEmail))
+		return nil
+	}
+
+	migrated := 0
+	skipped := 0
+
+	for _, r := range withEmail {
+		err := SetActorEmail(db, r.actorID, r.email)
 		if err != nil {
-			fmt.Printf("ERROR player %s (actor %d): %v\n", playerID, player.ActorID, err)
+			fmt.Printf("ERROR player %s (actor %d): %v\n", r.playerID, r.actorID, err)
 			skipped++
 			continue
 		}
 
-		fmt.Printf("OK   player %s (actor %d): %s\n", playerID, player.ActorID, addr.Address)
+		fmt.Printf("OK   player %s (actor %d): %s\n", r.playerID, r.actorID, r.email)
 		migrated++
+	}
+
+	for _, r := range noEmail {
+		fmt.Printf("SKIP player %s (actor %d): could not parse %q\n", r.playerID, r.actorID, r.email)
+		skipped++
 	}
 
 	fmt.Printf("\nMigrated: %d, Skipped: %d\n", migrated, skipped)
