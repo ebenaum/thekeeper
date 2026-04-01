@@ -27,7 +27,6 @@ func TestUseAuthKey(t *testing.T) {
 		wantErr bool
 	}{
 		{"valid key succeeds", key, false},
-		// BUG: UseAuthKey lacks a redeemed_at IS NULL check, so this currently succeeds
 		{"already redeemed key fails", key, true},
 		{"non-existent key fails", "nonexistent-key", true},
 	}

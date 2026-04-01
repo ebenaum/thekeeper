@@ -34,7 +34,9 @@ type jsonMessage struct {
 }
 
 func writeJSON(w http.ResponseWriter, msg string) {
-	json.NewEncoder(w).Encode(jsonMessage{Message: msg})
+	if err := json.NewEncoder(w).Encode(jsonMessage{Message: msg}); err != nil {
+		log.Println(err)
+	}
 }
 
 func validatePublicKey(tokenString string) (ecdsa.PublicKey, error) {
@@ -361,12 +363,18 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 		var eventsRequests proto.Events
 
 		const maxBodySize = 1 << 20 // 1 MB
-		body, err := io.ReadAll(io.LimitReader(r.Body, maxBodySize))
+		r.Body = http.MaxBytesReader(w, r.Body, maxBodySize)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-
-			log.Println(err)
-			writeJSON(w, "bad input")
+			var maxBytesErr *http.MaxBytesError
+			if errors.As(err, &maxBytesErr) {
+				w.WriteHeader(http.StatusRequestEntityTooLarge)
+				writeJSON(w, "request body too large")
+			} else {
+				w.WriteHeader(http.StatusBadRequest)
+				log.Println(err)
+				writeJSON(w, "bad input")
+			}
 
 			return
 		}

@@ -52,7 +52,6 @@ func TestFetchEvents(t *testing.T) {
 		{"from first event returns rest", timestamps[0], 2},
 		{"from second event returns last", timestamps[1], 1},
 		{"from last event returns nothing", timestamps[2], 0},
-		// BUG: current cursor logic returns 1 event when from is beyond the last event
 		{"from beyond last event returns nothing", timestamps[2] + 1000, 0},
 	}
 
