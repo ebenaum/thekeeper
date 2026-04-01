@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"math/rand"
+	"sync/atomic"
 	"time"
 
 	"github.com/ebenaum/thekeeper/proto"
@@ -61,6 +61,7 @@ func LinkState(db *sqlx.DB, actorID int64, publicKey []byte) (ActorSpace, error)
 	if err != nil {
 		return "", fmt.Errorf("begin: %w", err)
 	}
+	defer tx.Rollback()
 
 	var publicKeyID int64
 	err = tx.QueryRowx(`INSERT INTO public_keys (public_key) VALUES (?) RETURNING id`, publicKey).Scan(&publicKeyID)
@@ -130,7 +131,7 @@ func UseAuthKey(db *sqlx.DB, key string) (int64, error) {
 	var actorID int64
 
 	err := db.QueryRowx(
-		`UPDATE auth_keys SET redeemed_at=? WHERE key=? RETURNING actor_id`,
+		`UPDATE auth_keys SET redeemed_at=? WHERE key=? AND redeemed_at IS NULL RETURNING actor_id`,
 		time.Now().UTC().Unix(),
 		key,
 	).Scan(&actorID)
@@ -168,6 +169,7 @@ func GetState(db *sqlx.DB, publicKey []byte) (int64, ActorSpace, error) {
 	if err != nil {
 		return -1, "", fmt.Errorf("begin: %w", err)
 	}
+	defer tx.Rollback()
 
 	var publicKeyID int64
 	err = tx.QueryRowx(`INSERT INTO public_keys (public_key) VALUES (?) RETURNING id`, publicKey).Scan(&publicKeyID)
@@ -193,18 +195,33 @@ func GetState(db *sqlx.DB, publicKey []byte) (int64, ActorSpace, error) {
 	return id, space, nil
 }
 
+var lastTs atomic.Int64
+
+func nextTimestamp() int64 {
+	now := time.Now().UnixMicro()
+	for {
+		last := lastTs.Load()
+		next := now
+		if next <= last {
+			next = last + 1
+		}
+		if lastTs.CompareAndSwap(last, next) {
+			return next
+		}
+	}
+}
+
 func InsertEvents(db *sqlx.DB, sourceActorID int64, events []*proto.Event) ([]int64, error) {
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, fmt.Errorf("begin: %w", err)
 	}
+	defer tx.Rollback()
 
 	ids := make([]int64, len(events))
 
-	ts := time.Now().UnixMilli()*1000 + rand.Int63n(1000)
-
 	for i, event := range events {
-		ts += int64(i)
+		ts := nextTimestamp()
 
 		event.Ts = ts
 

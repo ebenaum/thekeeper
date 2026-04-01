@@ -18,7 +18,7 @@ func Run(db *sqlx.DB, tsResultsToInclude map[int64]bool) ([]RunEventResult, erro
 
 	results := make([]RunEventResult, 0)
 
-	records, err := GetEvents(db, -1, EventRecordStatusAll)
+	records, err := GetEvents(db, -1, EventRecordStatusAccepted|EventRecordStatusPending)
 	if err != nil {
 		return nil, fmt.Errorf("get events: %w", err)
 	}
@@ -27,7 +27,7 @@ func Run(db *sqlx.DB, tsResultsToInclude map[int64]bool) ([]RunEventResult, erro
 
 	for _, record := range records {
 		err := space.Process(record.SourceActorID, &record.Event)
-		if err != nil && record.Status&(EventRecordStatusPending|EventRecordStatusRejected) == 0 {
+		if err != nil && record.Status == EventRecordStatusAccepted {
 			return nil, fmt.Errorf(
 				"corrupted state: event %d has status %v. Process returned: %w",
 				record.Event.Ts,
@@ -99,20 +99,15 @@ func FetchEvents(db *sqlx.DB, sourceActorID int64, space ActorSpace, from int64)
 		}
 	}
 
-	var cursor int
 	events := projection.GetEvents()
 
-	for cursor = range events {
-		if events[cursor].Ts > from {
-			break
+	for i, event := range events {
+		if event.Ts > from {
+			return events[i:], nil
 		}
 	}
 
-	if len(events) > 0 && events[cursor].Ts == from {
-		return nil, nil
-	}
-
-	return events[cursor:], nil
+	return nil, nil
 }
 
 func InsertAndCheckEvents(db *sqlx.DB, from int64, sourceActorID int64, newEvents []*proto.Event) ([]RunEventResult, error) {

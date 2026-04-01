@@ -80,7 +80,7 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 			return fmt.Errorf("not authorized: actor does not exist")
 		}
 
-		if sourceActorID != actorID && s.Permission.Actors[sourceActorID] != PermissionOrga {
+		if sourceActorID != actorID {
 			return fmt.Errorf("not authorized: missing permission")
 		}
 

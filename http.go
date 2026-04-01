@@ -29,6 +29,16 @@ func (e Error) Error() string {
 	return e.Private.Error()
 }
 
+type jsonMessage struct {
+	Message string `json:"message"`
+}
+
+func writeJSON(w http.ResponseWriter, msg string) {
+	if err := json.NewEncoder(w).Encode(jsonMessage{Message: msg}); err != nil {
+		log.Println(err)
+	}
+}
+
 func validatePublicKey(tokenString string) (ecdsa.PublicKey, error) {
 	var publicKey ecdsa.PublicKey
 
@@ -115,13 +125,13 @@ func HandleState(db *sqlx.DB) http.HandlerFunc {
 
 			if errors.As(err, &errplus) {
 				log.Println(errplus.Private)
-				fmt.Fprintf(w, `{"message": "%s"}`, errplus.Public.Error())
+				writeJSON(w, errplus.Public.Error())
 
 				return
 			}
 
 			log.Println(err)
-			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+			writeJSON(w, err.Error())
 
 			return
 		}
@@ -134,7 +144,7 @@ func HandleState(db *sqlx.DB) http.HandlerFunc {
 		from, err := strconv.ParseInt(r.URL.Query().Get("from"), 10, 64)
 		if err != nil {
 			log.Println(err)
-			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+			writeJSON(w, err.Error())
 
 			return
 		}
@@ -165,13 +175,8 @@ func HandleState(db *sqlx.DB) http.HandlerFunc {
 
 		//		w.Header().Set("Content-Type", "application/x-protobuf")
 
-		_, err = w.Write(responseEncoded)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-
+		if _, err = w.Write(responseEncoded); err != nil {
 			log.Println(err)
-
-			return
 		}
 
 	}
@@ -202,13 +207,13 @@ func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
 
 			if errors.As(err, &errplus) {
 				log.Println(errplus.Private)
-				fmt.Fprintf(w, `{"message": "%s"}`, errplus.Public.Error())
+				writeJSON(w, errplus.Public.Error())
 
 				return
 			}
 
 			log.Println(err)
-			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+			writeJSON(w, err.Error())
 
 			return
 		}
@@ -217,16 +222,7 @@ func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 
 			log.Printf("actor %d space:%s not authorized to create auth link", actorID, actorSpace)
-			fmt.Fprintf(w, `{"message": "not authorized"}`)
-
-			return
-		}
-
-		if actorSpace != ActorSpaceOrga {
-			w.WriteHeader(http.StatusBadRequest)
-
-			log.Printf("actor %d space:%s not authorized to create auth link", actorID, actorSpace)
-			fmt.Fprintf(w, `{"message": "not authorized"}`)
+			writeJSON(w, "not authorized")
 
 			return
 		}
@@ -244,7 +240,7 @@ func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println(err)
-			fmt.Fprintf(w, `{"message": "internal error"}`)
+			writeJSON(w, "internal error")
 
 			return
 		}
@@ -253,7 +249,7 @@ func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 
 			log.Printf("actor %d not authorized to create auth link for actor %d of space %q", actorID, actorIDToLink, actorSpaceToLink)
-			fmt.Fprintf(w, `{"message": "not authorized"}`)
+			writeJSON(w, "not authorized")
 
 			return
 		}
@@ -267,7 +263,7 @@ func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		fmt.Fprintf(w, `{"message": "%s"}`, authKey)
+		writeJSON(w, authKey)
 	}
 }
 
@@ -296,13 +292,13 @@ func HandleRedeemAuthKey(db *sqlx.DB) http.HandlerFunc {
 
 			if errors.As(err, &errplus) {
 				log.Println(errplus.Private)
-				fmt.Fprintf(w, `{"message": "%s"}`, errplus.Public.Error())
+				writeJSON(w, errplus.Public.Error())
 
 				return
 			}
 
 			log.Println(err)
-			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+			writeJSON(w, err.Error())
 
 			return
 		}
@@ -348,13 +344,13 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 
 			if errors.As(err, &errplus) {
 				log.Println(errplus.Private)
-				fmt.Fprintf(w, `{"message": "%s"}`, errplus.Public.Error())
+				writeJSON(w, errplus.Public.Error())
 
 				return
 			}
 
 			log.Println(err)
-			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+			writeJSON(w, err.Error())
 
 			return
 		}
@@ -366,12 +362,19 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 
 		var eventsRequests proto.Events
 
+		const maxBodySize = 1 << 20 // 1 MB
+		r.Body = http.MaxBytesReader(w, r.Body, maxBodySize)
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-
-			log.Println(err)
-			fmt.Fprint(w, `{"message": "bad input"}`)
+			var maxBytesErr *http.MaxBytesError
+			if errors.As(err, &maxBytesErr) {
+				w.WriteHeader(http.StatusRequestEntityTooLarge)
+				writeJSON(w, "request body too large")
+			} else {
+				w.WriteHeader(http.StatusBadRequest)
+				log.Println(err)
+				writeJSON(w, "bad input")
+			}
 
 			return
 		}
@@ -381,7 +384,7 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 
 			log.Println(err)
-			fmt.Fprint(w, `{"message": "bad input"}`)
+			writeJSON(w, "bad input")
 
 			return
 		}
@@ -389,7 +392,7 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 		if len(eventsRequests.Events) == 0 {
 			w.WriteHeader(http.StatusBadRequest)
 
-			fmt.Fprint(w, `{"message": "bad input"}`)
+			writeJSON(w, "bad input")
 
 			return
 		}
@@ -399,19 +402,13 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 
 			log.Println(err)
-			fmt.Fprintf(w, `{"message": "%s"}`, err.Error())
+			writeJSON(w, err.Error())
 
 			return
 		}
 
-		encoder := json.NewEncoder(w)
-		err = encoder.Encode(result)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-
+		if err = json.NewEncoder(w).Encode(result); err != nil {
 			log.Println(err)
-
-			return
 		}
 	}
 }
