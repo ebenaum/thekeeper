@@ -1,13 +1,11 @@
 package main
 
 import (
-	cryptorand "crypto/rand"
 	"fmt"
 	"log"
 	"net/http"
 	"net/mail"
 	"os"
-	"strings"
 
 	_ "embed"
 
@@ -43,15 +41,18 @@ func main() {
 	// Migration: add email column if not present (idempotent for existing DBs)
 	_, _ = db.Exec(`ALTER TABLE actors ADD COLUMN email TEXT`)
 
+	smtpCfg, _ := LoadSMTPConfig() // OK if not set — CLI commands that need it will fail with a clear error
+	appURL := os.Getenv("APP_URL")
+
 	switch os.Args[1] {
 	case "http":
-		err = httpserver(db)
+		err = httpserver(db, smtpCfg, appURL)
 	case "https":
 		if len(os.Args) < 5 {
 			fmt.Println(usage())
 			os.Exit(1)
 		}
-		err = httpsserver(db)
+		err = httpsserver(db, smtpCfg, appURL)
 	case "reset":
 		err = insertreset(db)
 	case "create-orga":
@@ -105,18 +106,20 @@ func main() {
 	}
 }
 
-func httpserver(db *sqlx.DB) error {
+func httpserver(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) error {
 	http.HandleFunc("/state", HandleState(db))
 	http.HandleFunc("/auth/handles/{handle}", HandleCreateAuthKey(db))
 	http.HandleFunc("/auth/redeem/{key}", HandleRedeemAuthKey(db))
+	http.HandleFunc("/auth/invite", HandleInvite(db, smtpCfg, appURL))
 
 	return http.ListenAndServe(":8081", nil)
 }
 
-func httpsserver(db *sqlx.DB) error {
+func httpsserver(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) error {
 	http.HandleFunc("/state", HandleState(db))
 	http.HandleFunc("/auth/handles/{handle}", HandleCreateAuthKey(db))
 	http.HandleFunc("/auth/redeem/{key}", HandleRedeemAuthKey(db))
+	http.HandleFunc("/auth/invite", HandleInvite(db, smtpCfg, appURL))
 
 	return http.ListenAndServeTLS(":443", os.Args[3], os.Args[4], nil)
 }
@@ -250,54 +253,6 @@ func deletecharacter(db *sqlx.DB, characterID string) error {
 	}
 
 	return nil
-}
-
-func generateHandle(email string) string {
-	local := email
-	if idx := strings.Index(email, "@"); idx != -1 {
-		local = email[:idx]
-	}
-
-	handle := strings.ToLower(local)
-	// Replace non-alphanumeric with -
-	var buf strings.Builder
-	for _, r := range handle {
-		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
-			buf.WriteRune(r)
-		} else {
-			buf.WriteRune('-')
-		}
-	}
-	handle = buf.String()
-
-	// Trim leading/trailing dashes
-	handle = strings.Trim(handle, "-")
-
-	if handle == "" {
-		handle = "player"
-	}
-
-	return handle
-}
-
-func generateUniqueHandle(db *sqlx.DB, email string, explicitHandle string) (string, error) {
-	handle := explicitHandle
-	if handle == "" {
-		handle = generateHandle(email)
-	}
-
-	// Check if handle already taken
-	_, err := FindActorIDByHandle(db, handle)
-	if err != nil {
-		// Not found — handle is available
-		return handle, nil
-	}
-
-	// Collision — append random suffix
-	suffix := cryptorand.Text()[:6]
-	handle = handle + "-" + suffix
-
-	return handle, nil
 }
 
 func invite(db *sqlx.DB, email string, explicitHandle string) error {

@@ -4,6 +4,7 @@ import (
 	cryptorand "crypto/rand"
 	"database/sql"
 	"fmt"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -110,6 +111,54 @@ func FindActorIDByHandle(db *sqlx.DB, handle string) (int64, error) {
 	}
 
 	return -1, fmt.Errorf("handle not found for handle %q", handle)
+}
+
+func generateHandle(email string) string {
+	local := email
+	if idx := strings.Index(email, "@"); idx != -1 {
+		local = email[:idx]
+	}
+
+	handle := strings.ToLower(local)
+	// Replace non-alphanumeric with -
+	var buf strings.Builder
+	for _, r := range handle {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+			buf.WriteRune(r)
+		} else {
+			buf.WriteRune('-')
+		}
+	}
+	handle = buf.String()
+
+	// Trim leading/trailing dashes
+	handle = strings.Trim(handle, "-")
+
+	if handle == "" {
+		handle = "player"
+	}
+
+	return handle
+}
+
+func generateUniqueHandle(db *sqlx.DB, email string, explicitHandle string) (string, error) {
+	handle := explicitHandle
+	if handle == "" {
+		handle = generateHandle(email)
+	}
+
+	// Check if handle already taken
+	_, err := FindActorIDByHandle(db, handle)
+	if err != nil {
+		// Not found — handle is available
+		return handle, nil
+	}
+
+	// Collision — append random suffix
+	suffix := cryptorand.Text()[:6]
+	handle = handle + "-" + suffix
+
+	return handle, nil
 }
 
 func GetActorSpaceByActorID(db *sqlx.DB, actorID int64) (ActorSpace, error) {

@@ -412,3 +412,99 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 		}
 	}
 }
+
+func HandleInvite(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost && r.Method != http.MethodOptions {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		_, actorSpace, err := auth(db, r.Header.Get("Authorization"))
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			writeJSON(w, "not authorized")
+			return
+		}
+
+		if actorSpace != ActorSpaceOrga {
+			w.WriteHeader(http.StatusForbidden)
+			writeJSON(w, "not authorized")
+			return
+		}
+
+		var req struct {
+			Email  string `json:"email"`
+			Handle string `json:"handle"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			writeJSON(w, "bad input")
+			return
+		}
+
+		if req.Email == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			writeJSON(w, "email is required")
+			return
+		}
+
+		handle, err := generateUniqueHandle(db, req.Email, req.Handle)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			writeJSON(w, "internal error")
+			return
+		}
+
+		actorID, err := CreatePlayerActor(db, req.Email)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			writeJSON(w, "internal error")
+			return
+		}
+
+		result, err := InsertAndCheckEvents(db, -1, actorID, []*proto.Event{
+			{
+				Msg: &proto.Event_SeedActor{
+					SeedActor: &proto.EventSeedActor{
+						Handle: handle,
+					},
+				},
+			},
+		})
+		if err != nil || result[0].Status != EventRecordStatusAccepted {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Printf("seed actor failed: err=%v result=%v", err, result)
+			writeJSON(w, "internal error")
+			return
+		}
+
+		code, err := InsertAuthKey(db, actorID)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			writeJSON(w, "internal error")
+			return
+		}
+
+		if err := SendInviteEmail(smtpCfg, req.Email, appURL, code); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			writeJSON(w, "failed to send email")
+			return
+		}
+
+		writeJSON(w, handle)
+	}
+}
