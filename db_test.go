@@ -200,3 +200,44 @@ func TestSetActorEmail(t *testing.T) {
 		t.Errorf("got ID %d, want %d", foundID, actorID)
 	}
 }
+
+func TestGetState_RejectsUnknownKey(t *testing.T) {
+	db := setupTestDB(t)
+	db.Exec(`ALTER TABLE actors ADD COLUMN email TEXT`)
+
+	unknownKey := []byte("unknown-public-key-bytes-here-32")
+
+	_, _, err := GetState(db, unknownKey)
+	if err == nil {
+		t.Error("GetState should reject unknown public keys")
+	}
+}
+
+func TestGetState_AcceptsKnownKey(t *testing.T) {
+	db := setupTestDB(t)
+	db.Exec(`ALTER TABLE actors ADD COLUMN email TEXT`)
+
+	// Create an actor and link a key
+	actorID, err := CreatePlayerActor(db, "test@example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	publicKey := []byte("known-public-key-bytes-here--32!")
+
+	_, err = LinkState(db, actorID, publicKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	gotID, gotSpace, err := GetState(db, publicKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gotID != actorID {
+		t.Errorf("got ID %d, want %d", gotID, actorID)
+	}
+	if gotSpace != ActorSpacePlayer {
+		t.Errorf("got space %q, want %q", gotSpace, ActorSpacePlayer)
+	}
+}

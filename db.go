@@ -3,7 +3,6 @@ package main
 import (
 	cryptorand "crypto/rand"
 	"database/sql"
-	"errors"
 	"fmt"
 	"sync/atomic"
 	"time"
@@ -191,40 +190,8 @@ func GetState(db *sqlx.DB, publicKey []byte) (int64, ActorSpace, error) {
 	WHERE public_keys.public_key=?`,
 		publicKey,
 	).Scan(&id, &space)
-
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return -1, "", fmt.Errorf("query: %w", err)
-	}
-
-	if err == nil {
-		return id, space, nil
-	}
-
-	tx, err := db.Beginx()
 	if err != nil {
-		return -1, "", fmt.Errorf("begin: %w", err)
-	}
-	defer tx.Rollback()
-
-	var publicKeyID int64
-	err = tx.QueryRowx(`INSERT INTO public_keys (public_key) VALUES (?) RETURNING id`, publicKey).Scan(&publicKeyID)
-	if err != nil {
-		return -1, "", fmt.Errorf("insert public key: %w", err)
-	}
-
-	err = tx.QueryRowx(`INSERT INTO actors DEFAULT VALUES RETURNING id, space`).Scan(&id, &space)
-	if err != nil {
-		return -1, "", fmt.Errorf("insert actor: %w", err)
-	}
-
-	_, err = tx.Exec(`INSERT INTO actors_public_keys (actor_id, public_key_id) VALUES (?, ?)`, id, publicKeyID)
-	if err != nil {
-		return -1, "", fmt.Errorf("insert actors_public_keys: %w", err)
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return -1, "", fmt.Errorf("commit: %w", err)
+		return -1, "", fmt.Errorf("unknown public key: %w", err)
 	}
 
 	return id, space, nil
