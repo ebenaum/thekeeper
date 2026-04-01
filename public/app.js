@@ -3074,14 +3074,14 @@ async function print() {
     "\r\n",
   );
 
-  if (universMap["2025:" + character.orga?.playerGroup]) {
+  if (universMap["2026:" + character.orga?.playerGroup]) {
     bgGroupElement.textContent = (
-      universMap["2025:" + character.orga?.playerGroup].description || ""
+      universMap["2026:" + character.orga?.playerGroup].description || ""
     ).replaceAll("\n", "\r\n");
 
     bgGroupElement.parentElement?.classList.remove("d-none");
 
-    bgGroupTitleElement.textContent = `Backround de groupe : ${universMap["2025:" + character.orga?.playerGroup].label}`;
+    bgGroupTitleElement.textContent = `Backround de groupe : ${universMap["2026:" + character.orga?.playerGroup].label}`;
   }
 
   const deathRulesTitleElement = document.createElement("h2");
