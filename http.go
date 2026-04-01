@@ -173,13 +173,8 @@ func HandleState(db *sqlx.DB) http.HandlerFunc {
 
 		//		w.Header().Set("Content-Type", "application/x-protobuf")
 
-		_, err = w.Write(responseEncoded)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-
+		if _, err = w.Write(responseEncoded); err != nil {
 			log.Println(err)
-
-			return
 		}
 
 	}
@@ -413,14 +408,8 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		encoder := json.NewEncoder(w)
-		err = encoder.Encode(result)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-
+		if err = json.NewEncoder(w).Encode(result); err != nil {
 			log.Println(err)
-
-			return
 		}
 	}
 }
