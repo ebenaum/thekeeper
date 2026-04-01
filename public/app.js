@@ -615,7 +615,7 @@ async function personnageOrga(
 
     titleElement.value = player.name || "Sans nom";
 
-    infoElement.innerHTML = `${univers[player.group]?.label || "Sans monde"} | ${univers[player.worldOrigin]?.label || "Sans status"} | ${univers[player.worldApproach]?.label || "Sans alignement"}`;
+    infoElement.innerHTML = `${univers[player.group]?.label || "Sans monde"} | ${univers[player.worldOrigin]?.label || "Sans position"}`;
     raceVdvElement.textContent = `${univers[player.race]?.label || "Sans race"} | ${univers[player.vdv]?.label || "Sans Voie de Vie"}`;
 
     const characteristics = [];
@@ -1091,8 +1091,10 @@ async function personnage() {
   const /** @type {UniversEntry[]} */ univers = await universResponse.json();
   const races = univers.filter((entry) => entry.tags.includes("race"));
   const mondes = univers.filter((entry) => entry.tags.includes("monde"));
-  const origins = univers.filter((entry) =>
-    entry.tags.includes("world-of-origin"),
+  const origins = univers.filter(
+    (entry) =>
+      entry.tags.includes("world-of-origin") &&
+      entry.tags.includes("edition-2026"),
   );
   const approachs = univers.filter((entry) => entry.tags.includes("approach"));
   const vdvs = univers.filter((entry) => entry.tags.includes("vdv"));
@@ -1913,24 +1915,32 @@ async function personnage() {
   });
 
   /**
-   * Filter races based on the selected monde
+   * Filter races and VdVs based on the selected monde.
+   * Items matching the monde or having no monde tag are shown.
    * @param {string?} mondeKey - The key of the selected monde
    */
   function filterRacesAndVdvsByMonde(mondeKey) {
-    const elements = /** @type {NodeListOf<HTMLElement>} */ (
-      document.querySelectorAll("li[data-monde]")
+    const raceElements = /** @type {NodeListOf<HTMLElement>} */ (
+      raceSelect?.querySelectorAll("li")
+    );
+    const vdvElements = /** @type {NodeListOf<HTMLElement>} */ (
+      vdvSelect?.querySelectorAll("li")
     );
 
-    elements?.forEach((el) => {
-      if (el.dataset.monde === mondeKey) {
-        el.style.display = ""; // Show skill if VDV matches requirement
-      } else {
-        el.style.display = "none"; // Hide skill if VDV doesn't match or no VDV selected
-      }
+    [raceElements, vdvElements].forEach((elements) => {
+      elements?.forEach((el) => {
+        const elMonde = el.getAttribute("data-monde");
+        if (!mondeKey || !elMonde || elMonde === mondeKey) {
+          el.style.display = "";
+        } else {
+          el.style.display = "none";
+        }
+      });
     });
   }
 
   updateSkillList();
+  filterRacesAndVdvsByMonde(formResult.group || null);
 
   if (state && state.data.permission === "orga") {
     await personnageOrga(
@@ -1999,9 +2009,72 @@ async function personnage() {
         delete formResult[key];
       }
 
+      if (key === "group") {
+        const selectedMonde = op === "select" ? value : null;
+        filterRacesAndVdvsByMonde(selectedMonde);
+
+        // Reset race if it doesn't belong to the new monde
+        if (formResult.race) {
+          const raceEntry = universMap[formResult.race];
+          const raceMonde = raceEntry?.tags?.find((t) =>
+            t.startsWith("monde:"),
+          )?.split(":")[1];
+          if (raceMonde && raceMonde !== selectedMonde) {
+            formResult.race = "";
+            raceSelect?.querySelectorAll("li.selected").forEach((li) => {
+              li.classList.remove("selected");
+            });
+            const raceSummary = document.querySelector(
+              '.race .selected-section',
+            );
+            if (raceSummary) raceSummary.textContent = "";
+          }
+        }
+
+        // Reset VdV if it doesn't belong to the new monde
+        if (formResult.vdv) {
+          const vdvEntry = universMap[formResult.vdv];
+          const vdvMonde = vdvEntry?.tags?.find((t) =>
+            t.startsWith("monde:"),
+          )?.split(":")[1];
+          if (vdvMonde && vdvMonde !== selectedMonde) {
+            formResult.vdv = "";
+            vdvSelect?.querySelectorAll("li.selected").forEach((li) => {
+              li.classList.remove("selected");
+            });
+            const vdvSummary = document.querySelector(
+              '.vdv .selected-section',
+            );
+            if (vdvSummary) vdvSummary.textContent = "";
+          }
+        }
+      }
+
+      // Progressive disclosure: open the next section after a selection
+      if (op === "select") {
+        const flow = ["group", "worldOrigin", "race", "vdv"];
+        const nextIndex = flow.indexOf(key) + 1;
+        if (nextIndex > 0 && nextIndex < flow.length) {
+          const nextSection = document.querySelector(
+            "details." + flow[nextIndex],
+          );
+          if (nextSection) nextSection.setAttribute("open", "");
+        }
+      }
+
       updateSkillList();
     });
   });
+
+  // On load: open the first section that has no selection yet
+  const flow = ["group", "worldOrigin", "race", "vdv"];
+  for (const key of flow) {
+    if (!formResult[key]) {
+      const section = document.querySelector("details." + key);
+      if (section) section.setAttribute("open", "");
+      break;
+    }
+  }
 
   if (state?.data.permission === "orga") {
     Array.from(document.getElementsByClassName("description-edition")).forEach(
