@@ -374,7 +374,8 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 
 		var eventsRequests proto.Events
 
-		body, err := io.ReadAll(r.Body)
+		const maxBodySize = 1 << 20 // 1 MB
+		body, err := io.ReadAll(io.LimitReader(r.Body, maxBodySize))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 
