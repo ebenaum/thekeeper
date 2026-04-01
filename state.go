@@ -18,7 +18,7 @@ func Run(db *sqlx.DB, tsResultsToInclude map[int64]bool) ([]RunEventResult, erro
 
 	results := make([]RunEventResult, 0)
 
-	records, err := GetEvents(db, -1, EventRecordStatusAll)
+	records, err := GetEvents(db, -1, EventRecordStatusAccepted|EventRecordStatusPending)
 	if err != nil {
 		return nil, fmt.Errorf("get events: %w", err)
 	}
@@ -27,7 +27,7 @@ func Run(db *sqlx.DB, tsResultsToInclude map[int64]bool) ([]RunEventResult, erro
 
 	for _, record := range records {
 		err := space.Process(record.SourceActorID, &record.Event)
-		if err != nil && record.Status&(EventRecordStatusPending|EventRecordStatusRejected) == 0 {
+		if err != nil && record.Status == EventRecordStatusAccepted {
 			return nil, fmt.Errorf(
 				"corrupted state: event %d has status %v. Process returned: %w",
 				record.Event.Ts,
