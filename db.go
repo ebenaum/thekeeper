@@ -127,6 +127,41 @@ func GetActorSpaceByActorID(db *sqlx.DB, actorID int64) (ActorSpace, error) {
 	)
 }
 
+func CreatePlayerActor(db *sqlx.DB, email string) (int64, error) {
+	var id int64
+
+	err := db.QueryRowx(
+		`INSERT INTO actors (space, email) VALUES (?, ?) RETURNING id`,
+		ActorSpacePlayer,
+		email,
+	).Scan(&id)
+	if err != nil {
+		return -1, fmt.Errorf("insert actor: %w", err)
+	}
+
+	return id, nil
+}
+
+func FindActorIDByEmail(db *sqlx.DB, email string) (int64, error) {
+	var id int64
+
+	err := db.QueryRowx(`SELECT id FROM actors WHERE email = ?`, email).Scan(&id)
+	if err != nil {
+		return -1, fmt.Errorf("find actor by email: %w", err)
+	}
+
+	return id, nil
+}
+
+func SetActorEmail(db *sqlx.DB, actorID int64, email string) error {
+	_, err := db.Exec(`UPDATE actors SET email = ? WHERE id = ?`, email, actorID)
+	if err != nil {
+		return fmt.Errorf("set actor email: %w", err)
+	}
+
+	return nil
+}
+
 func UseAuthKey(db *sqlx.DB, key string) (int64, error) {
 	var actorID int64
 

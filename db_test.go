@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"testing"
 
 	"github.com/ebenaum/thekeeper/proto"
@@ -112,5 +113,90 @@ func TestFindActorIDByHandle(t *testing.T) {
 				t.Errorf("got ID %d, want %d", gotID, tt.wantID)
 			}
 		})
+	}
+}
+
+func TestCreatePlayerActor(t *testing.T) {
+	db := setupTestDB(t)
+
+	// Migration: add email column
+	db.Exec(`ALTER TABLE actors ADD COLUMN email TEXT`)
+
+	actorID, err := CreatePlayerActor(db, "player@example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if actorID <= 0 {
+		t.Errorf("expected positive actor ID, got %d", actorID)
+	}
+
+	// Verify email stored
+	var email sql.NullString
+	err = db.QueryRowx("SELECT email FROM actors WHERE id = ?", actorID).Scan(&email)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !email.Valid || email.String != "player@example.com" {
+		t.Errorf("email = %v, want player@example.com", email)
+	}
+
+	// Verify space is player
+	space, err := GetActorSpaceByActorID(db, actorID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if space != ActorSpacePlayer {
+		t.Errorf("space = %q, want %q", space, ActorSpacePlayer)
+	}
+}
+
+func TestFindActorIDByEmail(t *testing.T) {
+	db := setupTestDB(t)
+	db.Exec(`ALTER TABLE actors ADD COLUMN email TEXT`)
+
+	actorID, _ := CreatePlayerActor(db, "find-me@example.com")
+
+	tests := []struct {
+		name    string
+		email   string
+		wantID  int64
+		wantErr bool
+	}{
+		{"existing email", "find-me@example.com", actorID, false},
+		{"non-existent email", "nobody@example.com", -1, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotID, err := FindActorIDByEmail(db, tt.email)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !tt.wantErr && gotID != tt.wantID {
+				t.Errorf("got ID %d, want %d", gotID, tt.wantID)
+			}
+		})
+	}
+}
+
+func TestSetActorEmail(t *testing.T) {
+	db := setupTestDB(t)
+	db.Exec(`ALTER TABLE actors ADD COLUMN email TEXT`)
+
+	var actorID int64
+	db.QueryRowx("INSERT INTO actors (space) VALUES ('player') RETURNING id").Scan(&actorID)
+
+	err := SetActorEmail(db, actorID, "new@example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	foundID, err := FindActorIDByEmail(db, "new@example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if foundID != actorID {
+		t.Errorf("got ID %d, want %d", foundID, actorID)
 	}
 }
