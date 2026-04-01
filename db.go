@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"math/rand"
+	"sync/atomic"
 	"time"
 
 	"github.com/ebenaum/thekeeper/proto"
@@ -195,6 +195,22 @@ func GetState(db *sqlx.DB, publicKey []byte) (int64, ActorSpace, error) {
 	return id, space, nil
 }
 
+var lastTs atomic.Int64
+
+func nextTimestamp() int64 {
+	now := time.Now().UnixMicro()
+	for {
+		last := lastTs.Load()
+		next := now
+		if next <= last {
+			next = last + 1
+		}
+		if lastTs.CompareAndSwap(last, next) {
+			return next
+		}
+	}
+}
+
 func InsertEvents(db *sqlx.DB, sourceActorID int64, events []*proto.Event) ([]int64, error) {
 	tx, err := db.Beginx()
 	if err != nil {
@@ -204,10 +220,8 @@ func InsertEvents(db *sqlx.DB, sourceActorID int64, events []*proto.Event) ([]in
 
 	ids := make([]int64, len(events))
 
-	ts := time.Now().UnixMilli()*1000 + rand.Int63n(1000)
-
 	for i, event := range events {
-		ts += int64(i)
+		ts := nextTimestamp()
 
 		event.Ts = ts
 
