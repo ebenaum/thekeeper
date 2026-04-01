@@ -508,3 +508,54 @@ func HandleInvite(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.HandlerFu
 		writeJSON(w, handle)
 	}
 }
+
+func HandleRequestLink(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost && r.Method != http.MethodOptions {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		var req struct {
+			Email string `json:"email"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeJSON(w, "if this email is registered, a link has been sent")
+			return
+		}
+
+		// Always return the same response to prevent email enumeration
+		defer func() {
+			writeJSON(w, "if this email is registered, a link has been sent")
+		}()
+
+		if req.Email == "" {
+			return
+		}
+
+		actorID, err := FindActorIDByEmail(db, req.Email)
+		if err != nil {
+			// Email not found — do nothing, same response
+			return
+		}
+
+		code, err := InsertAuthKey(db, actorID)
+		if err != nil {
+			log.Printf("request-link: insert auth key for actor %d: %v", actorID, err)
+			return
+		}
+
+		if err := SendInviteEmail(smtpCfg, req.Email, appURL, code); err != nil {
+			log.Printf("request-link: send email to %s: %v", req.Email, err)
+		}
+	}
+}

@@ -111,6 +111,7 @@ func httpserver(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) error {
 	http.HandleFunc("/auth/handles/{handle}", HandleCreateAuthKey(db))
 	http.HandleFunc("/auth/redeem/{key}", HandleRedeemAuthKey(db))
 	http.HandleFunc("/auth/invite", HandleInvite(db, smtpCfg, appURL))
+	http.HandleFunc("/auth/request-link", HandleRequestLink(db, smtpCfg, appURL))
 
 	return http.ListenAndServe(":8081", nil)
 }
@@ -120,6 +121,7 @@ func httpsserver(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) error {
 	http.HandleFunc("/auth/handles/{handle}", HandleCreateAuthKey(db))
 	http.HandleFunc("/auth/redeem/{key}", HandleRedeemAuthKey(db))
 	http.HandleFunc("/auth/invite", HandleInvite(db, smtpCfg, appURL))
+	http.HandleFunc("/auth/request-link", HandleRequestLink(db, smtpCfg, appURL))
 
 	return http.ListenAndServeTLS(":443", os.Args[3], os.Args[4], nil)
 }
