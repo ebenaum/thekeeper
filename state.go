@@ -99,20 +99,15 @@ func FetchEvents(db *sqlx.DB, sourceActorID int64, space ActorSpace, from int64)
 		}
 	}
 
-	var cursor int
 	events := projection.GetEvents()
 
-	for cursor = range events {
-		if events[cursor].Ts > from {
-			break
+	for i, event := range events {
+		if event.Ts > from {
+			return events[i:], nil
 		}
 	}
 
-	if len(events) > 0 && events[cursor].Ts == from {
-		return nil, nil
-	}
-
-	return events[cursor:], nil
+	return nil, nil
 }
 
 func InsertAndCheckEvents(db *sqlx.DB, from int64, sourceActorID int64, newEvents []*proto.Event) ([]RunEventResult, error) {
