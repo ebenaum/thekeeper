@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/mail"
 	"os"
 	"strings"
 
@@ -15,7 +16,7 @@ import (
 )
 
 func usage() string {
-	return "./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle>|link-orga <db-path> <handle>|delete-player <db-path> <player id>|delete-character <db-path> <character id>|invite <db-path> <email> [handle]"
+	return "./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle>|link-orga <db-path> <handle>|delete-player <db-path> <player id>|delete-character <db-path> <character id>|invite <db-path> <email> [handle]|migrate-emails <db-path>"
 }
 
 //go:embed schema.sql
@@ -91,6 +92,8 @@ func main() {
 		}
 
 		err = invite(db, os.Args[3], explicitHandle)
+	case "migrate-emails":
+		err = migrateEmails(db)
 	default:
 		fmt.Println(usage())
 		os.Exit(1)
@@ -346,6 +349,58 @@ func invite(db *sqlx.DB, email string, explicitHandle string) error {
 	}
 
 	fmt.Printf("Invited %s as %q (actor %d)\n", email, handle, actorID)
+
+	return nil
+}
+
+func migrateEmails(db *sqlx.DB) error {
+	// Replay events to build player→actor mapping
+	sv := NewSpaceValidation()
+
+	records, err := GetEvents(db, -1, EventRecordStatusAccepted)
+	if err != nil {
+		return fmt.Errorf("get events: %w", err)
+	}
+
+	// Track latest PlayerPerson contact per player ID
+	playerContacts := map[string]string{}
+
+	for _, record := range records {
+		sv.Process(record.SourceActorID, &record.Event)
+
+		if pp, ok := record.Event.Msg.(*proto.Event_PlayerPerson); ok {
+			playerContacts[pp.PlayerPerson.PlayerId] = pp.PlayerPerson.Contact
+		}
+	}
+
+	migrated := 0
+	skipped := 0
+
+	for playerID, contact := range playerContacts {
+		player, exists := sv.PlayersIDs[playerID]
+		if !exists {
+			continue
+		}
+
+		addr, err := mail.ParseAddress(contact)
+		if err != nil {
+			fmt.Printf("SKIP player %s (actor %d): could not parse %q\n", playerID, player.ActorID, contact)
+			skipped++
+			continue
+		}
+
+		err = SetActorEmail(db, player.ActorID, addr.Address)
+		if err != nil {
+			fmt.Printf("ERROR player %s (actor %d): %v\n", playerID, player.ActorID, err)
+			skipped++
+			continue
+		}
+
+		fmt.Printf("OK   player %s (actor %d): %s\n", playerID, player.ActorID, addr.Address)
+		migrated++
+	}
+
+	fmt.Printf("\nMigrated: %d, Skipped: %d\n", migrated, skipped)
 
 	return nil
 }
