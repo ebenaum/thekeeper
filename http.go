@@ -225,15 +225,6 @@ func HandleCreateAuthKey(db *sqlx.DB) http.HandlerFunc {
 			return
 		}
 
-		if actorSpace != ActorSpaceOrga {
-			w.WriteHeader(http.StatusBadRequest)
-
-			log.Printf("actor %d space:%s not authorized to create auth link", actorID, actorSpace)
-			writeJSON(w, "not authorized")
-
-			return
-		}
-
 		handleToLink := r.PathValue("handle")
 
 		actorIDToLink, err := FindActorIDByHandle(db, handleToLink)
