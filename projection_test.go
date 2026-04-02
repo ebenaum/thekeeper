@@ -161,3 +161,62 @@ func TestSpaceOrga_SeesAllEvents(t *testing.T) {
 		t.Errorf("orga should see all %d events, got %d", len(allEvents), len(got))
 	}
 }
+
+func TestSpacePlayer_SeesActivateCharacterEvents(t *testing.T) {
+	type eventStep struct {
+		sourceActorID int64
+		event         *proto.Event
+	}
+
+	events := []eventStep{
+		{2, seedActorEvent("player-a")},
+		{2, seedPlayerEvent("player-a", "player:a")},
+		{2, playerCharacterEvent("player:a", "char:a")},
+		{2, activateCharacterEvent("char:a", "2025")},
+		{2, activateCharacterEvent("char:a", "2026")},
+	}
+
+	sp := NewSpacePlayer(2)
+	for _, e := range events {
+		if err := sp.Process(e.sourceActorID, e.event); err != nil {
+			t.Fatalf("Process: %v", err)
+		}
+	}
+
+	got := sp.GetEvents()
+	// SeedActor + SeedPlayer + PlayerCharacter + 2 ActivateCharacter = 5
+	if len(got) != 5 {
+		t.Errorf("got %d events, want 5", len(got))
+	}
+}
+
+func TestSpacePlayer_DoesNotSeeOtherPlayersActivateCharacter(t *testing.T) {
+	type eventStep struct {
+		sourceActorID int64
+		event         *proto.Event
+	}
+
+	events := []eventStep{
+		{2, seedActorEvent("player-a")},
+		{3, seedActorEvent("player-b")},
+		{2, seedPlayerEvent("player-a", "player:a")},
+		{3, seedPlayerEvent("player-b", "player:b")},
+		{2, playerCharacterEvent("player:a", "char:a")},
+		{3, playerCharacterEvent("player:b", "char:b")},
+		{2, activateCharacterEvent("char:a", "2026")},
+		{3, activateCharacterEvent("char:b", "2026")},
+	}
+
+	sp := NewSpacePlayer(2)
+	for _, e := range events {
+		if err := sp.Process(e.sourceActorID, e.event); err != nil {
+			t.Fatalf("Process: %v", err)
+		}
+	}
+
+	got := sp.GetEvents()
+	// SeedActor + SeedPlayer + PlayerCharacter + ActivateCharacter (char:a only) = 4
+	if len(got) != 4 {
+		t.Errorf("got %d events, want 4", len(got))
+	}
+}

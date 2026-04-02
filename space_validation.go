@@ -293,6 +293,13 @@ func (s *SpacePlayer) Process(sourceActorID int64, event *proto.Event) error {
 
 		return nil
 
+	case *proto.Event_ActivateCharacter:
+		if _, exists := s.CharacterIDs[v.ActivateCharacter.CharacterId]; exists {
+			s.Events = append(s.Events, event)
+		}
+
+		return nil
+
 	default:
 		return fmt.Errorf("event %v not handled", v)
 	}
