@@ -819,9 +819,38 @@ details {
   margin-bottom: 20px;
 }
 
+.index__player__characters__character {
+  margin-bottom: 0.75em;
+  padding-bottom: 0.75em;
+  border-bottom: 1px solid #ddd;
+}
+
+.index__player__characters__character:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.character-card__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .index__player__characters__character__name {
   font-size: 1.1rem;
   font-weight: bold;
+}
+
+.character-card__peek {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  margin: 0.2em 0;
+}
+
+.character-card__actions {
+  gap: 0.75em;
+  justify-content: flex-start;
 }
 
 .save-button {

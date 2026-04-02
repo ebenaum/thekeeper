@@ -2831,7 +2831,7 @@ async function index() {
 
         if (state.data.permission !== "orga") {
           if (edition === "2026") {
-            editionActionElement.textContent = "Retirer";
+            editionActionElement.textContent = "Retirer de 2026";
             editionActionElement.classList.remove("d-none");
             editionActionElement.addEventListener("click", async () => {
               const payload = create(EventsSchema, {

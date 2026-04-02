@@ -34,19 +34,25 @@
     </template>
     <template id="template__character">
       <li class="index__player__characters__character">
-        <span class="index__player__characters__character__name"></span> |
-        <span class="index__player__characters__character__peek"></span> -
-        <a class="index__player__characters__character__link a-underline d-none"
-          >Voir / Éditer</a
-        >
-        <a
-          class="index__player__characters__character__final__link a-underline d-none"
-          target="_blank"
-          >Fiche finale</a
-        >
-        <span class="d-none character-reviewed-badge">Revue par orga</span>
-        <span class="character-edition-badge"></span>
-        <button class="character-edition-action a-underline d-none"></button>
+        <div class="character-card__row">
+          <span class="index__player__characters__character__name"></span>
+          <span class="character-edition-badge"></span>
+        </div>
+        <div class="character-card__row character-card__peek">
+          <span class="index__player__characters__character__peek"></span>
+        </div>
+        <div class="character-card__row character-card__actions">
+          <span class="d-none character-reviewed-badge">Revue par orga</span>
+          <a class="index__player__characters__character__link a-underline d-none"
+            >Voir / Éditer</a
+          >
+          <a
+            class="index__player__characters__character__final__link a-underline d-none"
+            target="_blank"
+            >Fiche finale</a
+          >
+          <button class="character-edition-action a-underline d-none"></button>
+        </div>
       </li>
     </template>
 
