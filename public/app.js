@@ -2322,8 +2322,12 @@ async function theview() {
   Object.keys(state.data.players).forEach((playerId) => {
     const player = state.data.players[playerId];
 
-    const characters =
-      player.characters.length === 0 ? ["empty"] : player.characters;
+    const characters = player.characters
+      .filter((cid) => state.data.characters[cid]?.edition === "2026");
+
+    if (characters.length === 0) {
+      return;
+    }
 
     characters.forEach((characterId) => {
       const character = state.data.characters[characterId];
@@ -2693,7 +2697,15 @@ async function index() {
         "/personnage.html?playerId=" + playerId,
       );
 
-      player.characters.forEach((characterId) => {
+      const visibleCharacters = state.data.permission === "orga"
+        ? player.characters.filter((cid) => state.data.characters[cid]?.edition === "2026")
+        : player.characters;
+
+      if (state.data.permission === "orga" && visibleCharacters.length === 0) {
+        return;
+      }
+
+      visibleCharacters.forEach((characterId) => {
         const character = state.data.characters[characterId];
         if (!character) {
           console.warn(
@@ -2762,6 +2774,68 @@ async function index() {
         characterPeek = characterPeek.filter((n) => n);
 
         characterPeekElement.textContent = characterPeek.join(" - ");
+
+        const editionBadgeElement = /** @type {HTMLElement} */ (
+          characterClone.querySelector(".character-edition-badge")
+        );
+        const editionActionElement = /** @type {HTMLButtonElement} */ (
+          characterClone.querySelector(".character-edition-action")
+        );
+
+        const edition = character.edition || "2025";
+        editionBadgeElement.textContent = edition === "optout" ? "Opt-out" : edition;
+
+        if (state.data.permission !== "orga") {
+          if (edition === "2026") {
+            editionActionElement.textContent = "Retirer";
+            editionActionElement.classList.remove("d-none");
+            editionActionElement.addEventListener("click", async () => {
+              const payload = create(EventsSchema, {
+                events: [
+                  {
+                    msg: {
+                      case: "ActivateCharacter",
+                      value: { characterId: characterId, edition: "optout" },
+                    },
+                  },
+                ],
+              });
+              await fetch(`${globalThis.env.thekeeperURL}/state`, {
+                method: "POST",
+                headers: {
+                  Authorization: await auth(state.keys.private, state.keys.public),
+                  "Content-Type": "application/x-protobuf",
+                },
+                body: toBinary(EventsSchema, payload),
+              });
+              window.location.reload();
+            });
+          } else {
+            editionActionElement.textContent = "Inscrire pour 2026";
+            editionActionElement.classList.remove("d-none");
+            editionActionElement.addEventListener("click", async () => {
+              const payload = create(EventsSchema, {
+                events: [
+                  {
+                    msg: {
+                      case: "ActivateCharacter",
+                      value: { characterId: characterId, edition: "2026" },
+                    },
+                  },
+                ],
+              });
+              await fetch(`${globalThis.env.thekeeperURL}/state`, {
+                method: "POST",
+                headers: {
+                  Authorization: await auth(state.keys.private, state.keys.public),
+                  "Content-Type": "application/x-protobuf",
+                },
+                body: toBinary(EventsSchema, payload),
+              });
+              window.location.reload();
+            });
+          }
+        }
 
         charactersElement.prepend(characterClone);
       });
