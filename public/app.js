@@ -2563,38 +2563,65 @@ async function index() {
       // Character form is usable but nothing is saved to the server
       const demoMessage = document.createElement("div");
       demoMessage.className = "demo-banner";
-      demoMessage.innerHTML = `
-        <p>Tu peux explorer la création de personnage librement.
-        Pour sauvegarder ton personnage, demande une invitation à l'organisation.</p>
-        <p><a href="/personnage.html" class="a-underline">Explorer le formulaire de personnage</a></p>
-        <hr style="border:none;border-top:1px solid #000;margin:15px 0">
-        <p>Tu as déjà reçu un lien ? Demande un nouveau lien de connexion :</p>
-        <form id="request-link-form" style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap">
-          <input type="email" id="request-link-email" placeholder="ton@email.com" required
-            style="font-family:inherit;font-size:1rem;padding:5px 10px;border:2px solid #000">
-          <button type="submit" style="font-family:inherit;font-size:1rem;padding:5px 15px;border:2px solid #000;background:#fff;cursor:pointer">Envoyer</button>
-        </form>
-        <p id="request-link-msg" style="display:none;font-style:italic;margin-top:10px"></p>
-      `;
+
+      const exploreText = document.createElement("p");
+      exploreText.textContent = "Tu peux explorer la création de personnage librement. Pour sauvegarder ton personnage, demande une invitation à l'organisation.";
+      demoMessage.appendChild(exploreText);
+
+      const exploreLink = document.createElement("p");
+      const exploreAnchor = document.createElement("a");
+      exploreAnchor.href = "/personnage.html";
+      exploreAnchor.className = "a-underline";
+      exploreAnchor.textContent = "Explorer le formulaire de personnage";
+      exploreLink.appendChild(exploreAnchor);
+      demoMessage.appendChild(exploreLink);
+
+      const separator = document.createElement("hr");
+      separator.className = "demo-banner__separator";
+      demoMessage.appendChild(separator);
+
+      const loginText = document.createElement("p");
+      loginText.textContent = "Tu as déjà reçu un lien ? Demande un nouveau lien de connexion :";
+      demoMessage.appendChild(loginText);
+
+      const requestLinkForm = document.createElement("form");
+      requestLinkForm.className = "demo-banner__form";
+
+      const emailInput = document.createElement("input");
+      emailInput.type = "email";
+      emailInput.placeholder = "ton@email.com";
+      emailInput.required = true;
+      emailInput.className = "demo-banner__input";
+      requestLinkForm.appendChild(emailInput);
+
+      const submitBtn = document.createElement("button");
+      submitBtn.type = "submit";
+      submitBtn.className = "demo-banner__submit";
+      submitBtn.textContent = "Envoyer";
+      requestLinkForm.appendChild(submitBtn);
+
+      demoMessage.appendChild(requestLinkForm);
+
+      const msg = document.createElement("p");
+      msg.className = "demo-banner__msg d-none";
+      demoMessage.appendChild(msg);
+
       containerElement.appendChild(demoMessage);
 
-      const requestLinkForm = document.getElementById("request-link-form");
       requestLinkForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const email = document.getElementById("request-link-email").value;
-        const msg = document.getElementById("request-link-msg");
         try {
           await fetch(`${globalThis.env.thekeeperURL}/auth/request-link`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email }),
+            body: JSON.stringify({ email: emailInput.value }),
           });
           msg.textContent = "Si cette adresse est enregistrée, un lien t'a été envoyé par email.";
-          msg.style.display = "block";
-          requestLinkForm.style.display = "none";
+          msg.classList.remove("d-none");
+          requestLinkForm.classList.add("d-none");
         } catch (err) {
           msg.textContent = "Erreur réseau, réessaie plus tard.";
-          msg.style.display = "block";
+          msg.classList.remove("d-none");
         }
       });
 

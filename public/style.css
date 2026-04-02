@@ -927,6 +927,41 @@ b {
   text-decoration: underline;
 }
 
+.demo-banner__separator {
+  border: none;
+  border-top: 1px solid #000;
+  margin: 15px 0;
+}
+
+.demo-banner__form {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.demo-banner__input {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 5px 10px;
+  border: 2px solid #000;
+}
+
+.demo-banner__submit {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 5px 15px;
+  border: 2px solid #000;
+  background: #fff;
+  cursor: pointer;
+}
+
+.demo-banner__msg {
+  font-style: italic;
+  margin-top: 10px;
+}
+
 .d-none {
   display: none;
 }

@@ -119,9 +119,6 @@ func TestFindActorIDByHandle(t *testing.T) {
 func TestCreatePlayerActor(t *testing.T) {
 	db := setupTestDB(t)
 
-	// Migration: add email column
-	db.Exec(`ALTER TABLE actors ADD COLUMN email TEXT`)
-
 	actorID, err := CreatePlayerActor(db, "player@example.com")
 	if err != nil {
 		t.Fatal(err)
@@ -153,7 +150,6 @@ func TestCreatePlayerActor(t *testing.T) {
 
 func TestFindActorIDByEmail(t *testing.T) {
 	db := setupTestDB(t)
-	db.Exec(`ALTER TABLE actors ADD COLUMN email TEXT`)
 
 	actorID, _ := CreatePlayerActor(db, "find-me@example.com")
 
@@ -182,7 +178,6 @@ func TestFindActorIDByEmail(t *testing.T) {
 
 func TestSetActorEmail(t *testing.T) {
 	db := setupTestDB(t)
-	db.Exec(`ALTER TABLE actors ADD COLUMN email TEXT`)
 
 	var actorID int64
 	db.QueryRowx("INSERT INTO actors (space) VALUES ('player') RETURNING id").Scan(&actorID)
@@ -203,7 +198,6 @@ func TestSetActorEmail(t *testing.T) {
 
 func TestGetState_RejectsUnknownKey(t *testing.T) {
 	db := setupTestDB(t)
-	db.Exec(`ALTER TABLE actors ADD COLUMN email TEXT`)
 
 	unknownKey := []byte("unknown-public-key-bytes-here-32")
 
@@ -215,7 +209,6 @@ func TestGetState_RejectsUnknownKey(t *testing.T) {
 
 func TestGetState_AcceptsKnownKey(t *testing.T) {
 	db := setupTestDB(t)
-	db.Exec(`ALTER TABLE actors ADD COLUMN email TEXT`)
 
 	// Create an actor and link a key
 	actorID, err := CreatePlayerActor(db, "test@example.com")

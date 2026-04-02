@@ -503,6 +503,20 @@ func HandleInvite(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.HandlerFu
 func HandleRequestLink(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.HandlerFunc {
 	var mu sync.Mutex
 	limiters := map[string]*rate.Limiter{}
+	lastSeen := map[string]time.Time{}
+
+	go func() {
+		for range time.Tick(10 * time.Minute) {
+			mu.Lock()
+			for email, seen := range lastSeen {
+				if time.Since(seen) > 10*time.Minute {
+					delete(limiters, email)
+					delete(lastSeen, email)
+				}
+			}
+			mu.Unlock()
+		}
+	}()
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost && r.Method != http.MethodOptions {
@@ -549,6 +563,7 @@ func HandleRequestLink(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.Hand
 			lim = rate.NewLimiter(rate.Every(5*time.Minute/2), 2)
 			limiters[req.Email] = lim
 		}
+		lastSeen[req.Email] = time.Now()
 		mu.Unlock()
 
 		if !lim.Allow() {
