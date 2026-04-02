@@ -100,6 +100,12 @@ a {
   text-decoration: underline;
 }
 
+.greyed {
+  color: grey;
+  pointer-events: none;
+  text-decoration: none;
+}
+
 a:hover {
   color: inherit;
 }
