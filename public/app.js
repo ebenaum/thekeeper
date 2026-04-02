@@ -979,6 +979,7 @@ async function personnage() {
     banner.append("Ce personnage est en lecture seule. ");
 
     const enrollBtn = document.createElement("button");
+    enrollBtn.type = "button";
     enrollBtn.className = "a-underline";
     enrollBtn.textContent = "Inscrire pour 2026";
     enrollBtn.addEventListener("click", async () => {
