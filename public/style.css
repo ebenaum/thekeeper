@@ -876,6 +876,14 @@ details {
   color: #721c24;
 }
 
+.character-edition-action {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
 .save-button {
   font-size: 1.2rem;
   font-weight: bold;
