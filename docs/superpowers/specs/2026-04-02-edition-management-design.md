@@ -14,9 +14,12 @@ An edition is a string label (`"2025"`, `"2026"`, `"optout"`). A new `ActivateCh
 - `character_id` (string): the character being tagged
 - `edition` (string): one of `"2025"`, `"2026"`, `"optout"`
 
-**Backend validation** (`SpaceValidation`): reject any `ActivateCharacter` event where `edition` is not one of the three allowed values.
+**Backend validation** (`SpaceValidation`):
+- Reject any `ActivateCharacter` event where `edition` is not one of the three allowed values.
+- Only root (actor 0, i.e. CLI) can set edition to `"2025"`. Players and orgas cannot transition to `"2025"`.
+- Characters with edition `"2025"` or `"optout"` cannot be edited (`PlayerCharacter` and `PlayerCharacterOrgaEdit` events are rejected). The character must be enrolled for `"2026"` before editing.
 
-**Authorization**: a player can only activate their own characters. Standard permission model applies.
+**Authorization**: a player can only activate their own characters. Orga and root can activate any character.
 
 ## Migration
 
