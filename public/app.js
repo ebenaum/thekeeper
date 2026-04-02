@@ -97,13 +97,73 @@ async function storeKeypair(keypair) {
  * @property {string} description
  */
 
-/** @typedef {{[key: string]: *} & {createdAt: Date, surname: string, age: string, cityOfOrigin: string, contact: string, approvedConditions: boolean, emergencyContact: string, health: string, peopleToPlayWith: string, skills: string, useExistingCharacter: string, existingCharacterAchievements: string, gameStyle: string, gameStyleTags: string[], situationToAvoid: string, inscriptionType: string, pictureRights: boolean}} InformationsForm */
+/**
+ * @typedef {{
+ *   [key: string]: *,
+ *   createdAt: Date,
+ *   surname: string,
+ *   age: string,
+ *   cityOfOrigin: string,
+ *   contact: string,
+ *   approvedConditions: boolean,
+ *   emergencyContact: string,
+ *   health: string,
+ *   peopleToPlayWith: string,
+ *   skills: string,
+ *   useExistingCharacter: string,
+ *   existingCharacterAchievements: string,
+ *   gameStyle: string,
+ *   gameStyleTags: string[],
+ *   situationToAvoid: string,
+ *   inscriptionType: string,
+ *   pictureRights: boolean,
+ * }} InformationsForm
+ */
 
-/** @typedef {{[key: string]: number} & {corps: number, dexterite: number, influence: number, savoir: number}} Characteristics */
+/**
+ * @typedef {{
+ *   [key: string]: number,
+ *   corps: number,
+ *   dexterite: number,
+ *   influence: number,
+ *   savoir: number,
+ * }} Characteristics
+ */
 
-/** @typedef {{[key: string]: *} & {gifts: {title: string, description: string}[], handicaps: {title: string, description: string}[], quests: {title: string, description: string}[], mentalCrisis: string, publicResume: string, background: string, tags: string[], playerGroup: string}} OrgaForm */
+/**
+ * @typedef {{
+ *   [key: string]: *,
+ *   gifts: {title: string, description: string}[],
+ *   handicaps: {title: string, description: string}[],
+ *   quests: {title: string, description: string}[],
+ *   mentalCrisis: string,
+ *   publicResume: string,
+ *   background: string,
+ *   tags: string[],
+ *   playerGroup: string,
+ * }} OrgaForm
+ */
 
-/** @typedef {{[key: string]: *} & {createdAt: Date, playerId: string, name: string, group: string, worldOrigin: string, worldApproach: string, vdv: string, race: string, skills: {[key: string]: number}, inventory: {[key: string]: number}, characteristics: Characteristics, description: string, orga?: OrgaForm, edition?: string, editionHistory?: string[]}} CharacterForm */
+/**
+ * @typedef {{
+ *   [key: string]: *,
+ *   createdAt: Date,
+ *   playerId: string,
+ *   name: string,
+ *   group: string,
+ *   worldOrigin: string,
+ *   worldApproach: string,
+ *   vdv: string,
+ *   race: string,
+ *   skills: {[key: string]: number},
+ *   inventory: {[key: string]: number},
+ *   characteristics: Characteristics,
+ *   description: string,
+ *   orga?: OrgaForm,
+ *   edition?: string,
+ *   editionHistory?: string[],
+ * }} CharacterForm
+ */
 
 /**
  * @typedef {object} Skill
