@@ -324,7 +324,8 @@ func (s *SpaceOrga) Process(sourceActorID int64, event *proto.Event) error {
 	case *proto.Event_SeedPlayer, *proto.Event_PlayerPerson,
 		*proto.Event_PlayerCharacter, *proto.Event_SeedActor,
 		*proto.Event_Permission, *proto.Event_Reset_,
-		*proto.Event_DeleteCharacter, *proto.Event_DeletePlayer, *proto.Event_PlayerCharacterOrgaEdit:
+		*proto.Event_DeleteCharacter, *proto.Event_DeletePlayer,
+		*proto.Event_PlayerCharacterOrgaEdit, *proto.Event_ActivateCharacter:
 		s.Events = append(s.Events, event)
 
 		return nil

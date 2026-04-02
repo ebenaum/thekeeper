@@ -143,6 +143,7 @@ func TestSpaceOrga_SeesAllEvents(t *testing.T) {
 		{2, seedPlayerEvent("player-a", "player:a")},
 		{2, playerPersonEvent("player:a", "Alice")},
 		{2, playerCharacterEvent("player:a", "char:a")},
+		{2, activateCharacterEvent("char:a", "2026")},
 		{1, orgaEditEvent("char:a")},
 		{0, deleteCharacterEvent("char:a")},
 		{0, resetEvent()},
