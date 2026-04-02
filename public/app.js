@@ -976,7 +976,34 @@ async function personnage() {
 
     const banner = document.createElement("div");
     banner.className = "readonly-banner";
-    banner.textContent = "Ce personnage est en lecture seule. Inscris-le pour 2026 pour pouvoir le modifier.";
+    banner.append("Ce personnage est en lecture seule. ");
+
+    const enrollBtn = document.createElement("button");
+    enrollBtn.className = "a-underline";
+    enrollBtn.textContent = "Inscrire pour 2026";
+    enrollBtn.addEventListener("click", async () => {
+      const payload = create(EventsSchema, {
+        events: [
+          {
+            msg: {
+              case: "ActivateCharacter",
+              value: { characterId: characterId, edition: "2026" },
+            },
+          },
+        ],
+      });
+      await fetch(`${globalThis.env.thekeeperURL}/state`, {
+        method: "POST",
+        headers: {
+          Authorization: await auth(state.keys.private, state.keys.public),
+          "Content-Type": "application/x-protobuf",
+        },
+        body: toBinary(EventsSchema, payload),
+      });
+      window.location.reload();
+    });
+
+    banner.append(enrollBtn);
     formElement?.prepend(banner);
   }
 
