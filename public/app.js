@@ -8,6 +8,7 @@ import { EventsSchema } from "./event_pb.js";
 import { EventPlayerPersonSchema } from "./player_person_pb.js";
 import { EventPlayerCharacterSchema } from "./player_character_pb.js";
 import { EventPlayerCharacterOrgaEditSchema } from "./player_character_orga_edit_pb.js";
+import { EventActivateCharacterSchema } from "./activate_character_pb.js";
 
 /**
  *
@@ -76,7 +77,6 @@ async function storeKeypair(keypair) {
  * @property {CryptoKey} private
  */
 
-
 /**
  * @typedef {Object} UniversEntry
  * @property {string} key
@@ -130,6 +130,7 @@ async function storeKeypair(keypair) {
  * @property {Characteristics}        characteristics
  * @property {string}                 description
  * @property {OrgaForm?}              orga
+ * @property {string}                 [edition]
  */
 
 /**
@@ -376,6 +377,12 @@ function processEvent(data, ts, eventType, eventValue, reset) {
       });
 
       delete data.players[eventValue.playerId];
+
+      break;
+    case "ActivateCharacter":
+      if (data.characters[eventValue.characterId]) {
+        data.characters[eventValue.characterId].edition = eventValue.edition;
+      }
 
       break;
     default:
@@ -1977,16 +1984,16 @@ async function personnage() {
         // Reset race if it doesn't belong to the new monde
         if (formResult.race) {
           const raceEntry = universMap[formResult.race];
-          const raceMonde = raceEntry?.tags?.find((t) =>
-            t.startsWith("monde:"),
-          )?.split(":")[1];
+          const raceMonde = raceEntry?.tags
+            ?.find((t) => t.startsWith("monde:"))
+            ?.split(":")[1];
           if (raceMonde && raceMonde !== selectedMonde) {
             formResult.race = "";
             raceSelect?.querySelectorAll("li.selected").forEach((li) => {
               li.classList.remove("selected");
             });
             const raceSummary = document.querySelector(
-              '.race .selected-section',
+              ".race .selected-section",
             );
             if (raceSummary) raceSummary.textContent = "";
           }
@@ -1995,17 +2002,15 @@ async function personnage() {
         // Reset VdV if it doesn't belong to the new monde
         if (formResult.vdv) {
           const vdvEntry = universMap[formResult.vdv];
-          const vdvMonde = vdvEntry?.tags?.find((t) =>
-            t.startsWith("monde:"),
-          )?.split(":")[1];
+          const vdvMonde = vdvEntry?.tags
+            ?.find((t) => t.startsWith("monde:"))
+            ?.split(":")[1];
           if (vdvMonde && vdvMonde !== selectedMonde) {
             formResult.vdv = "";
             vdvSelect?.querySelectorAll("li.selected").forEach((li) => {
               li.classList.remove("selected");
             });
-            const vdvSummary = document.querySelector(
-              '.vdv .selected-section',
-            );
+            const vdvSummary = document.querySelector(".vdv .selected-section");
             if (vdvSummary) vdvSummary.textContent = "";
           }
         }
@@ -2094,6 +2099,16 @@ async function personnage() {
           skills: formResult.skills,
           description: formResult.description,
           inventory: formResult.inventory,
+        },
+      },
+    });
+
+    events.push({
+      msg: {
+        case: "ActivateCharacter",
+        value: {
+          characterId: characterId,
+          edition: "2026",
         },
       },
     });
@@ -2565,7 +2580,8 @@ async function index() {
       demoMessage.className = "demo-banner";
 
       const exploreText = document.createElement("p");
-      exploreText.textContent = "Tu peux explorer la création de personnage librement. Pour sauvegarder ton personnage, demande une invitation à l'organisation.";
+      exploreText.textContent =
+        "Tu peux explorer la création de personnage librement. Pour sauvegarder ton personnage, demande une invitation à l'organisation.";
       demoMessage.appendChild(exploreText);
 
       const exploreLink = document.createElement("p");
@@ -2581,7 +2597,8 @@ async function index() {
       demoMessage.appendChild(separator);
 
       const loginText = document.createElement("p");
-      loginText.textContent = "Tu as déjà reçu un lien ? Demande un nouveau lien de connexion :";
+      loginText.textContent =
+        "Tu as déjà reçu un lien ? Demande un nouveau lien de connexion :";
       demoMessage.appendChild(loginText);
 
       const requestLinkForm = document.createElement("form");
@@ -2616,7 +2633,8 @@ async function index() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: emailInput.value }),
           });
-          msg.textContent = "Si cette adresse est enregistrée, un lien t'a été envoyé par email.";
+          msg.textContent =
+            "Si cette adresse est enregistrée, un lien t'a été envoyé par email.";
           msg.classList.remove("d-none");
           requestLinkForm.classList.add("d-none");
         } catch (err) {
