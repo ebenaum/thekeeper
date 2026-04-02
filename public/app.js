@@ -2824,6 +2824,7 @@ async function index() {
 
         const edition = character.edition || "2025";
         editionBadgeElement.textContent = edition === "optout" ? "Opt-out" : "Édition " + edition;
+        editionBadgeElement.classList.add("character-edition-badge--" + edition);
 
         if (edition !== "2026") {
           characterLinkElement.textContent = "Voir";

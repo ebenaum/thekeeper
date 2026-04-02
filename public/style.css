@@ -853,6 +853,29 @@ details {
   justify-content: flex-start;
 }
 
+.character-edition-badge {
+  display: inline-block;
+  font-size: 0.75em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.character-edition-badge--2026 {
+  background: #d4edda;
+  color: #155724;
+}
+
+.character-edition-badge--2025 {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.character-edition-badge--optout {
+  background: #f8d7da;
+  color: #721c24;
+}
+
 .save-button {
   font-size: 1.2rem;
   font-weight: bold;
