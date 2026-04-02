@@ -473,15 +473,7 @@ func HandleInvite(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.HandlerFu
 			return
 		}
 
-		actorID, err := CreatePlayerActor(db, req.Email)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.Println(err)
-			writeJSON(w, "internal error")
-			return
-		}
-
-		code, err := InsertAuthKey(db, actorID)
+		_, code, err := InvitePlayerActor(db, req.Email)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println(err)

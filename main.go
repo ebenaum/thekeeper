@@ -14,7 +14,7 @@ import (
 )
 
 func usage() string {
-	return "./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle>|link-orga <db-path> <handle>|delete-player <db-path> <player id>|delete-character <db-path> <character id>|invite <db-path> <email>|migrate-emails <db-path>"
+	return "./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle> <email>|link-orga <db-path> <handle>|delete-player <db-path> <player id>|delete-character <db-path> <character id>|invite <db-path> <email>|migrate-emails <db-path>"
 }
 
 //go:embed schema.sql
@@ -40,7 +40,9 @@ func main() {
 
 	// Migration: add email column if not present (idempotent for existing DBs)
 	_, _ = db.Exec(`ALTER TABLE actors ADD COLUMN email TEXT`)
-	_, _ = db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_actors_email ON actors(email) WHERE email IS NOT NULL`)
+	if _, err := db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_actors_email ON actors(email) WHERE email IS NOT NULL`); err != nil {
+		log.Fatalf("create email index: %v", err)
+	}
 
 	smtpCfg, _ := LoadSMTPConfig() // OK if not set — CLI commands that need it will fail with a clear error
 	appURL := os.Getenv("APP_URL")
@@ -57,12 +59,12 @@ func main() {
 	case "reset":
 		err = insertreset(db)
 	case "create-orga":
-		if len(os.Args) < 4 {
+		if len(os.Args) < 5 {
 			fmt.Println(usage())
 			os.Exit(1)
 		}
 
-		err = createorga(db, os.Args[3])
+		err = createorga(db, os.Args[3], os.Args[4])
 	case "link-orga":
 		if len(os.Args) < 4 {
 			fmt.Println(usage())
@@ -123,12 +125,17 @@ func httpsserver(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) error {
 	return http.ListenAndServeTLS(":443", os.Args[3], os.Args[4], nil)
 }
 
-func createorga(db *sqlx.DB, orgaHandle string) error {
+func createorga(db *sqlx.DB, orgaHandle string, email string) error {
+	if _, err := mail.ParseAddress(email); err != nil {
+		return fmt.Errorf("invalid email %q: %w", email, err)
+	}
+
 	var id int64
 
 	err := db.QueryRowx(
-		`INSERT INTO actors (space) VALUES (?) RETURNING id`,
+		`INSERT INTO actors (space, email) VALUES (?, ?) RETURNING id`,
 		ActorSpaceOrga,
+		email,
 	).Scan(&id)
 	if err != nil {
 		return fmt.Errorf("insert actor: %w", err)
@@ -273,14 +280,9 @@ func invite(db *sqlx.DB, email string) error {
 		return fmt.Errorf("email %q already invited", email)
 	}
 
-	actorID, err := CreatePlayerActor(db, email)
+	actorID, code, err := InvitePlayerActor(db, email)
 	if err != nil {
-		return fmt.Errorf("create actor: %w", err)
-	}
-
-	code, err := InsertAuthKey(db, actorID)
-	if err != nil {
-		return fmt.Errorf("insert auth key: %w", err)
+		return fmt.Errorf("invite: %w", err)
 	}
 
 	err = SendInviteEmail(smtpCfg, email, appURL, code)

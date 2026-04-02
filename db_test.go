@@ -116,16 +116,20 @@ func TestFindActorIDByHandle(t *testing.T) {
 	}
 }
 
-func TestCreatePlayerActor(t *testing.T) {
+func TestInvitePlayerActor(t *testing.T) {
 	db := setupTestDB(t)
 
-	actorID, err := CreatePlayerActor(db, "player@example.com")
+	actorID, code, err := InvitePlayerActor(db, "player@example.com")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if actorID <= 0 {
 		t.Errorf("expected positive actor ID, got %d", actorID)
+	}
+
+	if code == "" {
+		t.Error("expected non-empty auth code")
 	}
 
 	// Verify email stored
@@ -146,12 +150,21 @@ func TestCreatePlayerActor(t *testing.T) {
 	if space != ActorSpacePlayer {
 		t.Errorf("space = %q, want %q", space, ActorSpacePlayer)
 	}
+
+	// Verify auth key exists and is redeemable
+	redeemedActorID, err := UseAuthKey(db, code)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if redeemedActorID != actorID {
+		t.Errorf("redeemed actor ID = %d, want %d", redeemedActorID, actorID)
+	}
 }
 
 func TestFindActorIDByEmail(t *testing.T) {
 	db := setupTestDB(t)
 
-	actorID, _ := CreatePlayerActor(db, "find-me@example.com")
+	actorID := createPlayerActor(t, db, "find-me@example.com")
 
 	tests := []struct {
 		name    string
@@ -211,14 +224,11 @@ func TestGetState_AcceptsKnownKey(t *testing.T) {
 	db := setupTestDB(t)
 
 	// Create an actor and link a key
-	actorID, err := CreatePlayerActor(db, "test@example.com")
-	if err != nil {
-		t.Fatal(err)
-	}
+	actorID := createPlayerActor(t, db, "test@example.com")
 
 	publicKey := []byte("known-public-key-bytes-here--32!")
 
-	_, err = LinkState(db, actorID, publicKey)
+	_, err := LinkState(db, actorID, publicKey)
 	if err != nil {
 		t.Fatal(err)
 	}

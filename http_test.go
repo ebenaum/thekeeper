@@ -87,7 +87,7 @@ func TestHandleInvite_Unauthorized(t *testing.T) {
 func TestHandleInvite_ForbiddenPlayer(t *testing.T) {
 	db := setupTestDB(t)
 
-	playerID, _ := CreatePlayerActor(db, "player@example.com")
+	playerID := createPlayerActor(t, db, "player@example.com")
 	playerAuth := createTestAuth(t, db, playerID)
 
 	handler := HandleInvite(db, SMTPConfig{}, "http://test.local")
@@ -139,7 +139,7 @@ func TestHandleInvite_DuplicateEmail(t *testing.T) {
 	db := setupTestDB(t)
 	_, orgaAuth := setupOrgaActor(t, db)
 
-	CreatePlayerActor(db, "existing@example.com")
+	createPlayerActor(t, db, "existing@example.com")
 
 	handler := HandleInvite(db, SMTPConfig{}, "http://test.local")
 
@@ -158,7 +158,7 @@ func TestHandleInvite_DuplicateEmail(t *testing.T) {
 func TestHandleRequestLink_ConstantResponse(t *testing.T) {
 	db := setupTestDB(t)
 
-	CreatePlayerActor(db, "exists@example.com")
+	createPlayerActor(t, db, "exists@example.com")
 
 	handler := HandleRequestLink(db, SMTPConfig{}, "http://test.local")
 

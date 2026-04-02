@@ -126,19 +126,36 @@ func GetActorSpaceByActorID(db *sqlx.DB, actorID int64) (ActorSpace, error) {
 	)
 }
 
-func CreatePlayerActor(db *sqlx.DB, email string) (int64, error) {
-	var id int64
 
-	err := db.QueryRowx(
+// InvitePlayerActor creates a player actor and its auth key in a single transaction.
+func InvitePlayerActor(db *sqlx.DB, email string) (int64, string, error) {
+	tx, err := db.Beginx()
+	if err != nil {
+		return -1, "", fmt.Errorf("begin: %w", err)
+	}
+	defer tx.Rollback()
+
+	var actorID int64
+	err = tx.QueryRowx(
 		`INSERT INTO actors (space, email) VALUES (?, ?) RETURNING id`,
 		ActorSpacePlayer,
 		email,
-	).Scan(&id)
+	).Scan(&actorID)
 	if err != nil {
-		return -1, fmt.Errorf("insert actor: %w", err)
+		return -1, "", fmt.Errorf("insert actor: %w", err)
 	}
 
-	return id, nil
+	code := cryptorand.Text()
+	_, err = tx.Exec(`INSERT INTO auth_keys (key, actor_id, redeemed_at) VALUES (?, ?, NULL)`, code, actorID)
+	if err != nil {
+		return -1, "", fmt.Errorf("insert auth key: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return -1, "", fmt.Errorf("commit: %w", err)
+	}
+
+	return actorID, code, nil
 }
 
 func FindActorIDByEmail(db *sqlx.DB, email string) (int64, error) {
@@ -153,9 +170,14 @@ func FindActorIDByEmail(db *sqlx.DB, email string) (int64, error) {
 }
 
 func SetActorEmail(db *sqlx.DB, actorID int64, email string) error {
-	_, err := db.Exec(`UPDATE actors SET email = ? WHERE id = ?`, email, actorID)
+	res, err := db.Exec(`UPDATE actors SET email = ? WHERE id = ?`, email, actorID)
 	if err != nil {
 		return fmt.Errorf("set actor email: %w", err)
+	}
+
+	n, _ := res.RowsAffected()
+	if n == 0 {
+		return fmt.Errorf("set actor email: actor %d not found", actorID)
 	}
 
 	return nil
