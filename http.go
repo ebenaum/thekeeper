@@ -562,7 +562,7 @@ func HandleRequestLink(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.Hand
 			return
 		}
 
-		if err := SendInviteEmail(smtpCfg, req.Email, appURL, code); err != nil {
+		if err := SendLoginEmail(smtpCfg, req.Email, appURL, code); err != nil {
 			log.Printf("request-link: send email to %s: %v", req.Email, err)
 		}
 	}

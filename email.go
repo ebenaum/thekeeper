@@ -69,7 +69,28 @@ func SendEmail(cfg SMTPConfig, to string, subject string, body string) error {
 	)
 }
 
+func RenderLoginEmail(appURL string, code string) string {
+	link := fmt.Sprintf("%s?code=%s", appURL, code)
+
+	return fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<body>
+<h2>Ebenaum GN 2026</h2>
+<p>Voici ton lien de connexion :</p>
+<p><a href="%s">Clique ici pour te connecter</a></p>
+<p>Ou copie ce lien dans ton navigateur :</p>
+<p>%s</p>
+<p><em>Ce lien est à usage unique.</em></p>
+</body>
+</html>`, link, link)
+}
+
 func SendInviteEmail(cfg SMTPConfig, to string, appURL string, code string) error {
 	body := RenderInviteEmail(appURL, code)
 	return SendEmail(cfg, to, "Ebenaum GN 2026 — Ton invitation", body)
+}
+
+func SendLoginEmail(cfg SMTPConfig, to string, appURL string, code string) error {
+	body := RenderLoginEmail(appURL, code)
+	return SendEmail(cfg, to, "Ebenaum GN 2026 — Ton lien de connexion", body)
 }
