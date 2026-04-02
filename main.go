@@ -15,7 +15,7 @@ import (
 )
 
 func usage() string {
-	return "./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle> <email>|link-orga <db-path> <handle>|delete-player <db-path> <player id>|delete-character <db-path> <character id>|invite <db-path> <email>|migrate-emails <db-path>|list-actors <db-path>"
+	return "./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle> <email>|link-orga <db-path> <handle>|delete-player <db-path> <player id>|delete-character <db-path> <character id>|invite <db-path> <email>|migrate-emails <db-path>|list-actors <db-path>|migrate-editions <db-path>"
 }
 
 //go:embed schema.sql
@@ -97,6 +97,8 @@ func main() {
 		err = migrateEmails(db, dryRun)
 	case "list-actors":
 		err = listActors(db)
+	case "migrate-editions":
+		err = migrateEditions(db)
 	default:
 		fmt.Println(usage())
 		os.Exit(1)
@@ -406,6 +408,56 @@ func migrateEmails(db *sqlx.DB, dryRun bool) error {
 
 	fmt.Printf("\nMigrated: %d, Skipped: %d\n", migrated, skipped)
 
+	return nil
+}
+
+func migrateEditions(db *sqlx.DB) error {
+	sv := NewSpaceValidation()
+
+	records, err := GetEvents(db, -1, EventRecordStatusAccepted)
+	if err != nil {
+		return fmt.Errorf("get events: %w", err)
+	}
+
+	alreadyActivated := map[string]bool{}
+	for _, record := range records {
+		sv.Process(record.SourceActorID, &record.Event)
+		if ac, ok := record.Event.Msg.(*proto.Event_ActivateCharacter); ok {
+			alreadyActivated[ac.ActivateCharacter.CharacterId] = true
+		}
+	}
+
+	var migrated int
+	for characterID, character := range sv.CharacterIDs {
+		if alreadyActivated[characterID] {
+			continue
+		}
+
+		player, exists := sv.PlayersIDs[character.PlayerID]
+		if !exists {
+			return fmt.Errorf("player %s for character %s not found", character.PlayerID, characterID)
+		}
+
+		result, err := InsertAndCheckEvents(db, -1, player.ActorID, []*proto.Event{
+			{
+				Msg: &proto.Event_ActivateCharacter{
+					ActivateCharacter: &proto.EventActivateCharacter{
+						CharacterId: characterID,
+						Edition:     "2025",
+					},
+				},
+			},
+		})
+		if err != nil {
+			return fmt.Errorf("activate character %s: %w", characterID, err)
+		}
+		if result[0].Status != EventRecordStatusAccepted {
+			return fmt.Errorf("activate character %s was not accepted: %v", characterID, result[0])
+		}
+		migrated++
+	}
+
+	fmt.Printf("Migrated %d characters to edition 2025\n", migrated)
 	return nil
 }
 
