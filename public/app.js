@@ -217,15 +217,12 @@ async function sync(state, reset) {
     state.data = newData();
   }
 
-  const response = await fetch(
-    `${env.thekeeperURL}/state?from=` + cursor,
-    {
-      method: "GET",
-      headers: {
-        Authorization: await auth(state.keys.private, state.keys.public),
-      },
+  const response = await fetch(`${env.thekeeperURL}/state?from=` + cursor, {
+    method: "GET",
+    headers: {
+      Authorization: await auth(state.keys.private, state.keys.public),
     },
-  );
+  });
 
   const msg = await fromBinary(
     EventsSchema,
@@ -371,8 +368,14 @@ function processEvent(data, ts, eventType, eventValue, reset) {
         if (!data.characters[eventValue.characterId].editionHistory) {
           data.characters[eventValue.characterId].editionHistory = [];
         }
-        if (!data.characters[eventValue.characterId].editionHistory?.includes(eventValue.edition)) {
-          data.characters[eventValue.characterId].editionHistory?.push(eventValue.edition);
+        if (
+          !data.characters[eventValue.characterId].editionHistory?.includes(
+            eventValue.edition,
+          )
+        ) {
+          data.characters[eventValue.characterId].editionHistory?.push(
+            eventValue.edition,
+          );
         }
       }
 
@@ -666,7 +669,9 @@ async function personnageOrga(
       );
 
       inputElement.addEventListener("input", (e) => {
-        formResult[inputName] = /** @type {HTMLInputElement}*/ (e.target)?.value;
+        formResult[inputName] = /** @type {HTMLInputElement}*/ (
+          e.target
+        )?.value;
 
         // @ts-ignore
         print(node);
@@ -989,7 +994,10 @@ async function personnage() {
       await fetch(`${env.thekeeperURL}/state`, {
         method: "POST",
         headers: {
-          Authorization: await auth(/** @type {State} */ (state).keys.private, /** @type {State} */ (state).keys.public),
+          Authorization: await auth(
+            /** @type {State} */ (state).keys.private,
+            /** @type {State} */ (state).keys.public,
+          ),
           "Content-Type": "application/x-protobuf",
         },
         body: toBinary(EventsSchema, payload),
@@ -2225,25 +2233,27 @@ async function theview2() {
     skills: {},
   };
 
-  Object.keys(state.data.characters).filter((cid) => state.data.characters[cid]?.edition === "2026").forEach((characterId) => {
-    const character = state.data.characters[characterId];
-    Object.keys(character.inventory).forEach((key) => {
-      agg.inventory[key] = agg.inventory[key] || { count: 0, characters: [] };
-      agg.inventory[key].characters.push(characterId);
-      agg.inventory[key].count += character.inventory[key];
-    });
+  Object.keys(state.data.characters)
+    .filter((cid) => state.data.characters[cid]?.edition === "2026")
+    .forEach((characterId) => {
+      const character = state.data.characters[characterId];
+      Object.keys(character.inventory).forEach((key) => {
+        agg.inventory[key] = agg.inventory[key] || { count: 0, characters: [] };
+        agg.inventory[key].characters.push(characterId);
+        agg.inventory[key].count += character.inventory[key];
+      });
 
-    Object.keys(character.skills).forEach((key) => {
-      agg.skills[key + ":" + character.skills[key]] = agg.skills[
-        key + ":" + character.skills[key]
-      ] || { count: 0, characters: [] };
+      Object.keys(character.skills).forEach((key) => {
+        agg.skills[key + ":" + character.skills[key]] = agg.skills[
+          key + ":" + character.skills[key]
+        ] || { count: 0, characters: [] };
 
-      agg.skills[key + ":" + character.skills[key]].characters.push(
-        characterId,
-      );
-      agg.skills[key + ":" + character.skills[key]].count += 1;
+        agg.skills[key + ":" + character.skills[key]].characters.push(
+          characterId,
+        );
+        agg.skills[key + ":" + character.skills[key]].count += 1;
+      });
     });
-  });
 
   Object.keys(agg.inventory).forEach((key) => {
     const count = agg.inventory[key].count;
@@ -2359,8 +2369,9 @@ async function theview() {
   Object.keys(state.data.players).forEach((playerId) => {
     const player = state.data.players[playerId];
 
-    const characters = player.characters
-      .filter((cid) => state.data.characters[cid]?.edition === "2026");
+    const characters = player.characters.filter(
+      (cid) => state.data.characters[cid]?.edition === "2026",
+    );
 
     if (characters.length === 0) {
       return;
@@ -2413,7 +2424,9 @@ async function theview() {
 
       const /** @type {(string|HTMLElement|undefined)[]} */ values = [];
       values.push(
-        (character?.createdAt || player.personal?.createdAt)?.toLocaleString() ?? "",
+        (
+          character?.createdAt || player.personal?.createdAt
+        )?.toLocaleString() ?? "",
       );
       values.push(
         character?.orga?.playerGroup === "" ||
@@ -2734,9 +2747,12 @@ async function index() {
         "/personnage.html?playerId=" + playerId,
       );
 
-      const visibleCharacters = state.data.permission === "orga"
-        ? player.characters.filter((cid) => state.data.characters[cid]?.edition === "2026")
-        : player.characters;
+      const visibleCharacters =
+        state.data.permission === "orga"
+          ? player.characters.filter(
+              (cid) => state.data.characters[cid]?.edition === "2026",
+            )
+          : player.characters;
 
       if (state.data.permission === "orga" && visibleCharacters.length === 0) {
         return;
@@ -2820,8 +2836,11 @@ async function index() {
         );
 
         const edition = character.edition || "2025";
-        editionBadgeElement.textContent = edition === "optout" ? "Non inscrit" : "Édition " + edition;
-        editionBadgeElement.classList.add("character-edition-badge--" + edition);
+        editionBadgeElement.textContent =
+          edition === "optout" ? "Non inscrit" : "Édition " + edition;
+        editionBadgeElement.classList.add(
+          "character-edition-badge--" + edition,
+        );
 
         if (edition !== "2026") {
           characterLinkElement.textContent = "Voir";
@@ -2845,7 +2864,10 @@ async function index() {
               await fetch(`${env.thekeeperURL}/state`, {
                 method: "POST",
                 headers: {
-                  Authorization: await auth(state.keys.private, state.keys.public),
+                  Authorization: await auth(
+                    state.keys.private,
+                    state.keys.public,
+                  ),
                   "Content-Type": "application/x-protobuf",
                 },
                 body: toBinary(EventsSchema, payload),
@@ -2869,7 +2891,10 @@ async function index() {
               await fetch(`${env.thekeeperURL}/state`, {
                 method: "POST",
                 headers: {
-                  Authorization: await auth(state.keys.private, state.keys.public),
+                  Authorization: await auth(
+                    state.keys.private,
+                    state.keys.public,
+                  ),
                   "Content-Type": "application/x-protobuf",
                 },
                 body: toBinary(EventsSchema, payload),
@@ -2885,9 +2910,13 @@ async function index() {
       characterListElement?.prepend(clone);
     });
 
-    if (state.data.permission === "orga" && characterListElement?.children.length === 0) {
+    if (
+      state.data.permission === "orga" &&
+      characterListElement?.children.length === 0
+    ) {
       const placeholder = document.createElement("p");
-      placeholder.textContent = "Aucun joueur inscrit pour l'édition 2026 pour le moment.";
+      placeholder.textContent =
+        "Aucun joueur inscrit pour l'édition 2026 pour le moment.";
       placeholder.style.textAlign = "center";
       placeholder.style.opacity = "0.6";
       placeholder.style.padding = "2em 0";
@@ -2931,7 +2960,7 @@ async function index() {
   }
 
   if (state?.data.permission === "orga") {
-    const counts = { "2026": 0, "2025": 0, "optout": 0, "2025to2026": 0 };
+    const counts = { 2026: 0, 2025: 0, optout: 0, "2025to2026": 0 };
     Object.values(state.data.characters).forEach((c) => {
       if (c.edition === "2026") counts["2026"]++;
       if (c.edition === "optout") counts["optout"]++;
@@ -3456,7 +3485,9 @@ async function print() {
       document.querySelector(`.${characteristic} .characteristic__description`)
     );
 
-    levelElement.textContent = String(character.characteristics[characteristic]);
+    levelElement.textContent = String(
+      character.characteristics[characteristic],
+    );
 
     labelElement.textContent =
       characteristics.find((entry) => entry.key === characteristic)?.label ||
