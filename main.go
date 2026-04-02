@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,7 +15,7 @@ import (
 )
 
 func usage() string {
-	return "./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle> <email>|link-orga <db-path> <handle>|delete-player <db-path> <player id>|delete-character <db-path> <character id>|invite <db-path> <email>|migrate-emails <db-path>"
+	return "./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle> <email>|link-orga <db-path> <handle>|delete-player <db-path> <player id>|delete-character <db-path> <character id>|invite <db-path> <email>|migrate-emails <db-path>|list-actors <db-path>"
 }
 
 //go:embed schema.sql
@@ -94,6 +95,8 @@ func main() {
 	case "migrate-emails":
 		dryRun := len(os.Args) >= 4 && os.Args[3] == "--dry-run"
 		err = migrateEmails(db, dryRun)
+	case "list-actors":
+		err = listActors(db)
 	default:
 		fmt.Println(usage())
 		os.Exit(1)
@@ -402,6 +405,49 @@ func migrateEmails(db *sqlx.DB, dryRun bool) error {
 	}
 
 	fmt.Printf("\nMigrated: %d, Skipped: %d\n", migrated, skipped)
+
+	return nil
+}
+
+func listActors(db *sqlx.DB) error {
+	sv := NewSpaceValidation()
+
+	records, err := GetEvents(db, -1, EventRecordStatusAccepted)
+	if err != nil {
+		return fmt.Errorf("get events: %w", err)
+	}
+
+	for _, record := range records {
+		sv.Process(record.SourceActorID, &record.Event)
+	}
+
+	rows, err := db.Queryx(`SELECT id, space, email FROM actors WHERE id != 0 ORDER BY id`)
+	if err != nil {
+		return fmt.Errorf("query actors: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id int64
+		var space ActorSpace
+		var email sql.NullString
+
+		if err := rows.Scan(&id, &space, &email); err != nil {
+			return fmt.Errorf("scan: %w", err)
+		}
+
+		handle := sv.Handles.IDToHandle[id]
+		if handle == "" {
+			handle = "(no handle)"
+		}
+
+		emailStr := ""
+		if email.Valid {
+			emailStr = email.String
+		}
+
+		fmt.Printf("actor %d  %s  %s  %s\n", id, space, handle, emailStr)
+	}
 
 	return nil
 }
