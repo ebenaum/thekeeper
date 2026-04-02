@@ -382,6 +382,12 @@ function processEvent(data, ts, eventType, eventValue, reset) {
     case "ActivateCharacter":
       if (data.characters[eventValue.characterId]) {
         data.characters[eventValue.characterId].edition = eventValue.edition;
+        if (!data.characters[eventValue.characterId].editionHistory) {
+          data.characters[eventValue.characterId].editionHistory = [];
+        }
+        if (!data.characters[eventValue.characterId].editionHistory.includes(eventValue.edition)) {
+          data.characters[eventValue.characterId].editionHistory.push(eventValue.edition);
+        }
       }
 
       break;
@@ -2229,7 +2235,7 @@ async function theview2() {
     skills: {},
   };
 
-  Object.keys(state.data.characters).forEach((characterId) => {
+  Object.keys(state.data.characters).filter((cid) => state.data.characters[cid]?.edition === "2026").forEach((characterId) => {
     const character = state.data.characters[characterId];
     Object.keys(character.inventory).forEach((key) => {
       agg.inventory[key] = agg.inventory[key] || { count: 0, characters: [] };
@@ -2888,6 +2894,15 @@ async function index() {
       characterListElement?.prepend(clone);
     });
 
+    if (state.data.permission === "orga" && characterListElement?.children.length === 0) {
+      const placeholder = document.createElement("p");
+      placeholder.textContent = "Aucun joueur inscrit pour l'édition 2026 pour le moment.";
+      placeholder.style.textAlign = "center";
+      placeholder.style.opacity = "0.6";
+      placeholder.style.padding = "2em 0";
+      characterListElement.appendChild(placeholder);
+    }
+
     containerElement
       ?.querySelectorAll(".player-card__sharelink")
       .forEach((span) => {
@@ -2922,6 +2937,21 @@ async function index() {
           }
         });
       });
+  }
+
+  if (state?.data.permission === "orga") {
+    const counts = { "2026": 0, "2025": 0, "optout": 0 };
+    Object.values(state.data.characters).forEach((c) => {
+      if (c.edition === "2026") counts["2026"]++;
+      if (c.edition === "optout") counts["optout"]++;
+      if (c.editionHistory?.includes("2025")) counts["2025"]++;
+    });
+    const recap = document.createElement("p");
+    recap.style.textAlign = "center";
+    recap.style.opacity = "0.6";
+    recap.style.padding = "1em 0";
+    recap.textContent = `Édition 2026 : ${counts["2026"]} · Édition 2025 : ${counts["2025"]} · Non inscrits : ${counts["optout"]}`;
+    containerElement?.appendChild(recap);
   }
 
   if (!state || state.data.permission !== "orga") {
