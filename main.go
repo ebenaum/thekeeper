@@ -40,6 +40,7 @@ func main() {
 
 	// Migration: add email column if not present (idempotent for existing DBs)
 	_, _ = db.Exec(`ALTER TABLE actors ADD COLUMN email TEXT`)
+	_, _ = db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_actors_email ON actors(email) WHERE email IS NOT NULL`)
 
 	smtpCfg, _ := LoadSMTPConfig() // OK if not set — CLI commands that need it will fail with a clear error
 	appURL := os.Getenv("APP_URL")
@@ -267,6 +268,14 @@ func invite(db *sqlx.DB, email string, explicitHandle string) error {
 	appURL := os.Getenv("APP_URL")
 	if appURL == "" {
 		return fmt.Errorf("APP_URL environment variable is required")
+	}
+
+	if _, err := mail.ParseAddress(email); err != nil {
+		return fmt.Errorf("invalid email %q: %w", email, err)
+	}
+
+	if _, err := FindActorIDByEmail(db, email); err == nil {
+		return fmt.Errorf("email %q already invited", email)
 	}
 
 	handle, err := generateUniqueHandle(db, email, explicitHandle)

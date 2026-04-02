@@ -2608,14 +2608,19 @@ async function index() {
         e.preventDefault();
         const email = document.getElementById("request-link-email").value;
         const msg = document.getElementById("request-link-msg");
-        await fetch(`${globalThis.env.thekeeperURL}/auth/request-link`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        });
-        msg.textContent = "Si cette adresse est enregistrée, un lien t'a été envoyé par email.";
-        msg.style.display = "block";
-        requestLinkForm.style.display = "none";
+        try {
+          await fetch(`${globalThis.env.thekeeperURL}/auth/request-link`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          });
+          msg.textContent = "Si cette adresse est enregistrée, un lien t'a été envoyé par email.";
+          msg.style.display = "block";
+          requestLinkForm.style.display = "none";
+        } catch (err) {
+          msg.textContent = "Erreur réseau, réessaie plus tard.";
+          msg.style.display = "block";
+        }
       });
 
       return;

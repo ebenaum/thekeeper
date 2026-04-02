@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/mail"
 	"strconv"
 	"sync"
 	"time"
@@ -458,6 +459,18 @@ func HandleInvite(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.HandlerFu
 		if req.Email == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			writeJSON(w, "email is required")
+			return
+		}
+
+		if _, err := mail.ParseAddress(req.Email); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			writeJSON(w, "invalid email")
+			return
+		}
+
+		if _, err := FindActorIDByEmail(db, req.Email); err == nil {
+			w.WriteHeader(http.StatusConflict)
+			writeJSON(w, "email already invited")
 			return
 		}
 

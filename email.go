@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"mime"
 	"net/smtp"
 	"os"
 )
@@ -53,8 +54,9 @@ func RenderInviteEmail(appURL string, code string) string {
 }
 
 func SendEmail(cfg SMTPConfig, to string, subject string, body string) error {
+	encodedSubject := mime.QEncoding.Encode("utf-8", subject)
 	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=\"UTF-8\"\r\n\r\n%s",
-		cfg.From, to, subject, body)
+		cfg.From, to, encodedSubject, body)
 
 	auth := smtp.PlainAuth("", cfg.User, cfg.Password, cfg.Host)
 

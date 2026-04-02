@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS auth_keys (
 CREATE TABLE IF NOT EXISTS actors (
     id INTEGER PRIMARY KEY,
     space TEXT CHECK( space IN ('orga','player') ) NOT NULL DEFAULT 'player',
-    email TEXT
+    email TEXT UNIQUE
 );
 
 INSERT OR IGNORE INTO actors (id) VALUES (0);

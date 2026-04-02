@@ -142,23 +142,28 @@ func generateHandle(email string) string {
 }
 
 func generateUniqueHandle(db *sqlx.DB, email string, explicitHandle string) (string, error) {
-	handle := explicitHandle
-	if handle == "" {
-		handle = generateHandle(email)
+	base := explicitHandle
+	if base == "" {
+		base = generateHandle(email)
 	}
 
 	// Check if handle already taken
-	_, err := FindActorIDByHandle(db, handle)
+	_, err := FindActorIDByHandle(db, base)
 	if err != nil {
 		// Not found — handle is available
-		return handle, nil
+		return base, nil
 	}
 
-	// Collision — append random suffix
-	suffix := cryptorand.Text()[:6]
-	handle = handle + "-" + suffix
+	// Collision — try with random suffixes
+	for range 5 {
+		candidate := base + "-" + cryptorand.Text()[:6]
+		_, err := FindActorIDByHandle(db, candidate)
+		if err != nil {
+			return candidate, nil
+		}
+	}
 
-	return handle, nil
+	return "", fmt.Errorf("could not generate unique handle for %q", base)
 }
 
 func GetActorSpaceByActorID(db *sqlx.DB, actorID int64) (ActorSpace, error) {
