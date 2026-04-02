@@ -11,6 +11,7 @@ import { file_player_character } from "./player_character_pb.js";
 import { file_player_character_orga_edit } from "./player_character_orga_edit_pb.js";
 import { file_delete_player } from "./delete_player_pb.js";
 import { file_delete_character } from "./delete_character_pb.js";
+import { file_activate_character } from "./activate_character_pb.js";
 
 /**
  * Describes the file event.proto.
@@ -18,7 +19,7 @@ import { file_delete_character } from "./delete_character_pb.js";
 export const file_event =
   /*@__PURE__*/
   fileDesc(
-    "CgtldmVudC5wcm90bxIJdGhla2VlcGVyIu8DCgVFdmVudBIKCgJ0cxgBIAEoAxIwCgpQZXJtaXNzaW9uGAIgASgLMhoudGhla2VlcGVyLkV2ZW50UGVybWlzc2lvbkgAEjAKClNlZWRQbGF5ZXIYAyABKAsyGi50aGVrZWVwZXIuRXZlbnRTZWVkUGxheWVySAASLgoJU2VlZEFjdG9yGAQgASgLMhkudGhla2VlcGVyLkV2ZW50U2VlZEFjdG9ySAASNAoMUGxheWVyUGVyc29uGAUgASgLMhwudGhla2VlcGVyLkV2ZW50UGxheWVyUGVyc29uSAASOgoPUGxheWVyQ2hhcmFjdGVyGAYgASgLMh8udGhla2VlcGVyLkV2ZW50UGxheWVyQ2hhcmFjdGVySAASDwoFUmVzZXQYByABKAhIABJKChdQbGF5ZXJDaGFyYWN0ZXJPcmdhRWRpdBgIIAEoCzInLnRoZWtlZXBlci5FdmVudFBsYXllckNoYXJhY3Rlck9yZ2FFZGl0SAASNAoMRGVsZXRlUGxheWVyGAkgASgLMhwudGhla2VlcGVyLkV2ZW50RGVsZXRlUGxheWVySAASOgoPRGVsZXRlQ2hhcmFjdGVyGAogASgLMh8udGhla2VlcGVyLkV2ZW50RGVsZXRlQ2hhcmFjdGVySABCBQoDbXNnIioKBkV2ZW50cxIgCgZldmVudHMYASADKAsyEC50aGVrZWVwZXIuRXZlbnRCKlooZ2l0aHViLmNvbS9lYmVuYXVtL3RoZWtlZXBlci9wcm90bztwcm90b2IGcHJvdG8z",
+    "CgtldmVudC5wcm90bxIJdGhla2VlcGVyIq8ECgVFdmVudBIKCgJ0cxgBIAEoAxIwCgpQZXJtaXNzaW9uGAIgASgLMhoudGhla2VlcGVyLkV2ZW50UGVybWlzc2lvbkgAEjAKClNlZWRQbGF5ZXIYAyABKAsyGi50aGVrZWVwZXIuRXZlbnRTZWVkUGxheWVySAASLgoJU2VlZEFjdG9yGAQgASgLMhkudGhla2VlcGVyLkV2ZW50U2VlZEFjdG9ySAASNAoMUGxheWVyUGVyc29uGAUgASgLMhwudGhla2VlcGVyLkV2ZW50UGxheWVyUGVyc29uSAASOgoPUGxheWVyQ2hhcmFjdGVyGAYgASgLMh8udGhla2VlcGVyLkV2ZW50UGxheWVyQ2hhcmFjdGVySAASDwoFUmVzZXQYByABKAhIABJKChdQbGF5ZXJDaGFyYWN0ZXJPcmdhRWRpdBgIIAEoCzInLnRoZWtlZXBlci5FdmVudFBsYXllckNoYXJhY3Rlck9yZ2FFZGl0SAASNAoMRGVsZXRlUGxheWVyGAkgASgLMhwudGhla2VlcGVyLkV2ZW50RGVsZXRlUGxheWVySAASOgoPRGVsZXRlQ2hhcmFjdGVyGAogASgLMh8udGhla2VlcGVyLkV2ZW50RGVsZXRlQ2hhcmFjdGVySAASPgoRQWN0aXZhdGVDaGFyYWN0ZXIYCyABKAsyIS50aGVrZWVwZXIuRXZlbnRBY3RpdmF0ZUNoYXJhY3RlckgAQgUKA21zZyIqCgZFdmVudHMSIAoGZXZlbnRzGAEgAygLMhAudGhla2VlcGVyLkV2ZW50QipaKGdpdGh1Yi5jb20vZWJlbmF1bS90aGVrZWVwZXIvcHJvdG87cHJvdG9iBnByb3RvMw",
     [
       file_permission,
       file_seed_player,
@@ -28,6 +29,7 @@ export const file_event =
       file_player_character_orga_edit,
       file_delete_player,
       file_delete_character,
+      file_activate_character,
     ],
   );
 
