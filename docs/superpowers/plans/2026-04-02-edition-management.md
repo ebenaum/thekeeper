@@ -18,7 +18,6 @@
 | Modify | `proto/event.proto` | Add `ActivateCharacter` to the `Event` oneof |
 | Regenerate | `proto/*.pb.go`, `public/*_pb.js` | Generated code from `proto/gen.sh` |
 | Modify | `space_validation.go` | Validate `ActivateCharacter` events (edition allowlist, character exists, player owns it) |
-| Modify | `space_validation.go` | Track edition status per character in `SpaceValidation` |
 | Modify | `space_validation.go` | Pass `ActivateCharacter` events through in `SpaceOrga` and `SpacePlayer` |
 | Modify | `space_validation_test.go` | Tests for validation logic |
 | Modify | `projection_test.go` | Tests for projection filtering |
@@ -175,7 +174,7 @@ go test ./... -run TestActivateCharacter -v
 
 Expected: FAIL — `event ... not handled` from the default case in `Process`.
 
-- [ ] **Step 3: Add the allowed editions set and CharacterEditions tracking**
+- [ ] **Step 3: Add the allowed editions set and the ActivateCharacter case**
 
 In `space_validation.go`, add the allowed editions variable near the top (after the existing `Permission` type constants):
 
@@ -186,47 +185,6 @@ var allowedEditions = map[string]bool{
 	"optout": true,
 }
 ```
-
-Add `CharacterEditions` field to the `SpaceValidation` struct:
-
-```go
-type SpaceValidation struct {
-	Handles    Handles
-	Permission Permission
-	PlayersIDs map[string]struct {
-		ActorID int64
-	}
-	CharacterIDs map[string]struct {
-		PlayerID string
-	}
-	CharacterEditions map[string]string
-}
-```
-
-Update `NewSpaceValidation` to initialize it:
-
-```go
-func NewSpaceValidation() SpaceValidation {
-	return SpaceValidation{
-		Handles: Handles{
-			HandleToID: map[string]int64{},
-			IDToHandle: map[int64]string{
-				0: "",
-			},
-		},
-		Permission: Permission{
-			Actors: map[int64]string{
-				0: PermissionRoot,
-			},
-		},
-		PlayersIDs:        map[string]struct{ ActorID int64 }{},
-		CharacterIDs:      map[string]struct{ PlayerID string }{},
-		CharacterEditions: map[string]string{},
-	}
-}
-```
-
-- [ ] **Step 4: Add the ActivateCharacter case to SpaceValidation.Process**
 
 Add a new case in the `Process` switch, before the `default`:
 
@@ -250,12 +208,12 @@ Add a new case in the `Process` switch, before the `default`:
 			return fmt.Errorf("not authorized")
 		}
 
-		s.CharacterEditions[v.ActivateCharacter.CharacterId] = v.ActivateCharacter.Edition
-
 		return nil
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+No state tracking needed — validation is purely stateless (check edition, check character exists, check authorization).
+
+- [ ] **Step 4: Run tests to verify they pass**
 
 Run:
 ```bash
@@ -264,16 +222,16 @@ go test ./... -run TestActivateCharacter -v
 
 Expected: all 8 cases PASS.
 
-- [ ] **Step 6: Run full test suite**
+- [ ] **Step 5: Run full test suite**
 
 Run:
 ```bash
 go test ./...
 ```
 
-Expected: all tests pass (the new `CharacterEditions` field does not break `TestGobEncodeDecode` — gob encodes exported fields and `map[string]string` is supported).
+Expected: all tests pass.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
 git add space_validation.go space_validation_test.go
@@ -539,18 +497,22 @@ func TestMigrateEditions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Verify: replay all events and check char:test has edition 2025
-	sv := NewSpaceValidation()
+	// Verify: replay all events and check an ActivateCharacter event exists for char:test
 	records, err := GetEvents(db, -1, EventRecordStatusAccepted)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, record := range records {
-		sv.Process(record.SourceActorID, &record.Event)
-	}
 
-	if sv.CharacterEditions["char:test"] != "2025" {
-		t.Errorf("expected edition 2025, got %q", sv.CharacterEditions["char:test"])
+	found := false
+	for _, record := range records {
+		if ac, ok := record.Event.Msg.(*proto.Event_ActivateCharacter); ok {
+			if ac.ActivateCharacter.CharacterId == "char:test" && ac.ActivateCharacter.Edition == "2025" {
+				found = true
+			}
+		}
+	}
+	if !found {
+		t.Error("expected ActivateCharacter event with edition 2025 for char:test")
 	}
 }
 ```
@@ -577,13 +539,17 @@ func migrateEditions(db *sqlx.DB) error {
 		return fmt.Errorf("get events: %w", err)
 	}
 
+	alreadyActivated := map[string]bool{}
 	for _, record := range records {
 		sv.Process(record.SourceActorID, &record.Event)
+		if ac, ok := record.Event.Msg.(*proto.Event_ActivateCharacter); ok {
+			alreadyActivated[ac.ActivateCharacter.CharacterId] = true
+		}
 	}
 
 	var migrated int
 	for characterID := range sv.CharacterIDs {
-		if sv.CharacterEditions[characterID] != "" {
+		if alreadyActivated[characterID] {
 			continue
 		}
 
@@ -851,78 +817,3 @@ git add public/index.html public/app.js
 git commit -m "feat: edition badge, enroll/opt-out buttons, filter orga views to 2026 only"
 ```
 
----
-
-### Task 9: Cleanup of DeleteCharacter in SpaceValidation
-
-**Files:**
-- Modify: `space_validation.go`
-- Modify: `space_validation_test.go`
-
-- [ ] **Step 1: Write a test for edition cleanup on character deletion**
-
-Add to `space_validation_test.go`:
-
-```go
-func TestDeleteCharacter_CleansUpEdition(t *testing.T) {
-	s := baseValidationState(t)
-
-	// Activate char:1 for 2026
-	if err := s.Process(2, activateCharacterEvent("char:1", "2026")); err != nil {
-		t.Fatal(err)
-	}
-	if s.CharacterEditions["char:1"] != "2026" {
-		t.Fatal("expected char:1 to have edition 2026")
-	}
-
-	// Delete char:1
-	if err := s.Process(0, deleteCharacterEvent("char:1")); err != nil {
-		t.Fatal(err)
-	}
-
-	if _, exists := s.CharacterEditions["char:1"]; exists {
-		t.Error("char:1 edition should have been cleaned up on delete")
-	}
-}
-```
-
-- [ ] **Step 2: Run test to verify it fails**
-
-Run:
-```bash
-go test ./... -run TestDeleteCharacter_CleansUpEdition -v
-```
-
-Expected: FAIL — delete does not clean up `CharacterEditions`.
-
-- [ ] **Step 3: Add cleanup to DeleteCharacter case**
-
-In `space_validation.go`, in the `Event_DeleteCharacter` case of `SpaceValidation.Process`, add after `delete(s.CharacterIDs, v.DeleteCharacter.CharacterId)`:
-
-```go
-		delete(s.CharacterEditions, v.DeleteCharacter.CharacterId)
-```
-
-- [ ] **Step 4: Also clean up editions in DeletePlayer cascade**
-
-In the `Event_DeletePlayer` case, inside the loop `for characterID, character := range s.CharacterIDs`, add after `delete(s.CharacterIDs, characterID)`:
-
-```go
-				delete(s.CharacterEditions, characterID)
-```
-
-- [ ] **Step 5: Run tests**
-
-Run:
-```bash
-go test ./...
-```
-
-Expected: all tests pass.
-
-- [ ] **Step 6: Commit**
-
-```bash
-git add space_validation.go space_validation_test.go
-git commit -m "fix: clean up CharacterEditions on character/player deletion"
-```
