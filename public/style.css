@@ -855,8 +855,8 @@ details {
 
 .character-edition-badge {
   display: inline-block;
-  font-size: 0.75em;
-  padding: 2px 8px;
+  font-size: 0.9em;
+  padding: 4px 10px;
   border-radius: 4px;
   font-weight: bold;
 }
