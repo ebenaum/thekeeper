@@ -248,6 +248,35 @@ func TestReset(t *testing.T) {
 	}
 }
 
+func TestActivateCharacter(t *testing.T) {
+	tests := []struct {
+		name          string
+		sourceActorID int64
+		characterID   string
+		edition       string
+		wantErr       bool
+	}{
+		{"owner activates own character for 2025", 2, "char:1", "2025", false},
+		{"owner activates own character for 2026", 2, "char:1", "2026", false},
+		{"owner opts out own character", 2, "char:1", "optout", false},
+		{"invalid edition rejected", 2, "char:1", "2027", true},
+		{"empty edition rejected", 2, "char:1", "", true},
+		{"other player rejected", 3, "char:1", "2026", true},
+		{"orga can activate any character", 1, "char:1", "2026", false},
+		{"non-existent character rejected", 2, "char:nonexistent", "2026", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := baseValidationState(t)
+			err := s.Process(tt.sourceActorID, activateCharacterEvent(tt.characterID, tt.edition))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Process() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 func TestGobEncodeDecode(t *testing.T) {
 	space := SpaceValidation{
 		Handles: Handles{

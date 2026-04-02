@@ -6,6 +6,12 @@ import (
 	"github.com/ebenaum/thekeeper/proto"
 )
 
+var allowedEditions = map[string]bool{
+	"2025":   true,
+	"2026":   true,
+	"optout": true,
+}
+
 type Actor struct {
 	Handle  string
 	Players map[string]struct{}
@@ -167,6 +173,26 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 		_, exists := s.CharacterIDs[v.PlayerCharacterOrgaEdit.CharacterId]
 		if !exists {
 			return fmt.Errorf("character does not exist")
+		}
+
+		return nil
+	case *proto.Event_ActivateCharacter:
+		if !allowedEditions[v.ActivateCharacter.Edition] {
+			return fmt.Errorf("invalid edition %q", v.ActivateCharacter.Edition)
+		}
+
+		character, exists := s.CharacterIDs[v.ActivateCharacter.CharacterId]
+		if !exists {
+			return fmt.Errorf("character does not exist")
+		}
+
+		player, exists := s.PlayersIDs[character.PlayerID]
+		if !exists {
+			return fmt.Errorf("player does not exist")
+		}
+
+		if sourceActorID != player.ActorID && s.Permission.Actors[sourceActorID] != PermissionOrga {
+			return fmt.Errorf("not authorized")
 		}
 
 		return nil
