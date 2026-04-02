@@ -446,8 +446,7 @@ func HandleInvite(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.HandlerFu
 		}
 
 		var req struct {
-			Email  string `json:"email"`
-			Handle string `json:"handle"`
+			Email string `json:"email"`
 		}
 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -474,34 +473,10 @@ func HandleInvite(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.HandlerFu
 			return
 		}
 
-		handle, err := generateUniqueHandle(db, req.Email, req.Handle)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.Println(err)
-			writeJSON(w, "internal error")
-			return
-		}
-
 		actorID, err := CreatePlayerActor(db, req.Email)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println(err)
-			writeJSON(w, "internal error")
-			return
-		}
-
-		result, err := InsertAndCheckEvents(db, -1, actorID, []*proto.Event{
-			{
-				Msg: &proto.Event_SeedActor{
-					SeedActor: &proto.EventSeedActor{
-						Handle: handle,
-					},
-				},
-			},
-		})
-		if err != nil || result[0].Status != EventRecordStatusAccepted {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.Printf("seed actor failed: err=%v result=%v", err, result)
 			writeJSON(w, "internal error")
 			return
 		}
@@ -521,7 +496,7 @@ func HandleInvite(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.HandlerFu
 			return
 		}
 
-		writeJSON(w, handle)
+		writeJSON(w, "invited")
 	}
 }
 

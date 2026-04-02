@@ -14,7 +14,7 @@ import (
 )
 
 func usage() string {
-	return "./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle>|link-orga <db-path> <handle>|delete-player <db-path> <player id>|delete-character <db-path> <character id>|invite <db-path> <email> [handle]|migrate-emails <db-path>"
+	return "./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle>|link-orga <db-path> <handle>|delete-player <db-path> <player id>|delete-character <db-path> <character id>|invite <db-path> <email>|migrate-emails <db-path>"
 }
 
 //go:embed schema.sql
@@ -88,12 +88,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		explicitHandle := ""
-		if len(os.Args) >= 5 {
-			explicitHandle = os.Args[4]
-		}
-
-		err = invite(db, os.Args[3], explicitHandle)
+		err = invite(db, os.Args[3])
 	case "migrate-emails":
 		dryRun := len(os.Args) >= 4 && os.Args[3] == "--dry-run"
 		err = migrateEmails(db, dryRun)
@@ -259,7 +254,7 @@ func deletecharacter(db *sqlx.DB, characterID string) error {
 	return nil
 }
 
-func invite(db *sqlx.DB, email string, explicitHandle string) error {
+func invite(db *sqlx.DB, email string) error {
 	smtpCfg, err := LoadSMTPConfig()
 	if err != nil {
 		return fmt.Errorf("SMTP config: %w", err)
@@ -278,31 +273,9 @@ func invite(db *sqlx.DB, email string, explicitHandle string) error {
 		return fmt.Errorf("email %q already invited", email)
 	}
 
-	handle, err := generateUniqueHandle(db, email, explicitHandle)
-	if err != nil {
-		return fmt.Errorf("generate handle: %w", err)
-	}
-
 	actorID, err := CreatePlayerActor(db, email)
 	if err != nil {
 		return fmt.Errorf("create actor: %w", err)
-	}
-
-	result, err := InsertAndCheckEvents(db, -1, actorID, []*proto.Event{
-		{
-			Msg: &proto.Event_SeedActor{
-				SeedActor: &proto.EventSeedActor{
-					Handle: handle,
-				},
-			},
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("seed actor event: %w", err)
-	}
-
-	if result[0].Status != EventRecordStatusAccepted {
-		return fmt.Errorf("seed actor event not accepted: %v", result[0])
 	}
 
 	code, err := InsertAuthKey(db, actorID)
@@ -315,7 +288,7 @@ func invite(db *sqlx.DB, email string, explicitHandle string) error {
 		return fmt.Errorf("send email: %w", err)
 	}
 
-	fmt.Printf("Invited %s as %q (actor %d)\n", email, handle, actorID)
+	fmt.Printf("Invited %s (actor %d)\n", email, actorID)
 
 	return nil
 }
