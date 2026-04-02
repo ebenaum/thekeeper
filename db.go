@@ -4,6 +4,7 @@ import (
 	cryptorand "crypto/rand"
 	"database/sql"
 	"fmt"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -129,6 +130,7 @@ func GetActorSpaceByActorID(db *sqlx.DB, actorID int64) (ActorSpace, error) {
 
 // InvitePlayerActor creates a player actor and its auth key in a single transaction.
 func InvitePlayerActor(db *sqlx.DB, email string) (int64, string, error) {
+	email = strings.ToLower(email)
 	tx, err := db.Beginx()
 	if err != nil {
 		return -1, "", fmt.Errorf("begin: %w", err)
@@ -159,6 +161,7 @@ func InvitePlayerActor(db *sqlx.DB, email string) (int64, string, error) {
 }
 
 func FindActorIDByEmail(db *sqlx.DB, email string) (int64, error) {
+	email = strings.ToLower(email)
 	var id int64
 
 	err := db.QueryRowx(`SELECT id FROM actors WHERE email = ?`, email).Scan(&id)
@@ -170,6 +173,7 @@ func FindActorIDByEmail(db *sqlx.DB, email string) (int64, error) {
 }
 
 func SetActorEmail(db *sqlx.DB, actorID int64, email string) error {
+	email = strings.ToLower(email)
 	res, err := db.Exec(`UPDATE actors SET email = ? WHERE id = ?`, email, actorID)
 	if err != nil {
 		return fmt.Errorf("set actor email: %w", err)
