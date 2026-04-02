@@ -2940,17 +2940,20 @@ async function index() {
   }
 
   if (state?.data.permission === "orga") {
-    const counts = { "2026": 0, "2025": 0, "optout": 0 };
+    const counts = { "2026": 0, "2025": 0, "optout": 0, "2025to2026": 0 };
     Object.values(state.data.characters).forEach((c) => {
       if (c.edition === "2026") counts["2026"]++;
       if (c.edition === "optout") counts["optout"]++;
-      if (c.editionHistory?.includes("2025")) counts["2025"]++;
+      if (c.editionHistory?.includes("2025")) {
+        counts["2025"]++;
+        if (c.edition === "2026") counts["2025to2026"]++;
+      }
     });
     const recap = document.createElement("p");
     recap.style.textAlign = "center";
     recap.style.opacity = "0.6";
     recap.style.padding = "1em 0";
-    recap.textContent = `Édition 2026 : ${counts["2026"]} · Édition 2025 : ${counts["2025"]} · Non inscrits : ${counts["optout"]}`;
+    recap.textContent = `Édition 2026 : ${counts["2026"]} · Édition 2025 : ${counts["2025"]} (${counts["2025to2026"]} inscrits en 2026) · Non inscrits : ${counts["optout"]}`;
     containerElement?.appendChild(recap);
   }
 
