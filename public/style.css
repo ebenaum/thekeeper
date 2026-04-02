@@ -897,6 +897,71 @@ b {
   background-color: rgb(212, 184, 0);
 }
 
+.demo-banner {
+  position: relative;
+  border: solid 3px black;
+  padding: 20px;
+  margin-top: 20px;
+  text-align: center;
+  width: 100%;
+  max-width: 600px;
+}
+
+.demo-banner:before {
+  content: " ";
+  position: absolute;
+  z-index: -1;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border: 2px solid #000000;
+}
+
+.demo-banner p {
+  margin: 10px 0;
+  font-size: 1.1rem;
+}
+
+.demo-banner a {
+  text-decoration: underline;
+}
+
+.demo-banner__separator {
+  border: none;
+  border-top: 1px solid #000;
+  margin: 15px 0;
+}
+
+.demo-banner__form {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.demo-banner__input {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 5px 10px;
+  border: 2px solid #000;
+}
+
+.demo-banner__submit {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 5px 15px;
+  border: 2px solid #000;
+  background: #fff;
+  cursor: pointer;
+}
+
+.demo-banner__msg {
+  font-style: italic;
+  margin-top: 10px;
+}
+
 .d-none {
   display: none;
 }

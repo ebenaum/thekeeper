@@ -75,6 +75,20 @@ func baseValidationState(t *testing.T) SpaceValidation {
 	return sv
 }
 
+func createPlayerActor(t *testing.T, db *sqlx.DB, email string) int64 {
+	t.Helper()
+	var id int64
+	err := db.QueryRowx(
+		`INSERT INTO actors (space, email) VALUES (?, ?) RETURNING id`,
+		ActorSpacePlayer,
+		email,
+	).Scan(&id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return id
+}
+
 func setupTestDB(t *testing.T) *sqlx.DB {
 	t.Helper()
 	db, err := sqlx.Open("sqlite3", ":memory:?_journal_mode=WAL&_busy_timeout=5000")

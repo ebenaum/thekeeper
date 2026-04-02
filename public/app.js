@@ -76,56 +76,6 @@ async function storeKeypair(keypair) {
  * @property {CryptoKey} private
  */
 
-/**
- *
- * @returns {Promise<State>}
- */
-async function init() {
-  const keypair = await generateKeypair();
-  const handle = createRandomString(16);
-
-  console.log(
-    `no keypair, generate new one: ${buf2hex(await window.crypto.subtle.exportKey("raw", keypair.public))}`,
-  );
-
-  const seed = create(EventsSchema, {
-    events: [
-      {
-        msg: {
-          case: "SeedActor",
-          value: {
-            handle: handle,
-          },
-        },
-      },
-    ],
-  });
-
-  const response = await fetch(`${globalThis.env.thekeeperURL}/state`, {
-    method: "POST",
-    headers: {
-      Authorization: await auth(keypair.private, keypair.public),
-      "Content-Type": "application/x-protobuf",
-    },
-    body: toBinary(EventsSchema, seed),
-  });
-
-  const jsonResponse = await response.json();
-  if (jsonResponse[0].error) {
-    throw jsonResponse[0].error;
-  }
-
-  const state = {
-    keys: keypair,
-    data: newData(),
-    cursor: -1,
-  };
-
-  storeKeypair(keypair);
-  await sync(state, true);
-
-  return state;
-}
 
 /**
  * @typedef {Object} UniversEntry
@@ -1004,9 +954,20 @@ async function personnage() {
 
   const formElement = document.getElementById("form");
 
+  if (!state) {
+    // Demo mode: hide all save buttons
+    document.querySelectorAll(".save-button").forEach((btn) => {
+      btn.style.display = "none";
+    });
+  }
+
   let submitted = false;
 
   const onsubmit = () => {
+    if (!state) {
+      return false;
+    }
+
     if (submitted) {
       return false;
     }
@@ -2090,11 +2051,11 @@ async function personnage() {
    * @param {string | null} existingPlayerId
    */
   async function submitForm(existingCharacterId, existingPlayerId) {
-    const events = [];
-
     if (!state) {
-      state = await init();
+      return;
     }
+
+    const events = [];
 
     let playerId = existingPlayerId;
 
@@ -2566,11 +2527,106 @@ async function index() {
 
     await sync(state, true);
 
+    if (!state.data.handle) {
+      const handle = createRandomString(16);
+      const seed = create(EventsSchema, {
+        events: [
+          {
+            msg: {
+              case: "SeedActor",
+              value: { handle: handle },
+            },
+          },
+        ],
+      });
+
+      await fetch(`${globalThis.env.thekeeperURL}/state`, {
+        method: "POST",
+        headers: {
+          Authorization: await auth(keypair.private, keypair.public),
+          "Content-Type": "application/x-protobuf",
+        },
+        body: toBinary(EventsSchema, seed),
+      });
+
+      await sync(state, true);
+    }
+
     window.location.href = "/";
 
     return;
   } else {
     state = await getState();
+
+    if (!state) {
+      // No stored session and no auth code — enter demo mode
+      // Character form is usable but nothing is saved to the server
+      const demoMessage = document.createElement("div");
+      demoMessage.className = "demo-banner";
+
+      const exploreText = document.createElement("p");
+      exploreText.textContent = "Tu peux explorer la création de personnage librement. Pour sauvegarder ton personnage, demande une invitation à l'organisation.";
+      demoMessage.appendChild(exploreText);
+
+      const exploreLink = document.createElement("p");
+      const exploreAnchor = document.createElement("a");
+      exploreAnchor.href = "/personnage.html";
+      exploreAnchor.className = "a-underline";
+      exploreAnchor.textContent = "Explorer le formulaire de personnage";
+      exploreLink.appendChild(exploreAnchor);
+      demoMessage.appendChild(exploreLink);
+
+      const separator = document.createElement("hr");
+      separator.className = "demo-banner__separator";
+      demoMessage.appendChild(separator);
+
+      const loginText = document.createElement("p");
+      loginText.textContent = "Tu as déjà reçu un lien ? Demande un nouveau lien de connexion :";
+      demoMessage.appendChild(loginText);
+
+      const requestLinkForm = document.createElement("form");
+      requestLinkForm.className = "demo-banner__form";
+
+      const emailInput = document.createElement("input");
+      emailInput.type = "email";
+      emailInput.placeholder = "ton@email.com";
+      emailInput.required = true;
+      emailInput.className = "demo-banner__input";
+      requestLinkForm.appendChild(emailInput);
+
+      const submitBtn = document.createElement("button");
+      submitBtn.type = "submit";
+      submitBtn.className = "demo-banner__submit";
+      submitBtn.textContent = "Envoyer";
+      requestLinkForm.appendChild(submitBtn);
+
+      demoMessage.appendChild(requestLinkForm);
+
+      const msg = document.createElement("p");
+      msg.className = "demo-banner__msg d-none";
+      demoMessage.appendChild(msg);
+
+      containerElement.appendChild(demoMessage);
+
+      requestLinkForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        try {
+          await fetch(`${globalThis.env.thekeeperURL}/auth/request-link`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: emailInput.value }),
+          });
+          msg.textContent = "Si cette adresse est enregistrée, un lien t'a été envoyé par email.";
+          msg.classList.remove("d-none");
+          requestLinkForm.classList.add("d-none");
+        } catch (err) {
+          msg.textContent = "Erreur réseau, réessaie plus tard.";
+          msg.classList.remove("d-none");
+        }
+      });
+
+      return;
+    }
   }
 
   if (state) {
@@ -2878,11 +2934,11 @@ async function informations() {
    * @param {string | null} existingPlayerId
    */
   async function submitForm(existingPlayerId) {
-    const events = [];
-
     if (!state) {
-      state = await init();
+      return;
     }
+
+    const events = [];
 
     let playerId = existingPlayerId;
 

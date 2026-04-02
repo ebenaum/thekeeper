@@ -11,10 +11,13 @@ CREATE TABLE IF NOT EXISTS auth_keys (
 
 CREATE TABLE IF NOT EXISTS actors (
     id INTEGER PRIMARY KEY,
-    space TEXT CHECK( space IN ('orga','player') ) NOT NULL DEFAULT 'player'
+    space TEXT CHECK( space IN ('orga','player') ) NOT NULL DEFAULT 'player',
+    email TEXT
 );
 
 INSERT OR IGNORE INTO actors (id) VALUES (0);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_actors_email ON actors(email) WHERE email IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS public_keys (
     id INTEGER PRIMARY KEY,

@@ -9,8 +9,12 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/mail"
 	"strconv"
+	"sync"
 	"time"
+
+	"golang.org/x/time/rate"
 
 	"github.com/ebenaum/thekeeper/proto"
 	"github.com/golang-jwt/jwt/v5"
@@ -409,6 +413,164 @@ func POSTState(db *sqlx.DB) http.HandlerFunc {
 
 		if err = json.NewEncoder(w).Encode(result); err != nil {
 			log.Println(err)
+		}
+	}
+}
+
+func HandleInvite(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost && r.Method != http.MethodOptions {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		_, actorSpace, err := auth(db, r.Header.Get("Authorization"))
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			writeJSON(w, "not authorized")
+			return
+		}
+
+		if actorSpace != ActorSpaceOrga {
+			w.WriteHeader(http.StatusForbidden)
+			writeJSON(w, "not authorized")
+			return
+		}
+
+		var req struct {
+			Email string `json:"email"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			writeJSON(w, "bad input")
+			return
+		}
+
+		if req.Email == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			writeJSON(w, "email is required")
+			return
+		}
+
+		if _, err := mail.ParseAddress(req.Email); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			writeJSON(w, "invalid email")
+			return
+		}
+
+		if _, err := FindActorIDByEmail(db, req.Email); err == nil {
+			w.WriteHeader(http.StatusConflict)
+			writeJSON(w, "email already invited")
+			return
+		}
+
+		_, code, err := InvitePlayerActor(db, req.Email)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			writeJSON(w, "internal error")
+			return
+		}
+
+		if err := SendInviteEmail(smtpCfg, req.Email, appURL, code); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			writeJSON(w, "failed to send email")
+			return
+		}
+
+		writeJSON(w, "invited")
+	}
+}
+
+func HandleRequestLink(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.HandlerFunc {
+	var mu sync.Mutex
+	limiters := map[string]*rate.Limiter{}
+	lastSeen := map[string]time.Time{}
+
+	go func() {
+		for range time.Tick(10 * time.Minute) {
+			mu.Lock()
+			for email, seen := range lastSeen {
+				if time.Since(seen) > 10*time.Minute {
+					delete(limiters, email)
+					delete(lastSeen, email)
+				}
+			}
+			mu.Unlock()
+		}
+	}()
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost && r.Method != http.MethodOptions {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		var req struct {
+			Email string `json:"email"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeJSON(w, "if this email is registered, a link has been sent")
+			return
+		}
+
+		// Always return the same response to prevent email enumeration
+		defer func() {
+			writeJSON(w, "if this email is registered, a link has been sent")
+		}()
+
+		if req.Email == "" {
+			return
+		}
+
+		actorID, err := FindActorIDByEmail(db, req.Email)
+		if err != nil {
+			// Email not found — do nothing, same response
+			return
+		}
+
+		mu.Lock()
+		lim, ok := limiters[req.Email]
+		if !ok {
+			// 2 requests per 5 minutes, burst of 2
+			lim = rate.NewLimiter(rate.Every(5*time.Minute/2), 2)
+			limiters[req.Email] = lim
+		}
+		lastSeen[req.Email] = time.Now()
+		mu.Unlock()
+
+		if !lim.Allow() {
+			log.Printf("request-link: rate limited %s", req.Email)
+			return
+		}
+
+		code, err := InsertAuthKey(db, actorID)
+		if err != nil {
+			log.Printf("request-link: insert auth key for actor %d: %v", actorID, err)
+			return
+		}
+
+		if err := SendLoginEmail(smtpCfg, req.Email, appURL, code); err != nil {
+			log.Printf("request-link: send email to %s: %v", req.Email, err)
 		}
 	}
 }

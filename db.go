@@ -3,7 +3,6 @@ package main
 import (
 	cryptorand "crypto/rand"
 	"database/sql"
-	"errors"
 	"fmt"
 	"sync/atomic"
 	"time"
@@ -127,6 +126,63 @@ func GetActorSpaceByActorID(db *sqlx.DB, actorID int64) (ActorSpace, error) {
 	)
 }
 
+
+// InvitePlayerActor creates a player actor and its auth key in a single transaction.
+func InvitePlayerActor(db *sqlx.DB, email string) (int64, string, error) {
+	tx, err := db.Beginx()
+	if err != nil {
+		return -1, "", fmt.Errorf("begin: %w", err)
+	}
+	defer tx.Rollback()
+
+	var actorID int64
+	err = tx.QueryRowx(
+		`INSERT INTO actors (space, email) VALUES (?, ?) RETURNING id`,
+		ActorSpacePlayer,
+		email,
+	).Scan(&actorID)
+	if err != nil {
+		return -1, "", fmt.Errorf("insert actor: %w", err)
+	}
+
+	code := cryptorand.Text()
+	_, err = tx.Exec(`INSERT INTO auth_keys (key, actor_id, redeemed_at) VALUES (?, ?, NULL)`, code, actorID)
+	if err != nil {
+		return -1, "", fmt.Errorf("insert auth key: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return -1, "", fmt.Errorf("commit: %w", err)
+	}
+
+	return actorID, code, nil
+}
+
+func FindActorIDByEmail(db *sqlx.DB, email string) (int64, error) {
+	var id int64
+
+	err := db.QueryRowx(`SELECT id FROM actors WHERE email = ?`, email).Scan(&id)
+	if err != nil {
+		return -1, fmt.Errorf("find actor by email: %w", err)
+	}
+
+	return id, nil
+}
+
+func SetActorEmail(db *sqlx.DB, actorID int64, email string) error {
+	res, err := db.Exec(`UPDATE actors SET email = ? WHERE id = ?`, email, actorID)
+	if err != nil {
+		return fmt.Errorf("set actor email: %w", err)
+	}
+
+	n, _ := res.RowsAffected()
+	if n == 0 {
+		return fmt.Errorf("set actor email: actor %d not found", actorID)
+	}
+
+	return nil
+}
+
 func UseAuthKey(db *sqlx.DB, key string) (int64, error) {
 	var actorID int64
 
@@ -156,40 +212,8 @@ func GetState(db *sqlx.DB, publicKey []byte) (int64, ActorSpace, error) {
 	WHERE public_keys.public_key=?`,
 		publicKey,
 	).Scan(&id, &space)
-
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return -1, "", fmt.Errorf("query: %w", err)
-	}
-
-	if err == nil {
-		return id, space, nil
-	}
-
-	tx, err := db.Beginx()
 	if err != nil {
-		return -1, "", fmt.Errorf("begin: %w", err)
-	}
-	defer tx.Rollback()
-
-	var publicKeyID int64
-	err = tx.QueryRowx(`INSERT INTO public_keys (public_key) VALUES (?) RETURNING id`, publicKey).Scan(&publicKeyID)
-	if err != nil {
-		return -1, "", fmt.Errorf("insert public key: %w", err)
-	}
-
-	err = tx.QueryRowx(`INSERT INTO actors DEFAULT VALUES RETURNING id, space`).Scan(&id, &space)
-	if err != nil {
-		return -1, "", fmt.Errorf("insert actor: %w", err)
-	}
-
-	_, err = tx.Exec(`INSERT INTO actors_public_keys (actor_id, public_key_id) VALUES (?, ?)`, id, publicKeyID)
-	if err != nil {
-		return -1, "", fmt.Errorf("insert actors_public_keys: %w", err)
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return -1, "", fmt.Errorf("commit: %w", err)
+		return -1, "", fmt.Errorf("unknown public key: %w", err)
 	}
 
 	return id, space, nil
