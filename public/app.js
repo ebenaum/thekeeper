@@ -1,5 +1,16 @@
 // @ts-check
 
+/**
+ * @typedef {object} Env
+ * @property {string} thekeeperURL
+ * @property {string} univers
+ * @property {string} appURL
+ */
+
+/** @type {Env} */
+// @ts-ignore
+const env = globalThis.env;
+
 // @ts-ignore
 import * as jose from "jose";
 // @ts-ignore
@@ -8,7 +19,6 @@ import { EventsSchema } from "./event_pb.js";
 import { EventPlayerPersonSchema } from "./player_person_pb.js";
 import { EventPlayerCharacterSchema } from "./player_character_pb.js";
 import { EventPlayerCharacterOrgaEditSchema } from "./player_character_orga_edit_pb.js";
-import { EventActivateCharacterSchema } from "./activate_character_pb.js";
 
 /**
  *
@@ -28,7 +38,8 @@ function createRandomString(length) {
 }
 
 /**
- * @param {any} buffer
+ * @param {ArrayBuffer} buffer
+ * @returns {string}
  */
 function buf2hex(buffer) {
   // buffer is an ArrayBuffer
@@ -72,13 +83,13 @@ async function storeKeypair(keypair) {
 }
 
 /**
- * @typedef {Object} KeyEntry
+ * @typedef {object} KeyEntry
  * @property {CryptoKey} public
  * @property {CryptoKey} private
  */
 
 /**
- * @typedef {Object} UniversEntry
+ * @typedef {object} UniversEntry
  * @property {string} key
  * @property {string[]} tags
  * @property {string} label
@@ -87,66 +98,75 @@ async function storeKeypair(keypair) {
  */
 
 /**
- * @typedef {Object} InformationsForm
- * @property {Date}     createdAt
- * @property {string}   surname
- * @property {string}   age
- * @property {string}   cityOfOrigin
- * @property {string}   contact
- * @property {boolean}  approvedConditions
- * @property {string}   emergencyContact
- * @property {string}   health
- * @property {string}   peopleToPlayWith
- * @property {string}   skills
- * @property {string}   useExistingCharacter
- * @property {string}   existingCharacterAchievements
- * @property {string}   gameStyle
- * @property {string[]} gameStyleTags
- * @property {string}   situationToAvoid
- * @property {string}   inscriptionType
- * @property {boolean}  pictureRights
+ * @typedef {{
+ *   [key: string]: Date | string | boolean | string[],
+ *   createdAt: Date,
+ *   surname: string,
+ *   age: string,
+ *   cityOfOrigin: string,
+ *   contact: string,
+ *   approvedConditions: boolean,
+ *   emergencyContact: string,
+ *   health: string,
+ *   peopleToPlayWith: string,
+ *   skills: string,
+ *   useExistingCharacter: string,
+ *   existingCharacterAchievements: string,
+ *   gameStyle: string,
+ *   gameStyleTags: string[],
+ *   situationToAvoid: string,
+ *   inscriptionType: string,
+ *   pictureRights: boolean,
+ * }} InformationsForm
  */
 
 /**
- * @typedef {Object} Characteristics
- * @property {number} corps
- * @property {number} dexterite
- * @property {number} influence
- * @property {number} savoir
+ * @typedef {{
+ *   [key: string]: number,
+ *   corps: number,
+ *   dexterite: number,
+ *   influence: number,
+ *   savoir: number,
+ * }} Characteristics
  */
 
 /**
- * @typedef {Object} CharacterForm
- * @property {Date}                   createdAt
- * @property {string}                 playerId
- * @property {string}                 name
- * @property {string}                 group
- * @property {string}                 worldOrigin
- * @property {string}                 worldApproach
- * @property {string}                 vdv
- * @property {string}                 race
- * @property {Object.<string,number>} skills
- * @property {Object.<string,number>} inventory
- * @property {Characteristics}        characteristics
- * @property {string}                 description
- * @property {OrgaForm?}              orga
- * @property {string}                 [edition]
+ * @typedef {{
+ *   [key: string]: string | string[] | {title: string, description: string}[],
+ *   gifts: {title: string, description: string}[],
+ *   handicaps: {title: string, description: string}[],
+ *   quests: {title: string, description: string}[],
+ *   mentalCrisis: string,
+ *   publicResume: string,
+ *   background: string,
+ *   tags: string[],
+ *   playerGroup: string,
+ * }} OrgaForm
  */
 
 /**
- * @typedef{Object} OrgaForm
- * @property {{title: string, description: string}[]} gifts
- * @property {{title: string, description: string}[]} handicaps
- * @property {{title: string, description: string}[]} quests
- * @property {string} mentalCrisis
- * @property {string} publicResume
- * @property {string} background
- * @property {string[]} tags
- * @property {string} playerGroup
+ * @typedef {{
+ *   [key: string]: Date | string | {[key: string]: number} | Characteristics | OrgaForm | string[] | undefined,
+ *   createdAt: Date,
+ *   playerId: string,
+ *   name: string,
+ *   group: string,
+ *   worldOrigin: string,
+ *   worldApproach: string,
+ *   vdv: string,
+ *   race: string,
+ *   skills: {[key: string]: number},
+ *   inventory: {[key: string]: number},
+ *   characteristics: Characteristics,
+ *   description: string,
+ *   orga?: OrgaForm,
+ *   edition?: string,
+ *   editionHistory?: string[],
+ * }} CharacterForm
  */
 
 /**
- * @typedef {Object} Skill
+ * @typedef {object} Skill
  * @property {string} key
  * @property {string} label
  * @property {string} description
@@ -159,15 +179,36 @@ async function storeKeypair(keypair) {
  */
 
 /**
- * @typedef {Object} Data
- * @property {Object.<string, {handle: string, personal?: InformationsForm, characters: string[]}>} players
- * @property {Object.<string, CharacterForm>} characters
+ * @typedef {object} Data
+ * @property {{[key: string]: {handle: string, personal?: InformationsForm, characters: string[]}}} players
+ * @property {{[key: string]: CharacterForm}} characters
  * @property {string} handle
  * @property {string} [permission]
  */
 
 /**
- * @typedef {Object} State
+ * @typedef {object} CharacteristicLevel
+ * @property {number} rank
+ * @property {number?} pcValue
+ * @property {string} key
+ * @property {string[]} tags
+ * @property {string} label
+ * @property {string?} img
+ * @property {string} description
+ */
+
+/**
+ * @typedef {object} CharacteristicEntry
+ * @property {CharacteristicLevel[]} levels
+ * @property {string} key
+ * @property {string[]} tags
+ * @property {string} label
+ * @property {string?} img
+ * @property {string} description
+ */
+
+/**
+ * @typedef {object} State
  * @property {Data} data
  * @property {number} cursor
  * @property {KeyEntry} keys
@@ -236,15 +277,12 @@ async function sync(state, reset) {
     state.data = newData();
   }
 
-  const response = await fetch(
-    `${globalThis.env.thekeeperURL}/state?from=` + cursor,
-    {
-      method: "GET",
-      headers: {
-        Authorization: await auth(state.keys.private, state.keys.public),
-      },
+  const response = await fetch(`${env.thekeeperURL}/state?from=` + cursor, {
+    method: "GET",
+    headers: {
+      Authorization: await auth(state.keys.private, state.keys.public),
     },
-  );
+  });
 
   const msg = await fromBinary(
     EventsSchema,
@@ -253,7 +291,7 @@ async function sync(state, reset) {
 
   msg.events.forEach(
     function (
-      /** @type {{ msg: { case: any; value: any; }; ts: number; }} */ event,
+      /** @type {{msg: {case: string; value: Record<string, string>}; ts: number}} */ event,
     ) {
       processEvent(
         state.data,
@@ -272,9 +310,10 @@ async function sync(state, reset) {
 
 /**
  * @param {Data} data
- * @param {any} eventType
- * @param {any} eventValue
- * @params {boolean} reset
+ * @param {number} ts
+ * @param {string} eventType
+ * @param {Record<string, string>} eventValue
+ * @param {boolean} reset
  */
 function processEvent(data, ts, eventType, eventValue, reset) {
   const eventDate = new Date(Number(ts) / 1000);
@@ -298,14 +337,14 @@ function processEvent(data, ts, eventType, eventValue, reset) {
     case "Reset":
       if (!reset) {
         localStorage.setItem("cursor", "-1");
-        window.location.href = window.location.href;
+        window.location.reload();
         console.log("reset");
       } else {
-        console.log("alreayd resetting, ignoring reset");
+        console.log("already resetting, ignoring reset");
       }
 
       break;
-    case "PlayerPerson":
+    case "PlayerPerson": {
       const info = toJson(EventPlayerPersonSchema, eventValue, {
         alwaysEmitImplicit: true,
       });
@@ -320,7 +359,8 @@ function processEvent(data, ts, eventType, eventValue, reset) {
       data.players[eventValue.playerId].personal = info;
 
       break;
-    case "PlayerCharacter":
+    }
+    case "PlayerCharacter": {
       const character = toJson(EventPlayerCharacterSchema, eventValue, {
         alwaysEmitImplicit: true,
       });
@@ -346,8 +386,9 @@ function processEvent(data, ts, eventType, eventValue, reset) {
       }
 
       break;
+    }
 
-    case "PlayerCharacterOrgaEdit":
+    case "PlayerCharacterOrgaEdit": {
       const orgaEdit = toJson(EventPlayerCharacterOrgaEditSchema, eventValue, {
         alwaysEmitImplicit: true,
       });
@@ -355,8 +396,9 @@ function processEvent(data, ts, eventType, eventValue, reset) {
       data.characters[eventValue.characterId].orga = orgaEdit;
 
       break;
+    }
 
-    case "DeleteCharacter":
+    case "DeleteCharacter": {
       const playerId = data.characters[eventValue.characterId].playerId;
 
       delete data.characters[eventValue.characterId];
@@ -370,6 +412,7 @@ function processEvent(data, ts, eventType, eventValue, reset) {
       }
 
       break;
+    }
 
     case "DeletePlayer":
       data.players[eventValue.playerId].characters.forEach((characterId) => {
@@ -385,8 +428,14 @@ function processEvent(data, ts, eventType, eventValue, reset) {
         if (!data.characters[eventValue.characterId].editionHistory) {
           data.characters[eventValue.characterId].editionHistory = [];
         }
-        if (!data.characters[eventValue.characterId].editionHistory.includes(eventValue.edition)) {
-          data.characters[eventValue.characterId].editionHistory.push(eventValue.edition);
+        if (
+          !data.characters[eventValue.characterId].editionHistory?.includes(
+            eventValue.edition,
+          )
+        ) {
+          data.characters[eventValue.characterId].editionHistory?.push(
+            eventValue.edition,
+          );
         }
       }
 
@@ -400,7 +449,7 @@ function processEvent(data, ts, eventType, eventValue, reset) {
  *
  * @param {CryptoKey} privateKey
  * @param {CryptoKey} publicKey
- * @returns
+ * @returns {Promise<string>}
  */
 async function auth(privateKey, publicKey) {
   return await new jose.SignJWT({})
@@ -442,7 +491,7 @@ function attachSelectListeners(elements, formKey, allowMultiple, callback) {
       const index = classes.indexOf("selected");
       if (index !== -1) {
         classes.splice(index, 1);
-        callback("unselect", formKey, li.getAttribute("data-key"));
+        callback("unselect", formKey, li.getAttribute("data-key") || "");
 
         // If the section as a selected-section element, empty it.
         if (selectedSectionElement) {
@@ -450,7 +499,7 @@ function attachSelectListeners(elements, formKey, allowMultiple, callback) {
         }
       } else {
         classes.push("selected");
-        callback("select", formKey, li.getAttribute("data-key"));
+        callback("select", formKey, li.getAttribute("data-key") || "");
 
         // If the section as a selected-section element, display the user choice there.
         if (selectedSectionElement) {
@@ -481,13 +530,13 @@ function attachSelectListeners(elements, formKey, allowMultiple, callback) {
 }
 
 /**
- * @typedef {function(SubmitEvent): any} OnSubmitCallback
+ * @typedef {function(SubmitEvent): boolean} OnSubmitCallback
  */
 
 /**
  * @param {CharacterForm} player - The player object containing character data.
- * @param {Array} characteristicsLevels - Array of characteristic level definitions.
- * @param {Object<string, UniversEntry>} univers - The universe definitions, keyed by identifier.
+ * @param {CharacteristicEntry[]} characteristicsLevels - Array of characteristic level definitions.
+ * @param {{[key: string]: UniversEntry}} univers - The universe definitions, keyed by identifier.
  * @param {Skill[]} skills - Array of skill definitions.
  * @param {OnSubmitCallback} onsubmit - Callback function to handle form submission.
  * @returns {Promise<void>} Resolves when the form is rendered and event listeners are attached.
@@ -581,6 +630,7 @@ async function personnageOrga(
     infoElement.innerHTML = `${univers[player.group]?.label || "Sans monde"} | ${univers[player.worldOrigin]?.label || "Sans position"}`;
     raceVdvElement.textContent = `${univers[player.race]?.label || "Sans race"} | ${univers[player.vdv]?.label || "Sans Voie de Vie"}`;
 
+    /** @type {string[]} */
     const characteristics = [];
 
     ["background", "mentalCrisis", "publicResume", "playerGroup"].forEach(
@@ -589,7 +639,7 @@ async function personnageOrga(
           el.querySelector(`.character-${inputName}__input`)
         );
 
-        inputElement.value = formResult[inputName];
+        inputElement.value = /** @type {string} */ (formResult[inputName]);
       },
     );
 
@@ -679,7 +729,9 @@ async function personnageOrga(
       );
 
       inputElement.addEventListener("input", (e) => {
-        formResult[inputName] = /** @type{HTMLInputElement}*/ (e.target)?.value;
+        formResult[inputName] = /** @type {HTMLInputElement}*/ (
+          e.target
+        )?.value;
 
         // @ts-ignore
         print(node);
@@ -698,25 +750,25 @@ async function personnageOrga(
 
     const key = sectionElement.dataset.key || "";
 
-    const addButtonElement = /** @type{HTMLElement} */ (
+    const addButtonElement = /** @type {HTMLElement} */ (
       sectionElement.querySelector(`.${sectionName}__add`)
     );
-    const confirmButtonElement = /** @type{HTMLElement} */ (
+    const confirmButtonElement = /** @type {HTMLElement} */ (
       sectionElement.querySelector(`.${sectionName}__confirm`)
     );
-    const inputWrapperElement = /** @type{HTMLElement} */ (
+    const inputWrapperElement = /** @type {HTMLElement} */ (
       sectionElement.querySelector(`.input-text`)
     );
 
-    const titleElement = /** @type{HTMLInputElement} */ (
+    const titleElement = /** @type {HTMLInputElement} */ (
       inputWrapperElement.querySelector(`input[name="title"]`)
     );
-    const descriptionElement = /** @type{HTMLInputElement} */ (
+    const descriptionElement = /** @type {HTMLInputElement} */ (
       inputWrapperElement.querySelector(`textarea[name="description"]`)
     );
 
     if (!titleElement || !descriptionElement) {
-      throw new Error("missing title or descritpion element");
+      throw new Error("missing title or description element");
     }
 
     addButtonElement.addEventListener("click", (e) => {
@@ -739,7 +791,9 @@ async function personnageOrga(
       inputWrapperElement.classList.add("d-none");
 
       if (titleElement.value && descriptionElement.value) {
-        formResult[key].push({
+        /** @type {{title: string, description: string}[]} */ (
+          formResult[key]
+        ).push({
           title: titleElement.value,
           description: descriptionElement.value,
         });
@@ -754,19 +808,21 @@ async function personnageOrga(
 
   node.addEventListener("click", (e) => {
     if (
-      /** @type{HTMLInputElement|null}*/ (e.target)?.classList.contains(
+      /** @type {HTMLInputElement|null}*/ (e.target)?.classList.contains(
         "titledescription__head__delete",
       )
     ) {
       e.preventDefault();
 
-      const element = /** @type{HTMLInputElement}*/ (e.target);
+      const element = /** @type {HTMLInputElement}*/ (e.target);
 
       const key = element.dataset.key;
       const index = parseInt(element.dataset.index || "");
 
       if (key) {
-        formResult[key].splice(index, 1);
+        /** @type {{title: string, description: string}[]} */ (
+          formResult[key]
+        ).splice(index, 1);
 
         print(node);
       }
@@ -779,8 +835,8 @@ async function personnageOrga(
 }
 
 /**
- *
  * @param {UniversEntry[]} univers
+ * @returns {CharacteristicEntry[]}
  */
 function extractCharacteristics(univers) {
   return univers
@@ -890,27 +946,9 @@ function extractSkills(univers) {
  * Calculates the inventory budget based on the dexterity characteristic level.
  * @param {number} dexterite - The dexterity level (from -2 to 4).
  * @returns {number} The corresponding inventory budget.
- * @throws {Error} If the dexterity level is outside the handled range.
  */
 function dexteriteToInventoryBudget(dexterite) {
-  switch (dexterite) {
-    case -2:
-      return 0;
-    case -1:
-      return 0;
-    case 0:
-      return 1;
-    case 1:
-      return 2;
-    case 2:
-      return 3;
-    case 3:
-      return 4;
-    case 4:
-      return 5;
-    default:
-      throw new Error("dexterite " + dexterite + "not handled");
-  }
+  return Math.max(0, dexterite + 1);
 }
 
 async function personnage() {
@@ -920,7 +958,7 @@ async function personnage() {
   const characterId = url.searchParams.get("characterId");
   let playerId = url.searchParams.get("playerId");
 
-  let /** @type{CharacterForm} */ formResult = {
+  let /** @type {CharacterForm} */ formResult = {
       createdAt: new Date(),
       playerId: "",
       name: "",
@@ -970,14 +1008,14 @@ async function personnage() {
   if (!state) {
     // Demo mode: hide all save buttons
     document.querySelectorAll(".save-button").forEach((btn) => {
-      btn.style.display = "none";
+      /** @type {HTMLElement} */ (btn).style.display = "none";
     });
   }
 
   const readOnly = characterId && formResult.edition !== "2026";
   if (readOnly) {
     document.querySelectorAll(".save-button").forEach((btn) => {
-      btn.style.display = "none";
+      /** @type {HTMLElement} */ (btn).style.display = "none";
     });
 
     const banner = document.createElement("div");
@@ -999,10 +1037,13 @@ async function personnage() {
           },
         ],
       });
-      await fetch(`${globalThis.env.thekeeperURL}/state`, {
+      await fetch(`${env.thekeeperURL}/state`, {
         method: "POST",
         headers: {
-          Authorization: await auth(state.keys.private, state.keys.public),
+          Authorization: await auth(
+            /** @type {State} */ (state).keys.private,
+            /** @type {State} */ (state).keys.public,
+          ),
           "Content-Type": "application/x-protobuf",
         },
         body: toBinary(EventsSchema, payload),
@@ -1101,7 +1142,7 @@ async function personnage() {
   const skillSelect = document.querySelector(".skills");
   const inventorySelect = document.querySelector(".inventory__select");
 
-  const universResponse = await fetch(globalThis.env.univers);
+  const universResponse = await fetch(env.univers);
   const /** @type {UniversEntry[]} */ univers = await universResponse.json();
   const races = univers.filter((entry) => entry.tags.includes("race"));
   const mondes = univers.filter((entry) => entry.tags.includes("monde"));
@@ -1114,7 +1155,7 @@ async function personnage() {
   const vdvs = univers.filter((entry) => entry.tags.includes("vdv"));
   const inventory = univers.filter((entry) => entry.tags.includes("inventory"));
 
-  const /** @type{Object<string, UniversEntry>} */ universMap = {};
+  const /** @type {{[key: string]: UniversEntry}} */ universMap = {};
   univers.forEach((entry) => {
     universMap[entry.key] = entry;
   });
@@ -1126,7 +1167,7 @@ async function personnage() {
   );
 
   characterNameInputElement.addEventListener("input", (e) => {
-    formResult.name = /** @type{HTMLInputElement}*/ (e.target)?.value;
+    formResult.name = /** @type {HTMLInputElement}*/ (e.target)?.value;
   });
 
   characterNameInputElement.value = formResult.name;
@@ -1156,7 +1197,7 @@ async function personnage() {
     (level) => level.rank === formResult.characteristics.savoir,
   );
 
-  const defaultSavoirPcValue = defaultSavoirLevel?.pcValue || 0; // Fallback to 1 if not found
+  const defaultSavoirPcValue = defaultSavoirLevel?.pcValue || 0;
 
   let skillBudget =
     /* allow orga to give whatever skills he wants */
@@ -1200,9 +1241,6 @@ async function personnage() {
   );
   budgetCounterElement.textContent = skillBudget + "";
 
-  const inventoryBudgetElement = /** @type {HTMLElement} */ (
-    document.querySelector(".inventory__budget")
-  );
   const inventoryBudgetCounterElement = /** @type {HTMLElement} */ (
     document.querySelector(".inventory__budget__counter")
   );
@@ -1269,7 +1307,7 @@ async function personnage() {
     });
 
     nodeInput.addEventListener("input", (e) => {
-      const target = /** @type{HTMLInputElement}*/ (e.target);
+      const target = /** @type {HTMLInputElement}*/ (e.target);
       const targetValue = parseInt(target?.value);
       if (isNaN(targetValue)) return;
 
@@ -1352,7 +1390,7 @@ async function personnage() {
    *
    * @param {Skill} skill
    * @param {number} rank
-   * @return {{description: string, title: string, rankTitle: string, rankDescription: string, nextRankDescription: string | null}}}
+   * @returns {{description: string, title: string, rankTitle: string, rankDescription: string, nextRankDescription: string | null}}
    */
   function skillBuild(skill, rank) {
     return {
@@ -1378,6 +1416,7 @@ async function personnage() {
     };
   }
 
+  /** @type {{[key: string]: function(): void}} */
   const skillResets = {};
 
   skills.forEach((skill) => {
@@ -1398,7 +1437,7 @@ async function personnage() {
 
     const print = (
       /** @type {Element} */ el,
-      /* @type {boolean}*/ firstPrint,
+      /** @type {boolean} */ firstPrint,
     ) => {
       const skillDesc = skillBuild(skill, lvl);
 
@@ -1500,7 +1539,7 @@ async function personnage() {
       node.querySelector(".skill__content__level__down")
     );
 
-    nodeRankUpElement.addEventListener("click", (e) => {
+    nodeRankUpElement.addEventListener("click", () => {
       if (skillBudget <= 0) {
         return;
       }
@@ -1511,7 +1550,7 @@ async function personnage() {
       }
     });
 
-    nodeRankDownElement.addEventListener("click", (e) => {
+    nodeRankDownElement.addEventListener("click", () => {
       if (lvl > 0) {
         onSkillPick(skill.key, lvl - 1, skill.levels[lvl - 1].cost);
         lvl--;
@@ -1557,7 +1596,11 @@ async function personnage() {
 
   updateSkillButtonStates();
 
-  // Replace the budget check in onSkillPick with the new function
+  /**
+   * @param {string} skillKey
+   * @param {number} rank
+   * @param {number} cost
+   */
   function onSkillPick(skillKey, rank, cost) {
     skillBudget += cost;
 
@@ -1662,7 +1705,7 @@ async function personnage() {
 
     plusElement.setAttribute("data-cost", cost.toString());
 
-    plusElement?.addEventListener("click", (e) => {
+    plusElement?.addEventListener("click", () => {
       if (inventoryBudget - cost < 0) {
         return;
       }
@@ -1674,7 +1717,7 @@ async function personnage() {
       print(node);
     });
 
-    minusElement?.addEventListener("click", (e) => {
+    minusElement?.addEventListener("click", () => {
       if (numberOfItems === 0) {
         return;
       }
@@ -1983,10 +2026,10 @@ async function personnage() {
       return;
     }
 
-    input.value = formResult[forAttribute] || "";
+    input.value = /** @type {string} */ (formResult[forAttribute]) || "";
 
     match.addEventListener("input", (event) => {
-      const target = /** @type{HTMLInputElement}*/ (event.target);
+      const target = /** @type {HTMLInputElement}*/ (event.target);
       formResult[forAttribute] = target.value;
     });
   });
@@ -2002,7 +2045,7 @@ async function personnage() {
     }
 
     lis.forEach((li) => {
-      if (formResult[forAttribute].toString() === li.getAttribute("data-key")) {
+      if (String(formResult[forAttribute]) === li.getAttribute("data-key")) {
         li.classList.add("selected");
         updateSkillList();
 
@@ -2182,7 +2225,7 @@ async function personnage() {
       events: events,
     });
 
-    const response = await fetch(`${globalThis.env.thekeeperURL}/state`, {
+    const response = await fetch(`${env.thekeeperURL}/state`, {
       method: "POST",
       headers: {
         Authorization: await auth(state.keys.private, state.keys.public),
@@ -2205,9 +2248,10 @@ async function personnage() {
 }
 
 async function theview2() {
-  const universResponse = await fetch(globalThis.env.univers);
+  const universResponse = await fetch(env.univers);
   const /** @type {UniversEntry[]} */ univers = await universResponse.json();
 
+  /** @type {{[key: string]: UniversEntry}} */
   const universMap = {};
   univers.forEach((entry) => {
     universMap[entry.key] = entry;
@@ -2222,38 +2266,40 @@ async function theview2() {
     return;
   }
 
-  const inventoryElement = /** @type{HTMLElement} */ (
+  const inventoryElement = /** @type {HTMLElement} */ (
     document.querySelector(".inventory-global")
   );
-  const skillsElement = /** @type{HTMLElement} */ (
+  const skillsElement = /** @type {HTMLElement} */ (
     document.querySelector(".skills-global")
   );
 
-  /** @type{{inventory: Object<string, {count: number, characters: string[]}>, skills: Object<string, {count: number, characters: string[]}>}} */
+  /** @type {{inventory: {[key: string]: {count: number, characters: string[]}}, skills: {[key: string]: {count: number, characters: string[]}}}} */
   const agg = {
     inventory: {},
     skills: {},
   };
 
-  Object.keys(state.data.characters).filter((cid) => state.data.characters[cid]?.edition === "2026").forEach((characterId) => {
-    const character = state.data.characters[characterId];
-    Object.keys(character.inventory).forEach((key) => {
-      agg.inventory[key] = agg.inventory[key] || { count: 0, characters: [] };
-      agg.inventory[key].characters.push(characterId);
-      agg.inventory[key].count += character.inventory[key];
-    });
+  Object.keys(state.data.characters)
+    .filter((cid) => state.data.characters[cid]?.edition === "2026")
+    .forEach((characterId) => {
+      const character = state.data.characters[characterId];
+      Object.keys(character.inventory).forEach((key) => {
+        agg.inventory[key] = agg.inventory[key] || { count: 0, characters: [] };
+        agg.inventory[key].characters.push(characterId);
+        agg.inventory[key].count += character.inventory[key];
+      });
 
-    Object.keys(character.skills).forEach((key) => {
-      agg.skills[key + ":" + character.skills[key]] = agg.skills[
-        key + ":" + character.skills[key]
-      ] || { count: 0, characters: [] };
+      Object.keys(character.skills).forEach((key) => {
+        agg.skills[key + ":" + character.skills[key]] = agg.skills[
+          key + ":" + character.skills[key]
+        ] || { count: 0, characters: [] };
 
-      agg.skills[key + ":" + character.skills[key]].characters.push(
-        characterId,
-      );
-      agg.skills[key + ":" + character.skills[key]].count += 1;
+        agg.skills[key + ":" + character.skills[key]].characters.push(
+          characterId,
+        );
+        agg.skills[key + ":" + character.skills[key]].count += 1;
+      });
     });
-  });
 
   Object.keys(agg.inventory).forEach((key) => {
     const count = agg.inventory[key].count;
@@ -2266,7 +2312,7 @@ async function theview2() {
       const character = state.data.characters[characterId];
 
       const characterLiElement = document.createElement("li");
-      characterLiElement.innerHTML = `<a class="a-underline" href="/personnage.html?characterId=${characterId}" target="blank_">${character.name}  x${character.inventory[key]}</a>`;
+      characterLiElement.innerHTML = `<a class="a-underline" href="/personnage.html?characterId=${characterId}" target="_blank">${character.name}  x${character.inventory[key]}</a>`;
 
       ulElement.appendChild(characterLiElement);
     });
@@ -2294,7 +2340,7 @@ async function theview2() {
       const character = state.data.characters[characterId];
 
       const characterLiElement = document.createElement("li");
-      characterLiElement.innerHTML = `<a class="a-underline" href="/personnage.html?characterId=${characterId}" target="blank_">${character.name}</a>`;
+      characterLiElement.innerHTML = `<a class="a-underline" href="/personnage.html?characterId=${characterId}" target="_blank">${character.name}</a>`;
 
       ulElement.appendChild(characterLiElement);
     });
@@ -2311,9 +2357,10 @@ async function theview2() {
 }
 
 async function theview() {
-  const universResponse = await fetch(globalThis.env.univers);
+  const universResponse = await fetch(env.univers);
   const /** @type {UniversEntry[]} */ univers = await universResponse.json();
 
+  /** @type {{[key: string]: UniversEntry}} */
   const universMap = {};
   univers.forEach((entry) => {
     universMap[entry.key] = entry;
@@ -2368,8 +2415,9 @@ async function theview() {
   Object.keys(state.data.players).forEach((playerId) => {
     const player = state.data.players[playerId];
 
-    const characters = player.characters
-      .filter((cid) => state.data.characters[cid]?.edition === "2026");
+    const characters = player.characters.filter(
+      (cid) => state.data.characters[cid]?.edition === "2026",
+    );
 
     if (characters.length === 0) {
       return;
@@ -2377,7 +2425,6 @@ async function theview() {
 
     characters.forEach((characterId) => {
       const character = state.data.characters[characterId];
-      const rowElement = document.createElement("tr");
 
       let characterElement;
       if (character) {
@@ -2423,7 +2470,9 @@ async function theview() {
 
       const /** @type {(string|HTMLElement|undefined)[]} */ values = [];
       values.push(
-        (character?.createdAt || player.personal?.createdAt).toLocaleString(),
+        (
+          character?.createdAt || player.personal?.createdAt
+        )?.toLocaleString() ?? "",
       );
       values.push(
         character?.orga?.playerGroup === "" ||
@@ -2473,7 +2522,7 @@ async function theview() {
   containerElement?.appendChild(tableElement);
 
   // @ts-ignore
-  let table = new window.DataTable("#theview", {
+  new window.DataTable("#theview", {
     layout: {
       topStart: {
         buttons: [
@@ -2512,9 +2561,10 @@ async function theview() {
 }
 
 async function index() {
-  const universResponse = await fetch(globalThis.env.univers);
+  const universResponse = await fetch(env.univers);
   const /** @type {UniversEntry[]} */ univers = await universResponse.json();
 
+  /** @type {{[key: string]: UniversEntry}} */
   const universMap = {};
   univers.forEach((entry) => {
     universMap[entry.key] = entry;
@@ -2546,7 +2596,7 @@ async function index() {
 
   const url = new URL(window.location.href);
   const authCode = url.searchParams.get("code");
-  let /** @type{State|null} */ state;
+  let /** @type {State|null} */ state;
 
   if (authCode) {
     if (localStorage.getItem("redeemed_code") === authCode) {
@@ -2557,7 +2607,7 @@ async function index() {
     const keypair = await generateKeypair();
 
     const response = await fetch(
-      `${globalThis.env.thekeeperURL}/auth/redeem/${authCode}`,
+      `${env.thekeeperURL}/auth/redeem/${authCode}`,
       {
         method: "POST",
         headers: {
@@ -2567,7 +2617,7 @@ async function index() {
       },
     );
 
-    if (response.status != 200) {
+    if (response.status !== 200) {
       const messageElement = document.createElement("h1");
 
       messageElement.textContent = "Le lien ne marche pas :(";
@@ -2605,7 +2655,7 @@ async function index() {
         ],
       });
 
-      await fetch(`${globalThis.env.thekeeperURL}/state`, {
+      await fetch(`${env.thekeeperURL}/state`, {
         method: "POST",
         headers: {
           Authorization: await auth(keypair.private, keypair.public),
@@ -2678,7 +2728,7 @@ async function index() {
       requestLinkForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         try {
-          await fetch(`${globalThis.env.thekeeperURL}/auth/request-link`, {
+          await fetch(`${env.thekeeperURL}/auth/request-link`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: emailInput.value }),
@@ -2687,7 +2737,7 @@ async function index() {
             "Si cette adresse est enregistrée, un lien t'a été envoyé par email.";
           msg.classList.remove("d-none");
           requestLinkForm.classList.add("d-none");
-        } catch (err) {
+        } catch {
           msg.textContent = "Erreur réseau, réessaie plus tard.";
           msg.classList.remove("d-none");
         }
@@ -2743,9 +2793,12 @@ async function index() {
         "/personnage.html?playerId=" + playerId,
       );
 
-      const visibleCharacters = state.data.permission === "orga"
-        ? player.characters.filter((cid) => state.data.characters[cid]?.edition === "2026")
-        : player.characters;
+      const visibleCharacters =
+        state.data.permission === "orga"
+          ? player.characters.filter(
+              (cid) => state.data.characters[cid]?.edition === "2026",
+            )
+          : player.characters;
 
       if (state.data.permission === "orga" && visibleCharacters.length === 0) {
         return;
@@ -2829,8 +2882,11 @@ async function index() {
         );
 
         const edition = character.edition || "2025";
-        editionBadgeElement.textContent = edition === "optout" ? "Non inscrit" : "Édition " + edition;
-        editionBadgeElement.classList.add("character-edition-badge--" + edition);
+        editionBadgeElement.textContent =
+          edition === "optout" ? "Non inscrit" : "Édition " + edition;
+        editionBadgeElement.classList.add(
+          "character-edition-badge--" + edition,
+        );
 
         if (edition !== "2026") {
           characterLinkElement.textContent = "Voir";
@@ -2851,10 +2907,13 @@ async function index() {
                   },
                 ],
               });
-              await fetch(`${globalThis.env.thekeeperURL}/state`, {
+              await fetch(`${env.thekeeperURL}/state`, {
                 method: "POST",
                 headers: {
-                  Authorization: await auth(state.keys.private, state.keys.public),
+                  Authorization: await auth(
+                    state.keys.private,
+                    state.keys.public,
+                  ),
                   "Content-Type": "application/x-protobuf",
                 },
                 body: toBinary(EventsSchema, payload),
@@ -2875,10 +2934,13 @@ async function index() {
                   },
                 ],
               });
-              await fetch(`${globalThis.env.thekeeperURL}/state`, {
+              await fetch(`${env.thekeeperURL}/state`, {
                 method: "POST",
                 headers: {
-                  Authorization: await auth(state.keys.private, state.keys.public),
+                  Authorization: await auth(
+                    state.keys.private,
+                    state.keys.public,
+                  ),
                   "Content-Type": "application/x-protobuf",
                 },
                 body: toBinary(EventsSchema, payload),
@@ -2894,9 +2956,13 @@ async function index() {
       characterListElement?.prepend(clone);
     });
 
-    if (state.data.permission === "orga" && characterListElement?.children.length === 0) {
+    if (
+      state.data.permission === "orga" &&
+      characterListElement?.children.length === 0
+    ) {
       const placeholder = document.createElement("p");
-      placeholder.textContent = "Aucun joueur inscrit pour l'édition 2026 pour le moment.";
+      placeholder.textContent =
+        "Aucun joueur inscrit pour l'édition 2026 pour le moment.";
       placeholder.style.textAlign = "center";
       placeholder.style.opacity = "0.6";
       placeholder.style.padding = "2em 0";
@@ -2913,7 +2979,7 @@ async function index() {
             navigator.clipboard.writeText(handle);
 
             const response = await fetch(
-              `${globalThis.env.thekeeperURL}/auth/handles/${handle}`,
+              `${env.thekeeperURL}/auth/handles/${handle}`,
               {
                 method: "POST",
                 headers: {
@@ -2925,14 +2991,14 @@ async function index() {
               },
             );
 
-            if (response.status != 200) {
+            if (response.status !== 200) {
               console.error("Error getting sharing link", response);
               return;
             }
 
             const jsonResponse = await response.json();
             navigator.clipboard.writeText(
-              `${globalThis.env.appURL}/index.html?code=${jsonResponse.message}`,
+              `${env.appURL}/index.html?code=${jsonResponse.message}`,
             );
           }
         });
@@ -2940,7 +3006,7 @@ async function index() {
   }
 
   if (state?.data.permission === "orga") {
-    const counts = { "2026": 0, "2025": 0, "optout": 0, "2025to2026": 0 };
+    const counts = { 2026: 0, 2025: 0, optout: 0, "2025to2026": 0 };
     Object.values(state.data.characters).forEach((c) => {
       if (c.edition === "2026") counts["2026"]++;
       if (c.edition === "optout") counts["optout"]++;
@@ -2970,7 +3036,7 @@ async function index() {
 async function informations() {
   let state = await getState();
 
-  let /** @type{InformationsForm} */ formResult = {
+  let /** @type {InformationsForm} */ formResult = {
       createdAt: new Date(),
       surname: "",
       age: "",
@@ -3044,7 +3110,9 @@ async function informations() {
     if (formResult[forAttribute]) {
       lis.forEach((li) => {
         if (
-          formResult[forAttribute].indexOf(li.getAttribute("data-key")) !== -1
+          /** @type {string[]} */ (formResult[forAttribute]).indexOf(
+            li.getAttribute("data-key") || "",
+          ) !== -1
         ) {
           li.classList.add("selected");
         }
@@ -3053,11 +3121,13 @@ async function informations() {
 
     attachSelectListeners(lis, forAttribute, true, (op, key, value) => {
       if (op === "select") {
-        formResult[key] = (formResult[key] || []).concat([value]);
+        formResult[key] = /** @type {string[]} */ (
+          formResult[key] || []
+        ).concat([value]);
       } else {
-        var index = formResult[key].indexOf(value);
+        const index = /** @type {string[]} */ (formResult[key]).indexOf(value);
         if (index !== -1) {
-          formResult[key].splice(index, 1);
+          /** @type {string[]} */ (formResult[key]).splice(index, 1);
         }
       }
     });
@@ -3073,10 +3143,10 @@ async function informations() {
       return;
     }
 
-    input.value = formResult[forAttribute] || "";
+    input.value = /** @type {string} */ (formResult[forAttribute]) || "";
 
     match.addEventListener("input", (event) => {
-      const target = /** @type{HTMLInputElement}*/ (event.target);
+      const target = /** @type {HTMLInputElement}*/ (event.target);
       formResult[forAttribute] = target.value;
     });
   });
@@ -3090,10 +3160,10 @@ async function informations() {
       return;
     }
 
-    input.checked = formResult[forAttribute] || false;
+    input.checked = /** @type {boolean} */ (formResult[forAttribute]) || false;
 
     match.addEventListener("input", (event) => {
-      const target = /** @type{HTMLInputElement}*/ (event.target);
+      const target = /** @type {HTMLInputElement}*/ (event.target);
       formResult[forAttribute] = target.checked;
     });
   });
@@ -3155,7 +3225,7 @@ async function informations() {
       events: events,
     });
 
-    const response = await fetch(`${globalThis.env.thekeeperURL}/state`, {
+    const response = await fetch(`${env.thekeeperURL}/state`, {
       method: "POST",
       headers: {
         Authorization: await auth(state.keys.private, state.keys.public),
@@ -3203,9 +3273,9 @@ async function print() {
     return;
   }
 
-  const universResponse = await fetch(globalThis.env.univers);
+  const universResponse = await fetch(env.univers);
   const /** @type {UniversEntry[]} */ univers = await universResponse.json();
-  const /** @type{Object<string, UniversEntry>} */ universMap = {};
+  const /** @type {{[key: string]: UniversEntry}} */ universMap = {};
   univers.forEach((entry) => {
     universMap[entry.key] = entry;
   });
@@ -3292,9 +3362,9 @@ async function print() {
   subtitleGroupElement.textContent = character.orga?.playerGroup || "";
   titleElement.textContent = character.name;
   trombiElement.textContent = character.orga?.publicResume || "";
-  mentalCrisisElement.textContent =
-    `Crise Mentale : ${character.orga?.mentalCrisis}` ||
-    "Crise Mentale : Aucune";
+  mentalCrisisElement.textContent = character.orga?.mentalCrisis
+    ? `Crise Mentale : ${character.orga.mentalCrisis}`
+    : "Crise Mentale : Aucune";
   bgElement.textContent = (character.orga?.background || "").replaceAll(
     "\n",
     "\r\n",
@@ -3465,7 +3535,9 @@ async function print() {
       document.querySelector(`.${characteristic} .characteristic__description`)
     );
 
-    levelElement.textContent = character.characteristics[characteristic];
+    levelElement.textContent = String(
+      character.characteristics[characteristic],
+    );
 
     labelElement.textContent =
       characteristics.find((entry) => entry.key === characteristic)?.label ||
@@ -3538,9 +3610,7 @@ function watchForHover() {
   let lastTouchTime = 0;
 
   function enableHover() {
-    const now = new Date();
-    // @ts-ignore
-    if (now - lastTouchTime < 500) return;
+    if (Date.now() - lastTouchTime < 500) return;
     document.body.classList.add("hasHover");
   }
 
@@ -3549,8 +3619,7 @@ function watchForHover() {
   }
 
   function updateLastTouchTime() {
-    // @ts-ignore
-    lastTouchTime = new Date();
+    lastTouchTime = Date.now();
   }
 
   document.addEventListener("touchstart", updateLastTouchTime, true);

@@ -12,22 +12,23 @@
 
 ## File Structure
 
-| File | Responsibility |
-|------|---------------|
-| `email.go` (new) | SMTP config, `SendEmail`, `SendInviteEmail` |
-| `email_test.go` (new) | Unit tests for email config loading, template rendering |
-| `db.go` | New `CreatePlayerActor`, `FindActorIDByEmail`, `SetActorEmail`. Simplified `GetState`. |
-| `db_test.go` | Tests for new DB functions and `GetState` rejection |
-| `http.go` | New `HandleInvite`, `HandleRequestLink` handlers |
-| `schema.sql` | Add `email` column to `actors` |
-| `main.go` | New `invite` and `migrate-emails` CLI commands, wire new HTTP routes, schema migration |
-| `public/app.js` | Demo mode for `personnage.html` without auth |
+| File                  | Responsibility                                                                         |
+| --------------------- | -------------------------------------------------------------------------------------- |
+| `email.go` (new)      | SMTP config, `SendEmail`, `SendInviteEmail`                                            |
+| `email_test.go` (new) | Unit tests for email config loading, template rendering                                |
+| `db.go`               | New `CreatePlayerActor`, `FindActorIDByEmail`, `SetActorEmail`. Simplified `GetState`. |
+| `db_test.go`          | Tests for new DB functions and `GetState` rejection                                    |
+| `http.go`             | New `HandleInvite`, `HandleRequestLink` handlers                                       |
+| `schema.sql`          | Add `email` column to `actors`                                                         |
+| `main.go`             | New `invite` and `migrate-emails` CLI commands, wire new HTTP routes, schema migration |
+| `public/app.js`       | Demo mode for `personnage.html` without auth                                           |
 
 ---
 
 ### Task 1: Schema migration — add email column to actors
 
 **Files:**
+
 - Modify: `schema.sql`
 - Modify: `main.go:35-38`
 
@@ -76,6 +77,7 @@ git commit -m "feat: add email column to actors table with idempotent migration"
 ### Task 2: SMTP email — config and sending
 
 **Files:**
+
 - Create: `email.go`
 - Create: `email_test.go`
 
@@ -264,6 +266,7 @@ git commit -m "feat: add SMTP email config and invite email template"
 ### Task 3: New DB functions — CreatePlayerActor, FindActorIDByEmail, SetActorEmail
 
 **Files:**
+
 - Modify: `db.go`
 - Modify: `db_test.go`
 
@@ -425,6 +428,7 @@ git commit -m "feat: add CreatePlayerActor, FindActorIDByEmail, SetActorEmail"
 ### Task 4: Remove self-registration from GetState
 
 **Files:**
+
 - Modify: `db.go:145-196`
 - Modify: `db_test.go`
 
@@ -534,6 +538,7 @@ git commit -m "feat: remove self-registration, GetState rejects unknown public k
 ### Task 5: invite CLI command
 
 **Files:**
+
 - Modify: `main.go`
 
 - [ ] **Step 1: Add handle generation helper**
@@ -689,6 +694,7 @@ git commit -m "feat: add invite CLI command for email-based player onboarding"
 ### Task 6: migrate-emails CLI command
 
 **Files:**
+
 - Modify: `main.go`
 
 - [ ] **Step 1: Add the migrate-emails command function**
@@ -779,6 +785,7 @@ git commit -m "feat: add migrate-emails CLI to backfill actor emails from Player
 ### Task 7: POST /auth/invite endpoint (orga-only)
 
 **Files:**
+
 - Modify: `http.go`
 - Modify: `main.go` (wire route)
 
@@ -923,6 +930,7 @@ git commit -m "feat: add POST /auth/invite endpoint for orga-initiated invitatio
 ### Task 8: POST /auth/request-link endpoint (public)
 
 **Files:**
+
 - Modify: `http.go`
 - Modify: `main.go` (wire route)
 
@@ -1012,11 +1020,13 @@ git commit -m "feat: add POST /auth/request-link for public email-based login li
 ### Task 9: Character form demo mode (frontend)
 
 **Files:**
+
 - Modify: `public/app.js`
 
 - [ ] **Step 1: Understand the current gating logic**
 
 In `public/app.js`, the main entry point (around line 2521) does:
+
 1. Check for `?code=` param → redeem flow
 2. Else → `getState()` which loads keypair from localStorage
 3. If `getState()` returns null (no stored keys) → calls `init()` which generates a keypair and POSTs a SeedActor event to the server
@@ -1098,6 +1108,7 @@ git commit -m "feat: add demo mode for unauthenticated character form browsing"
 ### Task 10: Final integration test
 
 **Files:**
+
 - All
 
 - [ ] **Step 1: Run all backend tests**
