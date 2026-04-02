@@ -428,17 +428,12 @@ func migrateEditions(db *sqlx.DB) error {
 	}
 
 	var migrated int
-	for characterID, character := range sv.CharacterIDs {
+	for characterID := range sv.CharacterIDs {
 		if alreadyActivated[characterID] {
 			continue
 		}
 
-		player, exists := sv.PlayersIDs[character.PlayerID]
-		if !exists {
-			return fmt.Errorf("player %s for character %s not found", character.PlayerID, characterID)
-		}
-
-		result, err := InsertAndCheckEvents(db, -1, player.ActorID, []*proto.Event{
+		result, err := InsertAndCheckEvents(db, -1, 0, []*proto.Event{
 			{
 				Msg: &proto.Event_ActivateCharacter{
 					ActivateCharacter: &proto.EventActivateCharacter{
