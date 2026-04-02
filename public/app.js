@@ -424,7 +424,6 @@ function processEvent(data, ts, eventType, eventValue, reset) {
       break;
     case "ActivateCharacter":
       if (data.characters[eventValue.characterId]) {
-        data.characters[eventValue.characterId].edition = eventValue.edition;
         if (!data.characters[eventValue.characterId].editionHistory) {
           data.characters[eventValue.characterId].editionHistory = [];
         }
@@ -436,7 +435,9 @@ function processEvent(data, ts, eventType, eventValue, reset) {
           data.characters[eventValue.characterId].editionHistory?.push(
             eventValue.edition,
           );
+          data.characters[eventValue.characterId].orga = undefined;
         }
+        data.characters[eventValue.characterId].edition = eventValue.edition;
       }
 
       break;
