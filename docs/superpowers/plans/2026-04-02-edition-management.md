@@ -12,25 +12,26 @@
 
 ## File Map
 
-| Action | File | Responsibility |
-|--------|------|----------------|
-| Create | `proto/activate_character.proto` | New protobuf message definition |
-| Modify | `proto/event.proto` | Add `ActivateCharacter` to the `Event` oneof |
-| Regenerate | `proto/*.pb.go`, `public/*_pb.js` | Generated code from `proto/gen.sh` |
-| Modify | `space_validation.go` | Validate `ActivateCharacter` events (edition allowlist, character exists, player owns it) |
-| Modify | `space_validation.go` | Pass `ActivateCharacter` events through in `SpaceOrga` and `SpacePlayer` |
-| Modify | `space_validation_test.go` | Tests for validation logic |
-| Modify | `projection_test.go` | Tests for projection filtering |
-| Modify | `testhelpers_test.go` | Add `activateCharacterEvent` helper |
-| Modify | `main.go` | Add `migrate-editions` CLI command |
-| Modify | `public/app.js` | Process `ActivateCharacter` in `processEvent`, auto-emit on character creation, enroll/opt-out UI |
-| Modify | `public/index.html` | Add edition badge and enroll/opt-out button to character template |
+| Action     | File                              | Responsibility                                                                                    |
+| ---------- | --------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Create     | `proto/activate_character.proto`  | New protobuf message definition                                                                   |
+| Modify     | `proto/event.proto`               | Add `ActivateCharacter` to the `Event` oneof                                                      |
+| Regenerate | `proto/*.pb.go`, `public/*_pb.js` | Generated code from `proto/gen.sh`                                                                |
+| Modify     | `space_validation.go`             | Validate `ActivateCharacter` events (edition allowlist, character exists, player owns it)         |
+| Modify     | `space_validation.go`             | Pass `ActivateCharacter` events through in `SpaceOrga` and `SpacePlayer`                          |
+| Modify     | `space_validation_test.go`        | Tests for validation logic                                                                        |
+| Modify     | `projection_test.go`              | Tests for projection filtering                                                                    |
+| Modify     | `testhelpers_test.go`             | Add `activateCharacterEvent` helper                                                               |
+| Modify     | `main.go`                         | Add `migrate-editions` CLI command                                                                |
+| Modify     | `public/app.js`                   | Process `ActivateCharacter` in `processEvent`, auto-emit on character creation, enroll/opt-out UI |
+| Modify     | `public/index.html`               | Add edition badge and enroll/opt-out button to character template                                 |
 
 ---
 
 ### Task 1: Protobuf Definition
 
 **Files:**
+
 - Create: `proto/activate_character.proto`
 - Modify: `proto/event.proto`
 
@@ -67,6 +68,7 @@ Add inside the `oneof msg` block:
 - [ ] **Step 3: Regenerate protobuf bindings**
 
 Run:
+
 ```bash
 cd proto && bash gen.sh
 ```
@@ -76,6 +78,7 @@ Expected: new files `proto/activate_character.pb.go` and `public/activate_charac
 - [ ] **Step 4: Verify the build compiles**
 
 Run:
+
 ```bash
 go build ./...
 ```
@@ -94,6 +97,7 @@ git commit -m "feat: add ActivateCharacter protobuf event type"
 ### Task 2: Test Helper
 
 **Files:**
+
 - Modify: `testhelpers_test.go`
 
 - [ ] **Step 1: Add the activateCharacterEvent helper**
@@ -109,6 +113,7 @@ func activateCharacterEvent(characterID, edition string) *proto.Event {
 - [ ] **Step 2: Verify tests still pass**
 
 Run:
+
 ```bash
 go test ./...
 ```
@@ -127,6 +132,7 @@ git commit -m "test: add activateCharacterEvent test helper"
 ### Task 3: SpaceValidation — Validation Logic
 
 **Files:**
+
 - Modify: `space_validation.go`
 - Modify: `space_validation_test.go`
 
@@ -168,6 +174,7 @@ func TestActivateCharacter(t *testing.T) {
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run:
+
 ```bash
 go test ./... -run TestActivateCharacter -v
 ```
@@ -216,6 +223,7 @@ No state tracking needed — validation is purely stateless (check edition, chec
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run:
+
 ```bash
 go test ./... -run TestActivateCharacter -v
 ```
@@ -225,6 +233,7 @@ Expected: all 8 cases PASS.
 - [ ] **Step 5: Run full test suite**
 
 Run:
+
 ```bash
 go test ./...
 ```
@@ -243,6 +252,7 @@ git commit -m "feat: validate ActivateCharacter events with edition allowlist"
 ### Task 4: SpaceOrga — Pass Through ActivateCharacter
 
 **Files:**
+
 - Modify: `space_validation.go` (`SpaceOrga`)
 - Modify: `projection_test.go`
 
@@ -304,6 +314,7 @@ func TestSpaceOrga_SeesAllEvents(t *testing.T) {
 - [ ] **Step 3: Run full test suite**
 
 Run:
+
 ```bash
 go test ./...
 ```
@@ -322,6 +333,7 @@ git commit -m "feat: pass ActivateCharacter events through orga projection"
 ### Task 5: Player Projection — Pass Through ActivateCharacter
 
 **Files:**
+
 - Modify: `space_validation.go` (`SpacePlayer`)
 - Modify: `projection_test.go`
 
@@ -393,6 +405,7 @@ func TestSpacePlayer_DoesNotSeeOtherPlayersActivateCharacter(t *testing.T) {
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run:
+
 ```bash
 go test ./... -run "TestSpacePlayer_SeesActivateCharacter|TestSpacePlayer_DoesNotSeeOtherPlayers" -v
 ```
@@ -415,6 +428,7 @@ Add a new case in `SpacePlayer.Process`, before the `default`:
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run:
+
 ```bash
 go test ./... -run "TestSpacePlayer_SeesActivateCharacter|TestSpacePlayer_DoesNotSeeOtherPlayers" -v
 ```
@@ -424,6 +438,7 @@ Expected: PASS.
 - [ ] **Step 5: Run full test suite**
 
 Run:
+
 ```bash
 go test ./...
 ```
@@ -442,6 +457,7 @@ git commit -m "feat: player projection passes through ActivateCharacter events"
 ### Task 6: Migration CLI Command
 
 **Files:**
+
 - Modify: `main.go`
 - Modify: `state_test.go`
 
@@ -520,6 +536,7 @@ func TestMigrateEditions(t *testing.T) {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run:
+
 ```bash
 go test ./... -run TestMigrateEditions -v
 ```
@@ -597,6 +614,7 @@ func usage() string {
 - [ ] **Step 5: Run the migration test**
 
 Run:
+
 ```bash
 go test ./... -run TestMigrateEditions -v
 ```
@@ -606,6 +624,7 @@ Expected: PASS.
 - [ ] **Step 6: Run full test suite**
 
 Run:
+
 ```bash
 go test ./...
 ```
@@ -624,6 +643,7 @@ git commit -m "feat: add migrate-editions CLI command to tag existing characters
 ### Task 7: Frontend — Process ActivateCharacter Events
 
 **Files:**
+
 - Modify: `public/app.js`
 
 - [ ] **Step 1: Add the import for the new protobuf schema**
@@ -639,6 +659,7 @@ import { EventActivateCharacterSchema } from "./activate_character_pb.js";
 Update the `CharacterForm` JSDoc typedef to include edition:
 
 In the `@typedef {Object} CharacterForm` block, add:
+
 ```javascript
  * @property {string}                 [edition]
 ```
@@ -659,15 +680,15 @@ Add a new case in `processEvent` (inside the `switch (eventType)` block, before 
 In the `submitForm` function inside `personnage()` (around line 2081, after the `PlayerCharacter` event push and before the orga edit check), add:
 
 ```javascript
-    events.push({
-      msg: {
-        case: "ActivateCharacter",
-        value: {
-          characterId: characterId,
-          edition: "2026",
-        },
-      },
-    });
+events.push({
+  msg: {
+    case: "ActivateCharacter",
+    value: {
+      characterId: characterId,
+      edition: "2026",
+    },
+  },
+});
 ```
 
 - [ ] **Step 4: Commit**
@@ -682,6 +703,7 @@ git commit -m "feat: frontend processes ActivateCharacter events and auto-emits 
 ### Task 8: Frontend — Edition UI in Player Index
 
 **Files:**
+
 - Modify: `public/index.html`
 - Modify: `public/app.js`
 
@@ -690,23 +712,23 @@ git commit -m "feat: frontend processes ActivateCharacter events and auto-emits 
 In `public/index.html`, update the `template__character` template to include edition elements:
 
 ```html
-    <template id="template__character">
-      <li class="index__player__characters__character">
-        <span class="index__player__characters__character__name"></span> |
-        <span class="index__player__characters__character__peek"></span> -
-        <a class="index__player__characters__character__link a-underline d-none"
-          >Voir / Éditer</a
-        >
-        <a
-          class="index__player__characters__character__final__link a-underline d-none"
-          target="_blank"
-          >Fiche finale</a
-        >
-        <span class="d-none character-reviewed-badge">Revue par orga</span>
-        <span class="character-edition-badge"></span>
-        <button class="character-edition-action a-underline d-none"></button>
-      </li>
-    </template>
+<template id="template__character">
+  <li class="index__player__characters__character">
+    <span class="index__player__characters__character__name"></span> |
+    <span class="index__player__characters__character__peek"></span> -
+    <a class="index__player__characters__character__link a-underline d-none"
+      >Voir / Éditer</a
+    >
+    <a
+      class="index__player__characters__character__final__link a-underline d-none"
+      target="_blank"
+      >Fiche finale</a
+    >
+    <span class="d-none character-reviewed-badge">Revue par orga</span>
+    <span class="character-edition-badge"></span>
+    <button class="character-edition-action a-underline d-none"></button>
+  </li>
+</template>
 ```
 
 - [ ] **Step 2: Add edition display and action logic in the index() function**
@@ -714,67 +736,67 @@ In `public/index.html`, update the `template__character` template to include edi
 In `public/app.js`, inside the `index()` function, find the block where character template clones are populated (the `player.characters.forEach` loop, around line 2678). After the existing badge/link logic (around line 2748, before `charactersElement.prepend(characterClone)`), add:
 
 ```javascript
-        const editionBadgeElement = /** @type {HTMLElement} */ (
-          characterClone.querySelector(".character-edition-badge")
-        );
-        const editionActionElement = /** @type {HTMLButtonElement} */ (
-          characterClone.querySelector(".character-edition-action")
-        );
+const editionBadgeElement = /** @type {HTMLElement} */ (
+  characterClone.querySelector(".character-edition-badge")
+);
+const editionActionElement = /** @type {HTMLButtonElement} */ (
+  characterClone.querySelector(".character-edition-action")
+);
 
-        const edition = character.edition || "2025";
-        editionBadgeElement.textContent = edition === "optout" ? "Opt-out" : edition;
+const edition = character.edition || "2025";
+editionBadgeElement.textContent = edition === "optout" ? "Opt-out" : edition;
 
-        if (state.data.permission !== "orga") {
-          if (edition === "2026") {
-            editionActionElement.textContent = "Retirer";
-            editionActionElement.classList.remove("d-none");
-            editionActionElement.addEventListener("click", async () => {
-              const payload = create(EventsSchema, {
-                events: [
-                  {
-                    msg: {
-                      case: "ActivateCharacter",
-                      value: { characterId: characterId, edition: "optout" },
-                    },
-                  },
-                ],
-              });
-              await fetch(`${globalThis.env.thekeeperURL}/state`, {
-                method: "POST",
-                headers: {
-                  Authorization: await auth(state.keys.private, state.keys.public),
-                  "Content-Type": "application/x-protobuf",
-                },
-                body: toBinary(EventsSchema, payload),
-              });
-              window.location.reload();
-            });
-          } else {
-            editionActionElement.textContent = "Inscrire pour 2026";
-            editionActionElement.classList.remove("d-none");
-            editionActionElement.addEventListener("click", async () => {
-              const payload = create(EventsSchema, {
-                events: [
-                  {
-                    msg: {
-                      case: "ActivateCharacter",
-                      value: { characterId: characterId, edition: "2026" },
-                    },
-                  },
-                ],
-              });
-              await fetch(`${globalThis.env.thekeeperURL}/state`, {
-                method: "POST",
-                headers: {
-                  Authorization: await auth(state.keys.private, state.keys.public),
-                  "Content-Type": "application/x-protobuf",
-                },
-                body: toBinary(EventsSchema, payload),
-              });
-              window.location.reload();
-            });
-          }
-        }
+if (state.data.permission !== "orga") {
+  if (edition === "2026") {
+    editionActionElement.textContent = "Retirer";
+    editionActionElement.classList.remove("d-none");
+    editionActionElement.addEventListener("click", async () => {
+      const payload = create(EventsSchema, {
+        events: [
+          {
+            msg: {
+              case: "ActivateCharacter",
+              value: { characterId: characterId, edition: "optout" },
+            },
+          },
+        ],
+      });
+      await fetch(`${globalThis.env.thekeeperURL}/state`, {
+        method: "POST",
+        headers: {
+          Authorization: await auth(state.keys.private, state.keys.public),
+          "Content-Type": "application/x-protobuf",
+        },
+        body: toBinary(EventsSchema, payload),
+      });
+      window.location.reload();
+    });
+  } else {
+    editionActionElement.textContent = "Inscrire pour 2026";
+    editionActionElement.classList.remove("d-none");
+    editionActionElement.addEventListener("click", async () => {
+      const payload = create(EventsSchema, {
+        events: [
+          {
+            msg: {
+              case: "ActivateCharacter",
+              value: { characterId: characterId, edition: "2026" },
+            },
+          },
+        ],
+      });
+      await fetch(`${globalThis.env.thekeeperURL}/state`, {
+        method: "POST",
+        headers: {
+          Authorization: await auth(state.keys.private, state.keys.public),
+          "Content-Type": "application/x-protobuf",
+        },
+        body: toBinary(EventsSchema, payload),
+      });
+      window.location.reload();
+    });
+  }
+}
 ```
 
 - [ ] **Step 3: Filter orga views to only show 2026 characters**
@@ -782,30 +804,35 @@ In `public/app.js`, inside the `index()` function, find the block where characte
 In `public/app.js`, in the `theview()` function (the orga table view), find the loop `Object.keys(state.data.players).forEach((playerId) => {` (around line 2307). Replace the characters variable:
 
 ```javascript
-    const characters = player.characters
-      .filter((cid) => state.data.characters[cid]?.edition === "2026");
+const characters = player.characters.filter(
+  (cid) => state.data.characters[cid]?.edition === "2026",
+);
 
-    if (characters.length === 0) {
-      return;
-    }
+if (characters.length === 0) {
+  return;
+}
 ```
 
 This replaces the existing line:
+
 ```javascript
-    const characters =
-      player.characters.length === 0 ? ["empty"] : player.characters;
+const characters =
+  player.characters.length === 0 ? ["empty"] : player.characters;
 ```
 
 In the `index()` function (the player/orga card view), the filtering is different: for orgas, skip characters not in 2026 and skip players with no 2026 characters. Find the `player.characters.forEach` loop inside the `Object.keys(state.data.players).forEach` block (around line 2678). Wrap it with edition filtering for orgas:
 
 ```javascript
-      const visibleCharacters = state.data.permission === "orga"
-        ? player.characters.filter((cid) => state.data.characters[cid]?.edition === "2026")
-        : player.characters;
+const visibleCharacters =
+  state.data.permission === "orga"
+    ? player.characters.filter(
+        (cid) => state.data.characters[cid]?.edition === "2026",
+      )
+    : player.characters;
 
-      if (state.data.permission === "orga" && visibleCharacters.length === 0) {
-        return;
-      }
+if (state.data.permission === "orga" && visibleCharacters.length === 0) {
+  return;
+}
 ```
 
 Then replace `player.characters.forEach` with `visibleCharacters.forEach` in the loop that follows.
@@ -816,4 +843,3 @@ Then replace `player.characters.forEach` with `visibleCharacters.forEach` in the
 git add public/index.html public/app.js
 git commit -m "feat: edition badge, enroll/opt-out buttons, filter orga views to 2026 only"
 ```
-

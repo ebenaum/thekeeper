@@ -13,6 +13,7 @@
 ### Task 1: Add edition selector to index.html and wire it into `index()`
 
 **Files:**
+
 - Modify: `public/index.html:59-66`
 - Modify: `public/app.js:2700-2904`
 
@@ -38,6 +39,7 @@ In `public/app.js`, inside the `index()` function, after the state is loaded and
 3. Use it to drive filtering
 
 Replace the player iteration block (lines 2700-2904) with a `renderIndex` inner function that:
+
 - Reads the selected edition from `#edition-selector`
 - Clears `characterListElement` before re-rendering
 - Filters characters based on selected edition:
@@ -52,7 +54,9 @@ Replace the player iteration block (lines 2700-2904) with a `renderIndex` inner 
 ```javascript
 // After state is loaded and permission checks are done (after line 2698):
 
-const editionSelector = /** @type {HTMLSelectElement | null} */ (document.querySelector("#edition-selector"));
+const editionSelector = /** @type {HTMLSelectElement | null} */ (
+  document.querySelector("#edition-selector")
+);
 
 if (state.data.permission === "orga" && editionSelector) {
   editionSelector.classList.remove("d-none");
@@ -117,14 +121,15 @@ function renderIndex() {
       createCharacterElement.classList.add("d-none");
     }
 
-    const visibleCharacters = state.data.permission === "orga"
-      ? player.characters.filter((cid) => {
-          const c = state.data.characters[cid];
-          if (!c) return false;
-          if (selectedEdition === "2026") return c.edition === "2026";
-          return c.editionHistory?.includes("2025");
-        })
-      : player.characters;
+    const visibleCharacters =
+      state.data.permission === "orga"
+        ? player.characters.filter((cid) => {
+            const c = state.data.characters[cid];
+            if (!c) return false;
+            if (selectedEdition === "2026") return c.edition === "2026";
+            return c.editionHistory?.includes("2025");
+          })
+        : player.characters;
 
     if (state.data.permission === "orga" && visibleCharacters.length === 0) {
       return;
@@ -208,7 +213,8 @@ function renderIndex() {
       );
 
       const edition = character.edition || "2025";
-      editionBadgeElement.textContent = edition === "optout" ? "Non inscrit" : "Édition " + edition;
+      editionBadgeElement.textContent =
+        edition === "optout" ? "Non inscrit" : "Édition " + edition;
       editionBadgeElement.classList.add("character-edition-badge--" + edition);
 
       if (edition !== "2026") {
@@ -237,7 +243,10 @@ function renderIndex() {
             await fetch(`${globalThis.env.thekeeperURL}/state`, {
               method: "POST",
               headers: {
-                Authorization: await auth(state.keys.private, state.keys.public),
+                Authorization: await auth(
+                  state.keys.private,
+                  state.keys.public,
+                ),
                 "Content-Type": "application/x-protobuf",
               },
               body: toBinary(EventsSchema, payload),
@@ -261,7 +270,10 @@ function renderIndex() {
             await fetch(`${globalThis.env.thekeeperURL}/state`, {
               method: "POST",
               headers: {
-                Authorization: await auth(state.keys.private, state.keys.public),
+                Authorization: await auth(
+                  state.keys.private,
+                  state.keys.public,
+                ),
                 "Content-Type": "application/x-protobuf",
               },
               body: toBinary(EventsSchema, payload),
@@ -277,7 +289,10 @@ function renderIndex() {
     characterListElement?.prepend(clone);
   });
 
-  if (state.data.permission === "orga" && characterListElement?.children.length === 0) {
+  if (
+    state.data.permission === "orga" &&
+    characterListElement?.children.length === 0
+  ) {
     const placeholder = document.createElement("p");
     placeholder.textContent = `Aucun joueur inscrit pour l'édition ${selectedEdition} pour le moment.`;
     placeholder.style.textAlign = "center";
@@ -323,6 +338,7 @@ renderIndex();
 - [ ] **Step 3: Test manually**
 
 Open the app as an orga user. Verify:
+
 - The edition selector appears at the top of the home page
 - Switching to "Édition 2025" shows characters with 2025 in their history
 - 2025 view has no action buttons and "Voir" instead of "Voir / Éditer"
@@ -343,6 +359,7 @@ git commit -m "feat: add edition selector to orga home page"
 ### Task 2: Add edition selector to theview
 
 **Files:**
+
 - Modify: `public/theview.html:39-41`
 - Modify: `public/app.js:2313-2510` (the `theview()` function)
 
@@ -367,7 +384,9 @@ In `public/app.js`, in the `theview()` function, wrap the table-building and Dat
 1. After state is loaded (line 2327), get the selector and set up the change listener (once):
 
 ```javascript
-const editionSelector = /** @type {HTMLSelectElement | null} */ (document.querySelector("#edition-selector"));
+const editionSelector = /** @type {HTMLSelectElement | null} */ (
+  document.querySelector("#edition-selector")
+);
 
 if (editionSelector) {
   editionSelector.addEventListener("change", () => {
@@ -394,18 +413,18 @@ renderTheview();
 
 ```javascript
 // Was: .filter((cid) => state.data.characters[cid]?.edition === "2026")
-const characters = player.characters
-  .filter((cid) => {
-    const c = state.data.characters[cid];
-    if (!c) return false;
-    if (selectedEdition === "2026") return c.edition === "2026";
-    return c.editionHistory?.includes("2025");
-  });
+const characters = player.characters.filter((cid) => {
+  const c = state.data.characters[cid];
+  if (!c) return false;
+  if (selectedEdition === "2026") return c.edition === "2026";
+  return c.editionHistory?.includes("2025");
+});
 ```
 
 - [ ] **Step 3: Test manually**
 
 Open theview as an orga. Verify:
+
 - Edition selector appears above the table
 - Switching to 2025 shows characters with 2025 history
 - Switching back to 2026 shows only current 2026 characters
@@ -423,6 +442,7 @@ git commit -m "feat: add edition selector to theview"
 ### Task 3: Add edition selector to theview2
 
 **Files:**
+
 - Modify: `public/theview2.html:22-32`
 - Modify: `public/app.js:2207-2311` (the `theview2()` function)
 
@@ -438,6 +458,8 @@ In `public/theview2.html`, add the edition selector inside `.theview2`, before t
   </select>
   <div>
     <h1>Inventaire global</h1>
+  </div>
+</div>
 ```
 
 - [ ] **Step 2: Wire the selector into `theview2()`**
@@ -447,7 +469,9 @@ In `public/app.js`, in the `theview2()` function, wrap the aggregation and rende
 1. After state is loaded and DOM elements are grabbed (after line 2230), set up the selector and change listener (once):
 
 ```javascript
-const editionSelector = /** @type {HTMLSelectElement | null} */ (document.querySelector("#edition-selector"));
+const editionSelector = /** @type {HTMLSelectElement | null} */ (
+  document.querySelector("#edition-selector")
+);
 
 if (editionSelector) {
   editionSelector.addEventListener("change", () => {
@@ -484,6 +508,7 @@ Object.keys(state.data.characters)
 - [ ] **Step 3: Test manually**
 
 Open theview2 as an orga. Verify:
+
 - Edition selector appears above inventory/skills lists
 - Switching to 2025 aggregates inventory/skills from 2025-history characters
 - Switching back to 2026 restores original aggregation
@@ -500,6 +525,7 @@ git commit -m "feat: add edition selector to theview2"
 ### Task 4: Style the edition selector
 
 **Files:**
+
 - Modify: `public/style.css`
 
 - [ ] **Step 1: Add CSS for `.edition-selector`**

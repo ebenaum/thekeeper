@@ -27,17 +27,18 @@ Executed on server startup. Ignore error if the column already exists (idempoten
 
 Environment variables:
 
-| Variable | Example |
-|----------|---------|
-| `SMTP_HOST` | `ssl0.ovh.net` |
-| `SMTP_PORT` | `587` |
-| `SMTP_USER` | `thekeeper@ebenaum.fr` |
-| `SMTP_PASSWORD` | `...` |
-| `SMTP_FROM` | `thekeeper@ebenaum.fr` |
+| Variable        | Example                |
+| --------------- | ---------------------- |
+| `SMTP_HOST`     | `ssl0.ovh.net`         |
+| `SMTP_PORT`     | `587`                  |
+| `SMTP_USER`     | `thekeeper@ebenaum.fr` |
+| `SMTP_PASSWORD` | `...`                  |
+| `SMTP_FROM`     | `thekeeper@ebenaum.fr` |
 
 Loaded at startup by both the HTTP server and CLI commands that send email.
 
 New file `email.go`:
+
 - `SMTPConfig` struct loaded from env vars.
 - `SendEmail(config SMTPConfig, to string, subject string, body string) error` using `net/smtp`.
 - `SendInviteEmail(config SMTPConfig, to string, appURL string, code string) error` — renders a simple HTML template with the invite link and calls `SendEmail`.
@@ -83,8 +84,9 @@ One-time migration for existing players:
 ### `POST /auth/invite` (orga-only)
 
 Request body:
+
 ```json
-{"email": "player@example.com", "handle": "some-handle"}
+{ "email": "player@example.com", "handle": "some-handle" }
 ```
 
 Same logic as the CLI `invite` command. Requires orga authentication. Returns the generated handle in the response. Handle is optional — auto-generated if omitted.
@@ -92,8 +94,9 @@ Same logic as the CLI `invite` command. Requires orga authentication. Returns th
 ### `POST /auth/request-link` (public, no auth)
 
 Request body:
+
 ```json
-{"email": "player@example.com"}
+{ "email": "player@example.com" }
 ```
 
 1. Looks up the email in `actors.email`.
@@ -117,14 +120,14 @@ Changes to the frontend JS in `public/app.js`:
 
 ## Files changed
 
-| File | Change |
-|------|--------|
-| `schema.sql` | Add `email TEXT` column to `actors` |
-| `main.go` | New `invite` and `migrate-emails` commands. Load SMTP config from env. Wire new HTTP handlers. |
-| `db.go` | New `CreatePlayerActor(email, handle)`. Modify `GetState` to reject unknown keys. New `GetActorEmail(actorID)`, `SetActorEmail(actorID, email)`. |
-| `http.go` | New `HandleInvite`, `HandleRequestLink` handlers. |
-| New `email.go` | `SMTPConfig`, `LoadSMTPConfig()`, `SendEmail()`, `SendInviteEmail()`. |
-| `public/app.js` | Demo mode for `personnage.html` without auth. `localStorage` persistence. |
+| File            | Change                                                                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `schema.sql`    | Add `email TEXT` column to `actors`                                                                                                              |
+| `main.go`       | New `invite` and `migrate-emails` commands. Load SMTP config from env. Wire new HTTP handlers.                                                   |
+| `db.go`         | New `CreatePlayerActor(email, handle)`. Modify `GetState` to reject unknown keys. New `GetActorEmail(actorID)`, `SetActorEmail(actorID, email)`. |
+| `http.go`       | New `HandleInvite`, `HandleRequestLink` handlers.                                                                                                |
+| New `email.go`  | `SMTPConfig`, `LoadSMTPConfig()`, `SendEmail()`, `SendInviteEmail()`.                                                                            |
+| `public/app.js` | Demo mode for `personnage.html` without auth. `localStorage` persistence.                                                                        |
 
 ## What this does NOT include
 
