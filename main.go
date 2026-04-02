@@ -15,7 +15,7 @@ import (
 )
 
 func usage() string {
-	return "./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle> <email>|link-orga <db-path> <handle>|delete-player <db-path> <player id>|delete-character <db-path> <character id>|invite <db-path> <email>|migrate-emails <db-path>|list-actors <db-path>|migrate-editions <db-path>"
+	return "./cmd http <db-path>|https <db-path> <certfile> <keyfile>|create-orga <db-path> <handle> <email>|link-orga <db-path> <handle>|delete-player <db-path> <player id>|delete-character <db-path> <character id>|invite <db-path> <email>|list-actors <db-path>"
 }
 
 //go:embed schema.sql
@@ -92,13 +92,8 @@ func main() {
 		}
 
 		err = invite(db, os.Args[3])
-	case "migrate-emails":
-		dryRun := len(os.Args) >= 4 && os.Args[3] == "--dry-run"
-		err = migrateEmails(db, dryRun)
 	case "list-actors":
 		err = listActors(db)
-	case "migrate-editions":
-		err = migrateEditions(db)
 	default:
 		fmt.Println(usage())
 		os.Exit(1)
@@ -297,162 +292,6 @@ func invite(db *sqlx.DB, email string) error {
 
 	fmt.Printf("Invited %s (actor %d)\n", email, actorID)
 
-	return nil
-}
-
-func migrateEmails(db *sqlx.DB, dryRun bool) error {
-	// Replay events to build player→actor mapping
-	sv := NewSpaceValidation()
-
-	records, err := GetEvents(db, -1, EventRecordStatusAccepted)
-	if err != nil {
-		return fmt.Errorf("get events: %w", err)
-	}
-
-	// Track latest PlayerPerson contact per player ID
-	playerContacts := map[string]string{}
-
-	for _, record := range records {
-		sv.Process(record.SourceActorID, &record.Event)
-
-		if pp, ok := record.Event.Msg.(*proto.Event_PlayerPerson); ok {
-			playerContacts[pp.PlayerPerson.PlayerId] = pp.PlayerPerson.Contact
-		}
-	}
-
-	// Resolve emails and detect duplicates
-	type resolved struct {
-		playerID string
-		actorID  int64
-		email    string
-	}
-
-	var withEmail []resolved
-	var noEmail []resolved
-	emailCount := map[string][]resolved{}
-
-	for playerID, contact := range playerContacts {
-		player, exists := sv.PlayersIDs[playerID]
-		if !exists {
-			continue
-		}
-
-		addr, err := mail.ParseAddress(contact)
-		if err != nil {
-			noEmail = append(noEmail, resolved{playerID: playerID, actorID: player.ActorID, email: contact})
-			continue
-		}
-
-		r := resolved{playerID: playerID, actorID: player.ActorID, email: addr.Address}
-		withEmail = append(withEmail, r)
-		emailCount[addr.Address] = append(emailCount[addr.Address], r)
-	}
-
-	if dryRun {
-		fmt.Println("=== DRY RUN ===")
-		fmt.Println()
-
-		fmt.Printf("--- With valid email (%d) ---\n", len(withEmail))
-		for _, r := range withEmail {
-			handle := sv.Handles.IDToHandle[r.actorID]
-			fmt.Printf("  actor %d (%s) player %s → %s\n", r.actorID, handle, r.playerID, r.email)
-		}
-
-		fmt.Printf("\n--- Without valid email (%d) ---\n", len(noEmail))
-		for _, r := range noEmail {
-			handle := sv.Handles.IDToHandle[r.actorID]
-			fmt.Printf("  actor %d (%s) player %s — contact: %q\n", r.actorID, handle, r.playerID, r.email)
-		}
-
-		hasDuplicates := false
-		for email, entries := range emailCount {
-			if len(entries) > 1 {
-				if !hasDuplicates {
-					fmt.Printf("\n--- Duplicate emails ---\n")
-					hasDuplicates = true
-				}
-				fmt.Printf("  %s:\n", email)
-				for _, r := range entries {
-					handle := sv.Handles.IDToHandle[r.actorID]
-					fmt.Printf("    actor %d (%s) player %s\n", r.actorID, handle, r.playerID)
-				}
-			}
-		}
-		if !hasDuplicates {
-			fmt.Println("\nNo duplicate emails found.")
-		}
-
-		fmt.Printf("\nSummary: %d would migrate, %d would skip\n", len(withEmail), len(noEmail))
-		return nil
-	}
-
-	migrated := 0
-	skipped := 0
-
-	for _, r := range withEmail {
-		err := SetActorEmail(db, r.actorID, r.email)
-		if err != nil {
-			fmt.Printf("ERROR player %s (actor %d): %v\n", r.playerID, r.actorID, err)
-			skipped++
-			continue
-		}
-
-		fmt.Printf("OK   player %s (actor %d): %s\n", r.playerID, r.actorID, r.email)
-		migrated++
-	}
-
-	for _, r := range noEmail {
-		fmt.Printf("SKIP player %s (actor %d): could not parse %q\n", r.playerID, r.actorID, r.email)
-		skipped++
-	}
-
-	fmt.Printf("\nMigrated: %d, Skipped: %d\n", migrated, skipped)
-
-	return nil
-}
-
-func migrateEditions(db *sqlx.DB) error {
-	sv := NewSpaceValidation()
-
-	records, err := GetEvents(db, -1, EventRecordStatusAccepted)
-	if err != nil {
-		return fmt.Errorf("get events: %w", err)
-	}
-
-	alreadyActivated := map[string]bool{}
-	for _, record := range records {
-		sv.Process(record.SourceActorID, &record.Event)
-		if ac, ok := record.Event.Msg.(*proto.Event_ActivateCharacter); ok {
-			alreadyActivated[ac.ActivateCharacter.CharacterId] = true
-		}
-	}
-
-	var migrated int
-	for characterID := range sv.CharacterIDs {
-		if alreadyActivated[characterID] {
-			continue
-		}
-
-		result, err := InsertAndCheckEvents(db, -1, 0, []*proto.Event{
-			{
-				Msg: &proto.Event_ActivateCharacter{
-					ActivateCharacter: &proto.EventActivateCharacter{
-						CharacterId: characterID,
-						Edition:     "2025",
-					},
-				},
-			},
-		})
-		if err != nil {
-			return fmt.Errorf("activate character %s: %w", characterID, err)
-		}
-		if result[0].Status != EventRecordStatusAccepted {
-			return fmt.Errorf("activate character %s was not accepted: %v", characterID, result[0])
-		}
-		migrated++
-	}
-
-	fmt.Printf("Migrated %d characters to edition 2025\n", migrated)
 	return nil
 }
 
