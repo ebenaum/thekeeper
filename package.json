@@ -1,0 +1,25 @@
+{
+  "name": "thekeeper",
+  "version": "1.0.0",
+  "main": ".env.dev.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github:ebenaum/thekeeper.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "eslint": "^9.39.4",
+    "eslint-plugin-jsdoc": "^61.7.1",
+    "globals": "^17.4.0",
+    "typescript": "^6.0.2"
+  }
+}
