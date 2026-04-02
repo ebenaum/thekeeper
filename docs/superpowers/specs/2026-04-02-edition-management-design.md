@@ -24,14 +24,17 @@ A CLI command (`migrate-editions` or similar) replays all existing events, ident
 
 ## Projection Changes
 
-### Orga Projection
-- Only includes characters whose most recent `ActivateCharacter` event has edition `"2026"`.
-- Aggregate stats (faction counts, etc.) computed only from 2026 characters.
-- Characters with `"2025"` or `"optout"` as latest status are excluded.
+Both orga and player projections pass `ActivateCharacter` events through to the frontend. Edition filtering is handled entirely on the frontend side.
 
-### Player Projection
+### Orga View (frontend)
+- Only displays characters whose most recent `ActivateCharacter` event has edition `"2026"`.
+- Aggregate stats (faction counts, etc.) computed only from 2026 characters.
+- Characters with `"2025"` or `"optout"` as latest status are hidden.
+- Players with no 2026 characters are hidden.
+
+### Player View (frontend)
 - Shows all characters as before.
-- Each character carries its current edition status (`"2025"`, `"2026"`, or `"optout"`) so the UI can display it and offer appropriate actions.
+- Each character displays its current edition status (`"2025"`, `"2026"`, or `"optout"`) with appropriate actions.
 
 ## Frontend Behavior
 

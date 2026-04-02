@@ -4,7 +4,7 @@
 
 **Goal:** Add edition tagging to characters so organizers only see 2026 characters, while players see all their characters across editions.
 
-**Architecture:** A new `ActivateCharacter` protobuf event type carries a `character_id` and `edition` string. The backend validates edition values against an allowlist (`2025`, `2026`, `optout`). The orga projection filters out characters not activated for `2026`. The player projection passes all `ActivateCharacter` events through so the frontend can display edition status and offer enroll/opt-out actions.
+**Architecture:** A new `ActivateCharacter` protobuf event type carries a `character_id` and `edition` string. The backend validates edition values against an allowlist (`2025`, `2026`, `optout`). Both projections pass `ActivateCharacter` events through to the frontend. Edition filtering (showing only 2026 characters in orga views) is handled entirely on the frontend side in `app.js`.
 
 **Tech Stack:** Go, Protocol Buffers (protoc + protoc-gen-go + protoc-gen-es), SQLite, vanilla JavaScript
 
@@ -19,8 +19,7 @@
 | Regenerate | `proto/*.pb.go`, `public/*_pb.js` | Generated code from `proto/gen.sh` |
 | Modify | `space_validation.go` | Validate `ActivateCharacter` events (edition allowlist, character exists, player owns it) |
 | Modify | `space_validation.go` | Track edition status per character in `SpaceValidation` |
-| Modify | `space_validation.go` | Filter orga projection (`SpaceOrga`) to exclude non-2026 characters |
-| Modify | `space_validation.go` | Pass `ActivateCharacter` events through in `SpacePlayer` |
+| Modify | `space_validation.go` | Pass `ActivateCharacter` events through in `SpaceOrga` and `SpacePlayer` |
 | Modify | `space_validation_test.go` | Tests for validation logic |
 | Modify | `projection_test.go` | Tests for projection filtering |
 | Modify | `testhelpers_test.go` | Add `activateCharacterEvent` helper |
@@ -283,165 +282,32 @@ git commit -m "feat: validate ActivateCharacter events with edition allowlist"
 
 ---
 
-### Task 4: Orga Projection — Filter by Edition
+### Task 4: SpaceOrga — Pass Through ActivateCharacter
 
 **Files:**
 - Modify: `space_validation.go` (`SpaceOrga`)
 - Modify: `projection_test.go`
 
-- [ ] **Step 1: Write failing test for orga projection filtering**
+The orga projection stays simple — just pass all events through, including `ActivateCharacter`. Edition filtering happens entirely on the frontend side.
 
-Add to `projection_test.go`:
+- [ ] **Step 1: Add ActivateCharacter to SpaceOrga.Process**
 
-```go
-func TestSpaceOrga_FiltersNon2026Characters(t *testing.T) {
-	type eventStep struct {
-		sourceActorID int64
-		event         *proto.Event
-	}
-
-	allEvents := []eventStep{
-		{1, seedActorEvent("orga-handle")},
-		{2, seedActorEvent("player-a")},
-		{3, seedActorEvent("player-b")},
-		{0, permissionEvent(1, PermissionOrga)},
-		{2, seedPlayerEvent("player-a", "player:a")},
-		{3, seedPlayerEvent("player-b", "player:b")},
-		{2, playerCharacterEvent("player:a", "char:a")},
-		{3, playerCharacterEvent("player:b", "char:b")},
-		// char:a activated for 2026, char:b stays on 2025
-		{2, activateCharacterEvent("char:a", "2026")},
-		{3, activateCharacterEvent("char:b", "2025")},
-	}
-
-	sp := NewSpaceOrga(1)
-	for _, e := range allEvents {
-		if err := sp.Process(e.sourceActorID, e.event); err != nil {
-			t.Fatalf("Process: %v", err)
-		}
-	}
-
-	got := sp.GetEvents()
-
-	// Should include: 3 SeedActor + 1 Permission + 2 SeedPlayer + 1 PlayerCharacter (char:a only) + 1 ActivateCharacter (char:a only)
-	// Excluded: PlayerCharacter for char:b, ActivateCharacter for char:b
-	// Count: 3 + 1 + 2 + 1 + 1 = 8
-	wantCount := 8
-	if len(got) != wantCount {
-		t.Errorf("got %d events, want %d", len(got), wantCount)
-		for i, e := range got {
-			t.Logf("  event[%d]: %T", i, e.Msg)
-		}
-	}
-}
-```
-
-- [ ] **Step 2: Run test to verify it fails**
-
-Run:
-```bash
-go test ./... -run TestSpaceOrga_FiltersNon2026Characters -v
-```
-
-Expected: FAIL — orga currently includes all events.
-
-- [ ] **Step 3: Replace the entire SpaceOrga implementation**
-
-Replace the `SpaceOrga` struct, constructor, `GetEvents`, and `Process` in `space_validation.go`. Key design decisions:
-- All events buffered into `AllEvents` during `Process`
-- `GetEvents` filters character-related events by checking `CharacterEditions` for the final edition
-- `Process` does NOT delete from `CharacterEditions` on character/player deletion — the edition info must persist so `GetEvents` can correctly include/exclude the full lifecycle of events for a character
+In `space_validation.go`, in `SpaceOrga.Process`, add `*proto.Event_ActivateCharacter` to the existing catch-all case:
 
 ```go
-type SpaceOrga struct {
-	ActorID           int64
-	AllEvents         []*proto.Event
-	CharacterEditions map[string]string
-	CharacterPlayers  map[string]string
-}
-
-func NewSpaceOrga(actorID int64) *SpaceOrga {
-	return &SpaceOrga{
-		ActorID:           actorID,
-		CharacterEditions: map[string]string{},
-		CharacterPlayers:  map[string]string{},
-	}
-}
-
-func (s *SpaceOrga) GetEvents() []*proto.Event {
-	var events []*proto.Event
-	for _, event := range s.AllEvents {
-		switch v := event.Msg.(type) {
-		case *proto.Event_PlayerCharacter:
-			if s.CharacterEditions[v.PlayerCharacter.CharacterId] == "2026" {
-				events = append(events, event)
-			}
-		case *proto.Event_PlayerCharacterOrgaEdit:
-			if s.CharacterEditions[v.PlayerCharacterOrgaEdit.CharacterId] == "2026" {
-				events = append(events, event)
-			}
-		case *proto.Event_ActivateCharacter:
-			if s.CharacterEditions[v.ActivateCharacter.CharacterId] == "2026" {
-				events = append(events, event)
-			}
-		case *proto.Event_DeleteCharacter:
-			if s.CharacterEditions[v.DeleteCharacter.CharacterId] == "2026" {
-				events = append(events, event)
-			}
-		default:
-			events = append(events, event)
-		}
-	}
-	return events
-}
-
-func (s *SpaceOrga) Process(sourceActorID int64, event *proto.Event) error {
-	switch v := event.Msg.(type) {
-	case *proto.Event_PlayerCharacter:
-		s.CharacterPlayers[v.PlayerCharacter.CharacterId] = v.PlayerCharacter.PlayerId
-		s.AllEvents = append(s.AllEvents, event)
-		return nil
-
-	case *proto.Event_ActivateCharacter:
-		s.CharacterEditions[v.ActivateCharacter.CharacterId] = v.ActivateCharacter.Edition
-		s.AllEvents = append(s.AllEvents, event)
-		return nil
-
-	case *proto.Event_PlayerCharacterOrgaEdit:
-		s.AllEvents = append(s.AllEvents, event)
-		return nil
-
-	case *proto.Event_DeleteCharacter:
-		s.AllEvents = append(s.AllEvents, event)
-		return nil
-
-	case *proto.Event_DeletePlayer:
-		s.AllEvents = append(s.AllEvents, event)
-		return nil
-
 	case *proto.Event_SeedPlayer, *proto.Event_PlayerPerson,
-		*proto.Event_SeedActor, *proto.Event_Permission, *proto.Event_Reset_:
-		s.AllEvents = append(s.AllEvents, event)
+		*proto.Event_PlayerCharacter, *proto.Event_SeedActor,
+		*proto.Event_Permission, *proto.Event_Reset_,
+		*proto.Event_DeleteCharacter, *proto.Event_DeletePlayer,
+		*proto.Event_PlayerCharacterOrgaEdit, *proto.Event_ActivateCharacter:
+		s.Events = append(s.Events, event)
+
 		return nil
-
-	default:
-		return fmt.Errorf("event %v not handled", v)
-	}
-}
 ```
 
-- [ ] **Step 4: Run the filtering test**
+- [ ] **Step 2: Update TestSpaceOrga_SeesAllEvents to include ActivateCharacter**
 
-Run:
-```bash
-go test ./... -run TestSpaceOrga_FiltersNon2026Characters -v
-```
-
-Expected: PASS.
-
-- [ ] **Step 5: Fix the existing TestSpaceOrga_SeesAllEvents test**
-
-The existing test expects orga to see ALL events. Now it won't see character events for characters without a 2026 activation. Update the test to activate characters for 2026:
+In `projection_test.go`, add an `ActivateCharacter` event to the test:
 
 ```go
 func TestSpaceOrga_SeesAllEvents(t *testing.T) {
@@ -473,14 +339,11 @@ func TestSpaceOrga_SeesAllEvents(t *testing.T) {
 	got := sp.GetEvents()
 	if len(got) != len(allEvents) {
 		t.Errorf("orga should see all %d events, got %d", len(allEvents), len(got))
-		for i, e := range got {
-			t.Logf("  event[%d]: %T", i, e.Msg)
-		}
 	}
 }
 ```
 
-- [ ] **Step 6: Run full test suite**
+- [ ] **Step 3: Run full test suite**
 
 Run:
 ```bash
@@ -489,11 +352,11 @@ go test ./...
 
 Expected: all tests pass.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
 git add space_validation.go projection_test.go
-git commit -m "feat: orga projection filters characters by 2026 edition"
+git commit -m "feat: pass ActivateCharacter events through orga projection"
 ```
 
 ---
@@ -948,24 +811,44 @@ In `public/app.js`, inside the `index()` function, find the block where characte
         }
 ```
 
-- [ ] **Step 3: Skip empty-character players in orga views**
+- [ ] **Step 3: Filter orga views to only show 2026 characters**
 
-In `public/app.js`, in the `theview()` function, find the loop `Object.keys(state.data.players).forEach((playerId) => {` (around line 2307). Add at the start of the callback, after `const player = state.data.players[playerId];`:
+In `public/app.js`, in the `theview()` function (the orga table view), find the loop `Object.keys(state.data.players).forEach((playerId) => {` (around line 2307). Replace the characters variable:
 
 ```javascript
-      // Skip players with no characters in this edition
-      if (player.characters.length === 0) {
+    const characters = player.characters
+      .filter((cid) => state.data.characters[cid]?.edition === "2026");
+
+    if (characters.length === 0) {
+      return;
+    }
+```
+
+This replaces the existing line:
+```javascript
+    const characters =
+      player.characters.length === 0 ? ["empty"] : player.characters;
+```
+
+In the `index()` function (the player/orga card view), the filtering is different: for orgas, skip characters not in 2026 and skip players with no 2026 characters. Find the `player.characters.forEach` loop inside the `Object.keys(state.data.players).forEach` block (around line 2678). Wrap it with edition filtering for orgas:
+
+```javascript
+      const visibleCharacters = state.data.permission === "orga"
+        ? player.characters.filter((cid) => state.data.characters[cid]?.edition === "2026")
+        : player.characters;
+
+      if (state.data.permission === "orga" && visibleCharacters.length === 0) {
         return;
       }
 ```
 
-In the `theview2()` function, find the same pattern (around line 2146) and add the same guard.
+Then replace `player.characters.forEach` with `visibleCharacters.forEach` in the loop that follows.
 
 - [ ] **Step 4: Commit**
 
 ```bash
 git add public/index.html public/app.js
-git commit -m "feat: edition badge, enroll/opt-out buttons, hide empty players in orga view"
+git commit -m "feat: edition badge, enroll/opt-out buttons, filter orga views to 2026 only"
 ```
 
 ---
