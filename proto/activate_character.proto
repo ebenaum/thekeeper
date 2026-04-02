@@ -1,0 +1,9 @@
+syntax = "proto3";
+package thekeeper;
+
+option go_package = "github.com/ebenaum/thekeeper/proto;proto";
+
+message EventActivateCharacter {
+   string characterId = 1;
+   string edition = 2;
+}

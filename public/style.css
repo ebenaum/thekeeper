@@ -100,6 +100,14 @@ a {
   text-decoration: underline;
 }
 
+.readonly-banner {
+  background: #f5e6c8;
+  border: 1px solid #555;
+  padding: 0.75em 1em;
+  margin-bottom: 1em;
+  text-align: center;
+}
+
 a:hover {
   color: inherit;
 }
@@ -811,9 +819,69 @@ details {
   margin-bottom: 20px;
 }
 
+.index__player__characters__character {
+  margin-bottom: 0.75em;
+  padding-bottom: 0.75em;
+  border-bottom: 1px solid #ddd;
+}
+
+.index__player__characters__character:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.character-card__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .index__player__characters__character__name {
   font-size: 1.1rem;
   font-weight: bold;
+}
+
+.character-card__peek {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  margin: 0.2em 0;
+}
+
+.character-card__actions {
+  gap: 0.75em;
+  justify-content: flex-start;
+}
+
+.character-edition-badge {
+  display: inline-block;
+  font-size: 0.9em;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.character-edition-badge--2026 {
+  background: #d4edda;
+  color: #155724;
+}
+
+.character-edition-badge--2025 {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.character-edition-badge--optout {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.character-edition-action {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
 }
 
 .save-button {

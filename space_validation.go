@@ -6,6 +6,12 @@ import (
 	"github.com/ebenaum/thekeeper/proto"
 )
 
+var allowedEditions = map[string]bool{
+	"2025":   true,
+	"2026":   true,
+	"optout": true,
+}
+
 type Actor struct {
 	Handle  string
 	Players map[string]struct{}
@@ -20,6 +26,7 @@ type SpaceValidation struct {
 	CharacterIDs map[string]struct {
 		PlayerID string
 	}
+	CharacterEditions map[string]string
 }
 
 func NewSpaceValidation() SpaceValidation {
@@ -35,8 +42,9 @@ func NewSpaceValidation() SpaceValidation {
 				0: PermissionRoot,
 			},
 		},
-		PlayersIDs:   map[string]struct{ ActorID int64 }{},
-		CharacterIDs: map[string]struct{ PlayerID string }{},
+		PlayersIDs:        map[string]struct{ ActorID int64 }{},
+		CharacterIDs:      map[string]struct{ PlayerID string }{},
+		CharacterEditions: map[string]string{},
 	}
 }
 
@@ -116,6 +124,10 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 			return fmt.Errorf("character already exists")
 		}
 
+		if edition := s.CharacterEditions[v.PlayerCharacter.CharacterId]; edition == "2025" || edition == "optout" {
+			return fmt.Errorf("character with edition %q cannot be edited", edition)
+		}
+
 		s.CharacterIDs[v.PlayerCharacter.CharacterId] = struct{ PlayerID string }{v.PlayerCharacter.PlayerId}
 
 		return nil
@@ -130,6 +142,7 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 		}
 
 		delete(s.CharacterIDs, v.DeleteCharacter.CharacterId)
+		delete(s.CharacterEditions, v.DeleteCharacter.CharacterId)
 
 		return nil
 
@@ -148,6 +161,7 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 		for characterID, character := range s.CharacterIDs {
 			if character.PlayerID == v.DeletePlayer.PlayerId {
 				delete(s.CharacterIDs, characterID)
+				delete(s.CharacterEditions, characterID)
 			}
 		}
 
@@ -168,6 +182,36 @@ func (s *SpaceValidation) Process(sourceActorID int64, event *proto.Event) error
 		if !exists {
 			return fmt.Errorf("character does not exist")
 		}
+
+		if edition := s.CharacterEditions[v.PlayerCharacterOrgaEdit.CharacterId]; edition == "2025" || edition == "optout" {
+			return fmt.Errorf("character with edition %q cannot be edited", edition)
+		}
+
+		return nil
+	case *proto.Event_ActivateCharacter:
+		if !allowedEditions[v.ActivateCharacter.Edition] {
+			return fmt.Errorf("invalid edition %q", v.ActivateCharacter.Edition)
+		}
+
+		character, exists := s.CharacterIDs[v.ActivateCharacter.CharacterId]
+		if !exists {
+			return fmt.Errorf("character does not exist")
+		}
+
+		player, exists := s.PlayersIDs[character.PlayerID]
+		if !exists {
+			return fmt.Errorf("player does not exist")
+		}
+
+		if sourceActorID != player.ActorID && s.Permission.Actors[sourceActorID] != PermissionOrga && s.Permission.Actors[sourceActorID] != PermissionRoot {
+			return fmt.Errorf("not authorized")
+		}
+
+		if v.ActivateCharacter.Edition == "2025" && s.Permission.Actors[sourceActorID] != PermissionRoot {
+			return fmt.Errorf("only root can set edition to 2025")
+		}
+
+		s.CharacterEditions[v.ActivateCharacter.CharacterId] = v.ActivateCharacter.Edition
 
 		return nil
 	default:
@@ -267,6 +311,13 @@ func (s *SpacePlayer) Process(sourceActorID int64, event *proto.Event) error {
 
 		return nil
 
+	case *proto.Event_ActivateCharacter:
+		if _, exists := s.CharacterIDs[v.ActivateCharacter.CharacterId]; exists {
+			s.Events = append(s.Events, event)
+		}
+
+		return nil
+
 	default:
 		return fmt.Errorf("event %v not handled", v)
 	}
@@ -298,7 +349,8 @@ func (s *SpaceOrga) Process(sourceActorID int64, event *proto.Event) error {
 	case *proto.Event_SeedPlayer, *proto.Event_PlayerPerson,
 		*proto.Event_PlayerCharacter, *proto.Event_SeedActor,
 		*proto.Event_Permission, *proto.Event_Reset_,
-		*proto.Event_DeleteCharacter, *proto.Event_DeletePlayer, *proto.Event_PlayerCharacterOrgaEdit:
+		*proto.Event_DeleteCharacter, *proto.Event_DeletePlayer,
+		*proto.Event_PlayerCharacterOrgaEdit, *proto.Event_ActivateCharacter:
 		s.Events = append(s.Events, event)
 
 		return nil

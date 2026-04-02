@@ -68,6 +68,70 @@ func TestFetchEvents(t *testing.T) {
 	}
 }
 
+func TestMigrateEditions(t *testing.T) {
+	db := setupTestDB(t)
+
+	actorID := createPlayerActor(t, db, "test@example.com")
+
+	// Seed the actor and create a player + character
+	seedEvents := []*proto.Event{
+		seedActorEvent("test-handle"),
+	}
+	results, err := InsertAndCheckEvents(db, -1, actorID, seedEvents)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if results[0].Status != EventRecordStatusAccepted {
+		t.Fatalf("seed actor not accepted: %v", results[0])
+	}
+
+	playerEvents := []*proto.Event{
+		seedPlayerEvent("test-handle", "player:test"),
+	}
+	results, err = InsertAndCheckEvents(db, -1, actorID, playerEvents)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if results[0].Status != EventRecordStatusAccepted {
+		t.Fatalf("seed player not accepted: %v", results[0])
+	}
+
+	charEvents := []*proto.Event{
+		playerCharacterEvent("player:test", "char:test"),
+	}
+	results, err = InsertAndCheckEvents(db, -1, actorID, charEvents)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if results[0].Status != EventRecordStatusAccepted {
+		t.Fatalf("player character not accepted: %v", results[0])
+	}
+
+	// Run migration
+	err = migrateEditions(db)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Verify: replay all events and check an ActivateCharacter event exists for char:test
+	records, err := GetEvents(db, -1, EventRecordStatusAccepted)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	found := false
+	for _, record := range records {
+		if ac, ok := record.Event.Msg.(*proto.Event_ActivateCharacter); ok {
+			if ac.ActivateCharacter.CharacterId == "char:test" && ac.ActivateCharacter.Edition == "2025" {
+				found = true
+			}
+		}
+	}
+	if !found {
+		t.Error("expected ActivateCharacter event with edition 2025 for char:test")
+	}
+}
+
 func TestFetchEvents_EmptyProjection(t *testing.T) {
 	db := setupTestDB(t)
 

@@ -248,6 +248,92 @@ func TestReset(t *testing.T) {
 	}
 }
 
+func TestActivateCharacter(t *testing.T) {
+	tests := []struct {
+		name          string
+		sourceActorID int64
+		characterID   string
+		edition       string
+		wantErr       bool
+	}{
+		{"owner activates own character for 2026", 2, "char:1", "2026", false},
+		{"owner opts out own character", 2, "char:1", "optout", false},
+		{"invalid edition rejected", 2, "char:1", "2027", true},
+		{"empty edition rejected", 2, "char:1", "", true},
+		{"other player rejected", 3, "char:1", "2026", true},
+		{"orga can activate any character", 1, "char:1", "2026", false},
+		{"non-existent character rejected", 2, "char:nonexistent", "2026", true},
+		{"player cannot set 2025", 2, "char:1", "2025", true},
+		{"orga cannot set 2025", 1, "char:1", "2025", true},
+		{"root can set 2025", 0, "char:1", "2025", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := baseValidationState(t)
+			err := s.Process(tt.sourceActorID, activateCharacterEvent(tt.characterID, tt.edition))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Process() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestEditionBlocksCharacterEdit(t *testing.T) {
+	tests := []struct {
+		name          string
+		edition       string
+		sourceActorID int64
+		wantErr       bool
+	}{
+		{"2025 character cannot be edited by owner", "2025", 2, true},
+		{"optout character cannot be edited by owner", "optout", 2, true},
+		{"2026 character can be edited by owner", "2026", 2, false},
+		{"2025 character cannot be edited by orga", "2025", 1, true},
+		{"optout character cannot be edited by orga", "optout", 1, true},
+		{"2026 character can be edited by orga", "2026", 1, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := baseValidationState(t)
+			// Set the edition via root
+			if err := s.Process(0, activateCharacterEvent("char:1", tt.edition)); err != nil {
+				t.Fatal(err)
+			}
+			err := s.Process(tt.sourceActorID, playerCharacterEvent("player:1", "char:1"))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Process() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestEditionBlocksOrgaEdit(t *testing.T) {
+	tests := []struct {
+		name    string
+		edition string
+		wantErr bool
+	}{
+		{"2025 character cannot be orga-edited", "2025", true},
+		{"optout character cannot be orga-edited", "optout", true},
+		{"2026 character can be orga-edited", "2026", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := baseValidationState(t)
+			if err := s.Process(0, activateCharacterEvent("char:1", tt.edition)); err != nil {
+				t.Fatal(err)
+			}
+			err := s.Process(1, orgaEditEvent("char:1"))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Process() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 func TestGobEncodeDecode(t *testing.T) {
 	space := SpaceValidation{
 		Handles: Handles{
