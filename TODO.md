@@ -12,13 +12,3 @@ Both writes (`Run()` via `InsertAndCheckEvents`) and reads (`FetchEvents`) repla
 
 **Files involved:** `state.go` (Run, FetchEvents), `space_validation.go` (SpaceValidation).
 
-## #12 — No rate limiting on actor self-registration [Hardening]
-
-`GetState` in `db.go:144` auto-creates a new player actor for any unseen public key. Any client generating fresh ECDSA keypairs can flood the `actors` table. Low practical risk for a LARP with known participants but worth hardening.
-
-**Options:**
-- **Invitation-only:** Require a valid auth key to create an actor. Return 401 for unknown keys. Most secure but changes the onboarding flow.
-- **In-memory rate limiter:** Track new actor creation per IP (e.g., 5/hour). Lightweight, doesn't change the flow.
-- **Registration cap:** Hard limit on total actors (`SELECT COUNT(*) FROM actors`). Simple and appropriate for a fixed-size event.
-
-**Files involved:** `db.go` (GetState), `http.go` (auth).
