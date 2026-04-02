@@ -43,6 +43,10 @@ func resetEvent() *proto.Event {
 	return &proto.Event{Msg: &proto.Event_Reset_{}}
 }
 
+func activateCharacterEvent(characterID, edition string) *proto.Event {
+	return &proto.Event{Msg: &proto.Event_ActivateCharacter{ActivateCharacter: &proto.EventActivateCharacter{CharacterId: characterID, Edition: edition}}}
+}
+
 // baseValidationState returns a SpaceValidation with:
 //   - Actor 0: root (implicit)
 //   - Actor 1: handle "orga-handle", permission=orga
