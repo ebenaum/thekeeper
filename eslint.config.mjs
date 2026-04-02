@@ -18,7 +18,7 @@ export default defineConfig([
       "jsdoc/no-undefined-types": ["warn", {
         definedTypes: ["NodeListOf"],
       }],
-      "jsdoc/reject-any-type": "off",
+      "jsdoc/reject-any-type": "warn",
     },
   },
 ]);

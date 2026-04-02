@@ -99,7 +99,7 @@ async function storeKeypair(keypair) {
 
 /**
  * @typedef {{
- *   [key: string]: *,
+ *   [key: string]: Date | string | boolean | string[],
  *   createdAt: Date,
  *   surname: string,
  *   age: string,
@@ -132,7 +132,7 @@ async function storeKeypair(keypair) {
 
 /**
  * @typedef {{
- *   [key: string]: *,
+ *   [key: string]: string | string[] | {title: string, description: string}[],
  *   gifts: {title: string, description: string}[],
  *   handicaps: {title: string, description: string}[],
  *   quests: {title: string, description: string}[],
@@ -146,7 +146,7 @@ async function storeKeypair(keypair) {
 
 /**
  * @typedef {{
- *   [key: string]: *,
+ *   [key: string]: Date | string | {[key: string]: number} | Characteristics | OrgaForm | string[] | undefined,
  *   createdAt: Date,
  *   playerId: string,
  *   name: string,
@@ -291,7 +291,7 @@ async function sync(state, reset) {
 
   msg.events.forEach(
     function (
-      /** @type {{msg: {case: string; value: *}; ts: number}} */ event,
+      /** @type {{msg: {case: string; value: Record<string, string>}; ts: number}} */ event,
     ) {
       processEvent(
         state.data,
@@ -312,7 +312,7 @@ async function sync(state, reset) {
  * @param {Data} data
  * @param {number} ts
  * @param {string} eventType
- * @param {*} eventValue
+ * @param {Record<string, string>} eventValue
  * @param {boolean} reset
  */
 function processEvent(data, ts, eventType, eventValue, reset) {
@@ -639,7 +639,7 @@ async function personnageOrga(
           el.querySelector(`.character-${inputName}__input`)
         );
 
-        inputElement.value = formResult[inputName];
+        inputElement.value = /** @type {string} */ (formResult[inputName]);
       },
     );
 
@@ -791,7 +791,9 @@ async function personnageOrga(
       inputWrapperElement.classList.add("d-none");
 
       if (titleElement.value && descriptionElement.value) {
-        formResult[key].push({
+        /** @type {{title: string, description: string}[]} */ (
+          formResult[key]
+        ).push({
           title: titleElement.value,
           description: descriptionElement.value,
         });
@@ -818,7 +820,9 @@ async function personnageOrga(
       const index = parseInt(element.dataset.index || "");
 
       if (key) {
-        formResult[key].splice(index, 1);
+        /** @type {{title: string, description: string}[]} */ (
+          formResult[key]
+        ).splice(index, 1);
 
         print(node);
       }
@@ -2040,7 +2044,7 @@ async function personnage() {
       return;
     }
 
-    input.value = formResult[forAttribute] || "";
+    input.value = /** @type {string} */ (formResult[forAttribute]) || "";
 
     match.addEventListener("input", (event) => {
       const target = /** @type {HTMLInputElement}*/ (event.target);
@@ -2059,7 +2063,7 @@ async function personnage() {
     }
 
     lis.forEach((li) => {
-      if (formResult[forAttribute].toString() === li.getAttribute("data-key")) {
+      if (String(formResult[forAttribute]) === li.getAttribute("data-key")) {
         li.classList.add("selected");
         updateSkillList();
 
@@ -3124,7 +3128,9 @@ async function informations() {
     if (formResult[forAttribute]) {
       lis.forEach((li) => {
         if (
-          formResult[forAttribute].indexOf(li.getAttribute("data-key")) !== -1
+          /** @type {string[]} */ (formResult[forAttribute]).indexOf(
+            li.getAttribute("data-key") || "",
+          ) !== -1
         ) {
           li.classList.add("selected");
         }
@@ -3133,11 +3139,13 @@ async function informations() {
 
     attachSelectListeners(lis, forAttribute, true, (op, key, value) => {
       if (op === "select") {
-        formResult[key] = (formResult[key] || []).concat([value]);
+        formResult[key] = /** @type {string[]} */ (
+          formResult[key] || []
+        ).concat([value]);
       } else {
-        var index = formResult[key].indexOf(value);
+        const index = /** @type {string[]} */ (formResult[key]).indexOf(value);
         if (index !== -1) {
-          formResult[key].splice(index, 1);
+          /** @type {string[]} */ (formResult[key]).splice(index, 1);
         }
       }
     });
@@ -3153,7 +3161,7 @@ async function informations() {
       return;
     }
 
-    input.value = formResult[forAttribute] || "";
+    input.value = /** @type {string} */ (formResult[forAttribute]) || "";
 
     match.addEventListener("input", (event) => {
       const target = /** @type {HTMLInputElement}*/ (event.target);
@@ -3170,7 +3178,7 @@ async function informations() {
       return;
     }
 
-    input.checked = formResult[forAttribute] || false;
+    input.checked = /** @type {boolean} */ (formResult[forAttribute]) || false;
 
     match.addEventListener("input", (event) => {
       const target = /** @type {HTMLInputElement}*/ (event.target);
