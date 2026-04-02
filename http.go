@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/mail"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -455,6 +456,8 @@ func HandleInvite(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.HandlerFu
 			return
 		}
 
+		req.Email = strings.ToLower(req.Email)
+
 		if req.Email == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			writeJSON(w, "email is required")
@@ -537,6 +540,8 @@ func HandleRequestLink(db *sqlx.DB, smtpCfg SMTPConfig, appURL string) http.Hand
 		defer func() {
 			writeJSON(w, "if this email is registered, a link has been sent")
 		}()
+
+		req.Email = strings.ToLower(req.Email)
 
 		if req.Email == "" {
 			return
