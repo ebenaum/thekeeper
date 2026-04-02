@@ -76,56 +76,6 @@ async function storeKeypair(keypair) {
  * @property {CryptoKey} private
  */
 
-/**
- *
- * @returns {Promise<State>}
- */
-async function init() {
-  const keypair = await generateKeypair();
-  const handle = createRandomString(16);
-
-  console.log(
-    `no keypair, generate new one: ${buf2hex(await window.crypto.subtle.exportKey("raw", keypair.public))}`,
-  );
-
-  const seed = create(EventsSchema, {
-    events: [
-      {
-        msg: {
-          case: "SeedActor",
-          value: {
-            handle: handle,
-          },
-        },
-      },
-    ],
-  });
-
-  const response = await fetch(`${globalThis.env.thekeeperURL}/state`, {
-    method: "POST",
-    headers: {
-      Authorization: await auth(keypair.private, keypair.public),
-      "Content-Type": "application/x-protobuf",
-    },
-    body: toBinary(EventsSchema, seed),
-  });
-
-  const jsonResponse = await response.json();
-  if (jsonResponse[0].error) {
-    throw jsonResponse[0].error;
-  }
-
-  const state = {
-    keys: keypair,
-    data: newData(),
-    cursor: -1,
-  };
-
-  storeKeypair(keypair);
-  await sync(state, true);
-
-  return state;
-}
 
 /**
  * @typedef {Object} UniversEntry
@@ -2101,11 +2051,11 @@ async function personnage() {
    * @param {string | null} existingPlayerId
    */
   async function submitForm(existingCharacterId, existingPlayerId) {
-    const events = [];
-
     if (!state) {
-      state = await init();
+      return;
     }
+
+    const events = [];
 
     let playerId = existingPlayerId;
 
@@ -2577,6 +2527,31 @@ async function index() {
 
     await sync(state, true);
 
+    if (!state.data.handle) {
+      const handle = createRandomString(16);
+      const seed = create(EventsSchema, {
+        events: [
+          {
+            msg: {
+              case: "SeedActor",
+              value: { handle: handle },
+            },
+          },
+        ],
+      });
+
+      await fetch(`${globalThis.env.thekeeperURL}/state`, {
+        method: "POST",
+        headers: {
+          Authorization: await auth(keypair.private, keypair.public),
+          "Content-Type": "application/x-protobuf",
+        },
+        body: toBinary(EventsSchema, seed),
+      });
+
+      await sync(state, true);
+    }
+
     window.location.href = "/";
 
     return;
@@ -2932,11 +2907,11 @@ async function informations() {
    * @param {string | null} existingPlayerId
    */
   async function submitForm(existingPlayerId) {
-    const events = [];
-
     if (!state) {
-      state = await init();
+      return;
     }
+
+    const events = [];
 
     let playerId = existingPlayerId;
 
