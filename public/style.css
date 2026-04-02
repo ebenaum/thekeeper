@@ -100,10 +100,12 @@ a {
   text-decoration: underline;
 }
 
-.greyed {
-  color: grey;
-  pointer-events: none;
-  text-decoration: none;
+.readonly-banner {
+  background: #2a2a2a;
+  border: 1px solid #555;
+  padding: 0.75em 1em;
+  margin-bottom: 1em;
+  text-align: center;
 }
 
 a:hover {

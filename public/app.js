@@ -968,6 +968,18 @@ async function personnage() {
     });
   }
 
+  const readOnly = characterId && formResult.edition !== "2026";
+  if (readOnly) {
+    document.querySelectorAll(".save-button").forEach((btn) => {
+      btn.style.display = "none";
+    });
+
+    const banner = document.createElement("div");
+    banner.className = "readonly-banner";
+    banner.textContent = "Ce personnage est en lecture seule. Inscris-le pour 2026 pour pouvoir le modifier.";
+    formElement?.prepend(banner);
+  }
+
   let submitted = false;
 
   const onsubmit = () => {
@@ -2787,7 +2799,6 @@ async function index() {
 
         if (edition !== "2026") {
           characterLinkElement.textContent = "Voir";
-          characterLinkElement.classList.add("greyed");
         }
 
         if (state.data.permission !== "orga") {
