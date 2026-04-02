@@ -340,7 +340,7 @@ function processEvent(data, ts, eventType, eventValue, reset) {
         window.location.reload();
         console.log("reset");
       } else {
-        console.log("alreayd resetting, ignoring reset");
+        console.log("already resetting, ignoring reset");
       }
 
       break;
@@ -768,7 +768,7 @@ async function personnageOrga(
     );
 
     if (!titleElement || !descriptionElement) {
-      throw new Error("missing title or descritpion element");
+      throw new Error("missing title or description element");
     }
 
     addButtonElement.addEventListener("click", (e) => {
@@ -946,27 +946,9 @@ function extractSkills(univers) {
  * Calculates the inventory budget based on the dexterity characteristic level.
  * @param {number} dexterite - The dexterity level (from -2 to 4).
  * @returns {number} The corresponding inventory budget.
- * @throws {Error} If the dexterity level is outside the handled range.
  */
 function dexteriteToInventoryBudget(dexterite) {
-  switch (dexterite) {
-    case -2:
-      return 0;
-    case -1:
-      return 0;
-    case 0:
-      return 1;
-    case 1:
-      return 2;
-    case 2:
-      return 3;
-    case 3:
-      return 4;
-    case 4:
-      return 5;
-    default:
-      throw new Error("dexterite " + dexterite + "not handled");
-  }
+  return Math.max(0, dexterite + 1);
 }
 
 async function personnage() {
@@ -1215,7 +1197,7 @@ async function personnage() {
     (level) => level.rank === formResult.characteristics.savoir,
   );
 
-  const defaultSavoirPcValue = defaultSavoirLevel?.pcValue || 0; // Fallback to 1 if not found
+  const defaultSavoirPcValue = defaultSavoirLevel?.pcValue || 0;
 
   let skillBudget =
     /* allow orga to give whatever skills he wants */
@@ -2330,7 +2312,7 @@ async function theview2() {
       const character = state.data.characters[characterId];
 
       const characterLiElement = document.createElement("li");
-      characterLiElement.innerHTML = `<a class="a-underline" href="/personnage.html?characterId=${characterId}" target="blank_">${character.name}  x${character.inventory[key]}</a>`;
+      characterLiElement.innerHTML = `<a class="a-underline" href="/personnage.html?characterId=${characterId}" target="_blank">${character.name}  x${character.inventory[key]}</a>`;
 
       ulElement.appendChild(characterLiElement);
     });
@@ -2358,7 +2340,7 @@ async function theview2() {
       const character = state.data.characters[characterId];
 
       const characterLiElement = document.createElement("li");
-      characterLiElement.innerHTML = `<a class="a-underline" href="/personnage.html?characterId=${characterId}" target="blank_">${character.name}</a>`;
+      characterLiElement.innerHTML = `<a class="a-underline" href="/personnage.html?characterId=${characterId}" target="_blank">${character.name}</a>`;
 
       ulElement.appendChild(characterLiElement);
     });
@@ -2635,7 +2617,7 @@ async function index() {
       },
     );
 
-    if (response.status != 200) {
+    if (response.status !== 200) {
       const messageElement = document.createElement("h1");
 
       messageElement.textContent = "Le lien ne marche pas :(";
@@ -3009,7 +2991,7 @@ async function index() {
               },
             );
 
-            if (response.status != 200) {
+            if (response.status !== 200) {
               console.error("Error getting sharing link", response);
               return;
             }
@@ -3628,9 +3610,7 @@ function watchForHover() {
   let lastTouchTime = 0;
 
   function enableHover() {
-    const now = new Date();
-    // @ts-ignore
-    if (now - lastTouchTime < 500) return;
+    if (Date.now() - lastTouchTime < 500) return;
     document.body.classList.add("hasHover");
   }
 
@@ -3639,8 +3619,7 @@ function watchForHover() {
   }
 
   function updateLastTouchTime() {
-    // @ts-ignore
-    lastTouchTime = new Date();
+    lastTouchTime = Date.now();
   }
 
   document.addEventListener("touchstart", updateLastTouchTime, true);
